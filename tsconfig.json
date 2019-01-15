@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
+    "module": "commonjs",
+    "noImplicitReturns": true,
+    "jsx": "react"
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}

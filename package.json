@@ -1,0 +1,65 @@
+{
+  "name": "rasasa",
+  "version": "0.1.0",
+  "description": "A RSS Reader",
+  "author": "Timothee Deve",
+  "scripts": {
+    "precommit": "npm run lint && npm run build",
+    "start:dev:server": "webpack-dev-server",
+    "start:dev:ts": "tsc --watch",
+    "build": "webpack",
+    "lint": "npm run lint:prettier && npm run lint:ts && npm run lint:tslint",
+    "lint:prettier": "prettier src/**/* --write",
+    "lint:ts": "tsc",
+    "lint:tslint": "npx tslint src/**/*"
+  },
+  "babel": {
+    "presets": [
+      "@babel/react",
+      "@babel/typescript",
+      [
+        "@babel/env",
+        {
+          "targets": {
+            "browsers": [
+              "last 3 chrome versions",
+              "last 3 firefox versions"
+            ]
+          }
+        }
+      ]
+    ]
+  },
+  "prettier": {
+    "printWidth": 110,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "arrowParens": "avoid"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.1.0",
+    "@types/react": "^16.7.18",
+    "@types/react-dom": "^16.0.11",
+    "babel-loader": "^8.0.5",
+    "html-webpack-plugin": "^3.2.0",
+    "prettier": "^1.15.3",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "source-map-loader": "^0.2.4",
+    "tslint": "^5.12.1",
+    "tslint-config-prettier": "^1.17.0",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.2.2",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
+  }
+}
