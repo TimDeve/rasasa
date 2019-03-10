@@ -1,0 +1,7 @@
+:8090
+
+proxy /api localhost:8091 {
+  without /api
+}
+
+proxy / localhost:8092
