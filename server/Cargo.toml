@@ -5,11 +5,13 @@ authors = ["Tim Deve <timdeve@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-rss       = "1.6.1"
-http      = "0.1.16"
-tokio     = "0.1.16"
-serde     = "1.0.89"
-dotenv    = "0.10.1"
-diesel    = { version = "1.4.1", features = ["postgres"] }
-tower-web = "0.3.5"
+rss              = "1.6.1"
+http             = "0.1.16"
+tokio            = "0.1.16"
+serde            = "1.0.89"
+dotenv           = "0.10.1"
+diesel           = { version = "1.4.1", features = ["postgres"] }
+reqwest          = "0.9.11"
+tower-web        = "0.3.5"
+atom_syndication = "0.6"
 

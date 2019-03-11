@@ -1,16 +1,16 @@
 #[macro_use]
 extern crate tower_web;
 extern crate diesel;
-extern crate rasasa_server;
-extern crate tokio;
 extern crate http;
+extern crate rasasa_server;
+extern crate rss;
+extern crate tokio;
 
 use self::diesel::prelude::*;
-use rasasa_server::models::*;
-use rasasa_server::establish_db_connection;
-use tower_web::ServiceBuilder;
-
 use http::Response;
+use rasasa_server::models::*;
+use rasasa_server::*;
+use tower_web::ServiceBuilder;
 
 #[derive(Clone, Debug)]
 struct App;
@@ -25,6 +25,11 @@ struct FeedsResponse {
     feeds: Vec<Feed>,
 }
 
+#[derive(Response)]
+struct StoriesResponse {
+    stories: Vec<Story>,
+}
+
 impl_web! {
     impl App {
         #[get("/v0/name/:name")]
@@ -32,6 +37,25 @@ impl_web! {
         fn name_endpoint(&self, name: String) -> Result<NameResponse, ()> {
             Ok(NameResponse {
                 name,
+            })
+        }
+
+        #[get("/v0/stories")]
+        #[content_type("json")]
+        fn get_news(&self) -> Result<StoriesResponse, ()> {
+            use rasasa_server::schema::feeds::dsl::*;
+
+            let connection = establish_db_connection();
+            let results = feeds
+                .load::<Feed>(&connection)
+                .expect("Error loading feeds");
+
+            let stories = results.iter()
+                .flat_map(|feed| fetch_stories(&feed.url).unwrap())
+                .collect();
+
+            Ok(StoriesResponse {
+                stories
             })
         }
 

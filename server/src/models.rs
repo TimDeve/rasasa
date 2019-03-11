@@ -13,3 +13,10 @@ pub struct Feed {
     pub name: String,
     pub url: String,
 }
+
+#[derive(Serialize)]
+pub struct Story {
+    pub is_read: bool,
+    pub url: String,
+    pub title: String,
+}
