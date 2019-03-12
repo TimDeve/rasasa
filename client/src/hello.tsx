@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 
-async function loadName(setName: Function) {
+async function loadName(setName: (name: string) => void) {
   const res = await fetch('/api/v0/name/world')
 
-  if (!res.ok) return setName('Failed')
+  if (!res.ok) {
+    return setName('Failed')
+  }
 
   const json = await res.json()
 

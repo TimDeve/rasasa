@@ -19,8 +19,8 @@ module.exports = {
       },
       {
         test: /\.js$/,
-        use: ["source-map-loader"],
-        enforce: "pre"
+        use: ['source-map-loader'],
+        enforce: 'pre',
       },
     ],
   },
@@ -28,7 +28,5 @@ module.exports = {
     extensions: ['.tsx', '.js'],
     modules: [path.resolve('src'), path.resolve('node_modules')],
   },
-  plugins: [
-    new HtmlWebpackPlugin(),
-  ],
+  plugins: [new HtmlWebpackPlugin({ template: path.resolve('src/index.html') })],
 }
