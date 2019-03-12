@@ -18,10 +18,10 @@ pub struct Feed {
 
 #[derive(Serialize)]
 pub struct Story {
-    #[serde(rename = "isRead")]
-    pub is_read: bool,
+    pub title: String,
+    pub url: String,
     #[serde(rename = "publishedDate")]
     pub published_date: DateTime<FixedOffset>,
-    pub url: String,
-    pub title: String,
+    #[serde(rename = "isRead")]
+    pub is_read: bool,
 }

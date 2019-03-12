@@ -51,11 +51,11 @@ impl_web! {
                 .load::<Feed>(&connection)
                 .expect("Error loading feeds");
 
-            let mut stories :Vec<Story> = results.iter()
+            let mut stories: Vec<Story> = results.iter()
                 .flat_map(|feed| fetch_stories(&feed.url).unwrap())
                 .collect();
 
-            stories.sort_by(|a,b| a.published_date.cmp(&b.published_date));
+            stories.sort_by(|a,b| b.published_date.cmp(&a.published_date));
 
             Ok(StoriesResponse {
                 stories
