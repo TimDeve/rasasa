@@ -10,6 +10,7 @@ extern crate reqwest;
 
 use self::models::*;
 use atom_syndication::Feed;
+use chrono::DateTime;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
@@ -61,6 +62,7 @@ fn marshal_atom_feed_into_stories(feed: Feed) -> Vec<Story> {
             is_read: false,
             url: entry.links()[0].href().to_string(),
             title: entry.title().to_string(),
+            published_date: DateTime::parse_from_rfc3339(entry.published().unwrap()).unwrap(),
         })
         .collect()
 }
@@ -72,6 +74,7 @@ fn marshal_rss_feed_into_stories(feed: Channel) -> Vec<Story> {
             is_read: false,
             url: entry.link().unwrap().to_string(),
             title: entry.title().unwrap().to_string(),
+            published_date: DateTime::parse_from_rfc2822(entry.pub_date().unwrap()).unwrap(),
         })
         .collect()
 }

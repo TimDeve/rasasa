@@ -1,4 +1,6 @@
 use super::schema::feeds;
+use chrono::offset::FixedOffset;
+use chrono::DateTime;
 
 #[derive(Insertable, Extract)]
 #[table_name = "feeds"]
@@ -16,7 +18,10 @@ pub struct Feed {
 
 #[derive(Serialize)]
 pub struct Story {
+    #[serde(rename = "isRead")]
     pub is_read: bool,
+    #[serde(rename = "publishedDate")]
+    pub published_date: DateTime<FixedOffset>,
     pub url: String,
     pub title: String,
 }

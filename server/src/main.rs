@@ -1,5 +1,6 @@
 #[macro_use]
 extern crate tower_web;
+extern crate chrono;
 extern crate diesel;
 extern crate http;
 extern crate rasasa_server;
@@ -50,9 +51,11 @@ impl_web! {
                 .load::<Feed>(&connection)
                 .expect("Error loading feeds");
 
-            let stories = results.iter()
+            let mut stories :Vec<Story> = results.iter()
                 .flat_map(|feed| fetch_stories(&feed.url).unwrap())
                 .collect();
+
+            stories.sort_by(|a,b| a.published_date.cmp(&b.published_date));
 
             Ok(StoriesResponse {
                 stories
