@@ -9,9 +9,9 @@
     "start:dev:ts": "tsc --watch",
     "build": "webpack",
     "lint": "npm run lint:prettier && npm run lint:ts && npm run lint:tslint",
-    "lint:prettier": "prettier src/**/* --write",
+    "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write",
     "lint:ts": "tsc",
-    "lint:tslint": "npx tslint src/**/*"
+    "lint:tslint": "npx tslint src/**/*.{ts,tsx,js,jsx,json}"
   },
   "babel": {
     "presets": [
@@ -28,6 +28,9 @@
           }
         }
       ]
+    ],
+    "plugins": [
+      "react-hot-loader/babel"
     ]
   },
   "prettier": {
@@ -46,6 +49,7 @@
     "@babel/preset-env": "^7.2.3",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.1.0",
+    "@hot-loader/react-dom": "^16.8.4",
     "@types/react": "^16.7.18",
     "@types/react-dom": "^16.0.11",
     "@types/react-router-dom": "^4.3.1",
@@ -54,6 +58,7 @@
     "prettier": "^1.15.3",
     "react": "^16.8.0",
     "react-dom": "^16.8.0",
+    "react-hot-loader": "^4.8.0",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "source-map-loader": "^0.2.4",

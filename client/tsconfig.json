@@ -6,7 +6,8 @@
     "alwaysStrict": true,
     "module": "commonjs",
     "noImplicitReturns": true,
-    "jsx": "react"
+    "jsx": "react",
+    "lib": ["ES2018", "DOM"]
   },
   "include": [
     "./src/**/*"
