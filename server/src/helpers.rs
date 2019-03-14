@@ -1,14 +1,4 @@
-pub mod models;
-pub mod schema;
-
-#[macro_use]
-extern crate diesel;
-#[macro_use]
-extern crate tower_web;
-extern crate dotenv;
-extern crate reqwest;
-
-use self::models::*;
+use crate::stories::models::Story;
 use atom_syndication::Feed;
 use chrono::DateTime;
 use diesel::pg::PgConnection;
