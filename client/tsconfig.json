@@ -7,9 +7,9 @@
     "module": "commonjs",
     "noImplicitReturns": true,
     "jsx": "react",
-    "lib": ["ES2018", "DOM"]
+    "lib": ["ES2018", "DOM"],
+    "baseUrl": "./src",
+    "rootDir": "./src"
   },
-  "include": [
-    "./src/**/*"
-  ]
+  "include": ["./src/**/*"]
 }

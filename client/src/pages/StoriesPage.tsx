@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 interface Story {
   isRead: boolean
@@ -28,7 +29,9 @@ export default function StoriesPage() {
       {stories && (
         <ul>
           {stories.map(story => (
-          <li><a href={story.url}>{story.title}</a></li>
+            <li>
+              <a href={story.url}>{story.title}</a> - <Link to={`/story?page=${story.url}`}>Reader mode</Link>
+            </li>
           ))}
         </ul>
       )}
