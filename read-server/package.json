@@ -3,18 +3,35 @@
   "version": "0.1.0",
   "description": "",
   "main": "src/index.js",
+  "author": "Timothee Deve",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "precommit": "npm run lint",
+    "start": "node src/index.js",
+    "start:dev": "nodemon src/index.js",
+    "lint": "npm run lint:prettier",
+    "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write"
   },
-  "author": "",
+  "prettier": {
+    "printWidth": 110,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "bracketSpacing": true,
+    "arrowParens": "avoid"
+  },
   "license": "UNLICENSED",
   "dependencies": {
+    "bluebird": "^3.5.3",
     "fastify": "^2.1.0",
     "jsdom": "^14.0.0",
     "node-fetch": "^2.3.0",
-    "readability": "git+https://github.com/mozilla/readability.git"
+    "readability": "git+https://github.com/TimDeve/readability.git",
+    "redis": "^2.8.0"
   },
   "devDependencies": {
+    "nodemon": "^1.18.10",
     "prettier": "^1.16.4"
   }
 }
