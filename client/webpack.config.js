@@ -11,9 +11,18 @@ module.exports = {
     hot: true,
     historyApiFallback: true,
     host: '0.0.0.0',
-    proxy: {
-      '/api': { target: 'http://localhost:8091', pathRewrite: { '^/api': '' } },
-    },
+    proxy: [
+      {
+        context: ['/api/**', '!**/read'],
+        target: 'http://localhost:8091',
+        pathRewrite: { '^/api': '' },
+      },
+      {
+        context: ['/api/v0/read'],
+        target: 'http://localhost:8092',
+        pathRewrite: { '^/api': '' },
+      },
+    ],
   },
   output: {
     filename: 'index.js',
