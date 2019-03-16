@@ -1,4 +1,4 @@
-use crate::stories::models::Story;
+use crate::stories::models::NewStory;
 use atom_syndication::Feed;
 use chrono::DateTime;
 use diesel::pg::PgConnection;
@@ -21,14 +21,14 @@ pub fn establish_db_connection() -> PgConnection {
     PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
 }
 
-pub fn fetch_stories(url: &String) -> Result<Vec<Story>, Box<std::error::Error>> {
+pub fn fetch_stories(url: &String, feed_id: i32) -> Result<Vec<NewStory>, Box<std::error::Error>> {
     let content = reqwest::get(url)?.text()?;
 
     let feed = extract_feed(content);
 
     return match feed {
-        FeedType::Rss(f) => Ok(marshal_rss_feed_into_stories(f)),
-        FeedType::Atom(f) => Ok(marshal_atom_feed_into_stories(f)),
+        FeedType::Rss(f) => Ok(marshal_rss_feed_into_stories(f, feed_id)),
+        FeedType::Atom(f) => Ok(marshal_atom_feed_into_stories(f, feed_id)),
         FeedType::None => Ok(vec![]),
     };
 }
@@ -45,11 +45,12 @@ pub fn extract_feed(s: String) -> FeedType {
     };
 }
 
-fn marshal_atom_feed_into_stories(feed: Feed) -> Vec<Story> {
+fn marshal_atom_feed_into_stories(feed: Feed, feed_id: i32) -> Vec<NewStory> {
     feed.entries()
         .iter()
-        .map(|entry| Story {
+        .map(|entry| NewStory {
             is_read: false,
+            feed_id,
             url: entry.links()[0].href().to_string(),
             title: entry.title().to_string(),
             published_date: DateTime::parse_from_rfc3339(entry.published().unwrap()).unwrap(),
@@ -57,11 +58,12 @@ fn marshal_atom_feed_into_stories(feed: Feed) -> Vec<Story> {
         .collect()
 }
 
-fn marshal_rss_feed_into_stories(feed: Channel) -> Vec<Story> {
+fn marshal_rss_feed_into_stories(feed: Channel, feed_id: i32) -> Vec<NewStory> {
     feed.items()
         .iter()
-        .map(|entry| Story {
+        .map(|entry| NewStory {
             is_read: false,
+            feed_id,
             url: entry.link().unwrap().to_string(),
             title: entry.title().unwrap().to_string(),
             published_date: DateTime::parse_from_rfc2822(entry.pub_date().unwrap()).unwrap(),

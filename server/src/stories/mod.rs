@@ -9,6 +9,7 @@ pub mod models;
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
 use crate::helpers::{establish_db_connection, fetch_stories};
+use diesel::insert_into;
 use models::*;
 
 #[derive(Clone, Debug)]
@@ -19,27 +20,46 @@ struct StoriesResponse {
     stories: Vec<Story>,
 }
 
+#[derive(Extract)]
+struct GetStoriesQueryString {
+    refresh: Option<bool>,
+}
+
 impl_web! {
     impl StoriesResource {
-
         #[get("/v0/stories")]
         #[content_type("json")]
-        fn get_news(&self) -> Result<StoriesResponse, ()> {
+        fn get_news(&self, query_string: GetStoriesQueryString) -> Result<StoriesResponse, ()> {
+            use crate::schema::stories::dsl::*;
             use crate::schema::feeds::dsl::*;
 
             let connection = establish_db_connection();
-            let results = feeds
-                .load::<Feed>(&connection)
-                .expect("Error loading feeds");
 
-            let mut stories: Vec<Story> = results.iter()
-                .flat_map(|feed| fetch_stories(&feed.url).unwrap())
-                .collect();
+            if let Some(refresh) = query_string.refresh {
+                if refresh {
+                    let results = feeds
+                        .load::<Feed>(&connection)
+                        .expect("Error loading feeds");
 
-            stories.sort_by(|a,b| b.published_date.cmp(&a.published_date));
+                    let stories_list: Vec<NewStory> = results.iter()
+                        .flat_map(|feed| fetch_stories(&feed.url, feed.id).unwrap())
+                        .collect();
+
+                    insert_into(stories)
+                        .values(stories_list)
+                        .on_conflict_do_nothing()
+                        .execute(&connection).unwrap();
+                }
+            }
+
+
+            let results = stories
+                .order(published_date.desc())
+                .load::<Story>(&connection)
+                .expect("Error loading stories");
 
             Ok(StoriesResponse {
-                stories
+                stories: results
             })
         }
 
