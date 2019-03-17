@@ -47,5 +47,20 @@ impl_web! {
                 .unwrap())
         }
 
+        #[delete("/v0/feeds/:feed_id")]
+        fn delete_feed(&self, feed_id: i32) -> Result<http::Response<&'static str>, ()> {
+            use crate::schema::feeds::dsl::*;
+
+            let connection = establish_db_connection();
+
+            diesel::delete(feeds.filter(id.eq(feed_id)))
+                .execute(&connection)
+                .expect("Error deleting feed");
+
+            Ok(http::Response::builder()
+                .status(200)
+                .body("")
+                .unwrap())
+        }
     }
 }

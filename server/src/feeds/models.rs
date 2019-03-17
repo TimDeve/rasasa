@@ -8,7 +8,8 @@ pub struct NewFeed {
     pub url: String,
 }
 
-#[derive(Queryable, Serialize)]
+#[derive(Identifiable, Associations, Queryable, Serialize)]
+#[table_name = "feeds"]
 pub struct Feed {
     pub id: i32,
     pub name: String,

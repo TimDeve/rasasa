@@ -2,6 +2,7 @@ use chrono::offset::FixedOffset;
 use chrono::DateTime;
 use diesel::*;
 
+use crate::feeds::models::Feed;
 use crate::schema::stories;
 
 #[derive(Insertable)]
@@ -14,7 +15,9 @@ pub struct NewStory {
     pub published_date: DateTime<FixedOffset>,
 }
 
-#[derive(Serialize, Queryable)]
+#[derive(Identifiable, Associations, Serialize, Queryable)]
+#[belongs_to(Feed, foreign_key = "feed_id")]
+#[table_name = "stories"]
 pub struct Story {
     pub id: i32,
     #[serde(skip_serializing)]
