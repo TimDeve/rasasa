@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import queryString from 'query-string'
 
 interface Story {
-  id: number,
+  id: number
   isRead: boolean
   url: string
   title: string

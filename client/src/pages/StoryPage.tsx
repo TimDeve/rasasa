@@ -24,11 +24,14 @@ function StoryPage({ history }: StoryPageProps) {
 
   const [story, setStory] = useState<Story | null>(null)
 
-  useEffect(() => {
-    if (typeof page === 'string') {
-      fetchStory(page, setStory)
-    }
-  }, [])
+  useEffect(
+    () => {
+      if (typeof page === 'string') {
+        fetchStory(page, setStory)
+      }
+    },
+    [page]
+  )
 
   if (!story) {
     return null
