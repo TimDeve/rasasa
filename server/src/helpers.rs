@@ -1,5 +1,6 @@
 use crate::stories::models::NewStory;
 use atom_syndication::Feed;
+use chrono::prelude::*;
 use chrono::DateTime;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
@@ -48,12 +49,18 @@ pub fn extract_feed(s: String) -> FeedType {
 fn marshal_atom_feed_into_stories(feed: Feed, feed_id: i32) -> Vec<NewStory> {
     feed.entries()
         .iter()
-        .map(|entry| NewStory {
-            is_read: false,
-            feed_id,
-            url: entry.links()[0].href().to_string(),
-            title: entry.title().to_string(),
-            published_date: DateTime::parse_from_rfc3339(entry.published().unwrap()).unwrap(),
+        .map(|entry| {
+            let published_date = match (entry.published(), entry.updated()) {
+                (Some(date), _) => DateTime::parse_from_rfc3339(date).unwrap(),
+                (_, date) => DateTime::parse_from_rfc3339(date).unwrap(),
+            };
+            NewStory {
+                is_read: false,
+                feed_id,
+                url: entry.links()[0].href().to_string(),
+                title: entry.title().to_string(),
+                published_date,
+            }
         })
         .collect()
 }
