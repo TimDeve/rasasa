@@ -1,12 +1,11 @@
-use crate::stories::models::NewStory;
 use atom_syndication::Feed;
-use chrono::prelude::*;
 use chrono::DateTime;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
-use dotenv::dotenv;
 use rss::Channel;
 use std::env;
+
+use crate::stories::models::NewStory;
 
 #[derive(Debug)]
 pub enum FeedType {
@@ -16,8 +15,6 @@ pub enum FeedType {
 }
 
 pub fn establish_db_connection() -> PgConnection {
-    dotenv().ok();
-
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env_var must be set");
     PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
 }

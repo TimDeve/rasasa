@@ -13,12 +13,16 @@ pub mod helpers;
 pub mod schema;
 pub mod stories;
 
-use feeds::FeedsResource;
-use stories::StoriesResource;
+use dotenv::dotenv;
 use tower_web::middleware::log::LogMiddleware;
 use tower_web::ServiceBuilder;
 
+use feeds::FeedsResource;
+use stories::StoriesResource;
+
 pub fn main() {
+    dotenv().ok();
+
     let _ = env_logger::try_init();
 
     let addr = "127.0.0.1:8091".parse().expect("Invalid address");

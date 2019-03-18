@@ -6,10 +6,11 @@ extern crate tokio;
 
 pub mod models;
 
+use diesel::insert_into;
+
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
 use crate::helpers::{establish_db_connection, fetch_stories};
-use diesel::insert_into;
 use models::*;
 
 #[derive(Clone, Debug)]

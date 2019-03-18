@@ -1,5 +1,6 @@
-use crate::schema::feeds;
 use diesel::*;
+
+use crate::schema::feeds;
 
 #[derive(Insertable, Extract)]
 #[table_name = "feeds"]
