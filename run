@@ -7,3 +7,17 @@ task_server:build() {
   cargo build --release
 }
 
+task_server:watch() {
+  runner_parallel server:watch:check server:watch:run
+}
+
+task_server:watch:check() {
+  cd server || return
+  touch .watchtrigger
+  cargo watch -x check -s 'touch .watchtrigger'
+}
+
+task_server:watch:run() {
+  cd server || return
+  cargo watch --no-gitignore -w .watchtrigger -x run
+}
