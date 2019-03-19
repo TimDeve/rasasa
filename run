@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+cd "$(dirname "$0")" || exit
+source scripts/runner.sh
+
+task_server:build() {
+  cd server || return
+  cargo build --release
+}
+
