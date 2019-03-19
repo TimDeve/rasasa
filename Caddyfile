@@ -1,7 +1,19 @@
 :8090
 
+log stdout
+gzip
+root ./public
+
+rewrite {
+  if {path} not_starts_with /api
+  to {path} {path}/  /
+}
+
 proxy /api localhost:8091 {
   without /api
 }
 
-proxy / localhost:8092
+proxy /api/v0/read localhost:8092 {
+  without /api
+}
+
