@@ -1,0 +1,16 @@
+.component {
+  font-size: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-right: 0.8em;
+  padding-left: 0.8em;
+  background: white;
+  border-width: 1px;
+  border-color: black;
+  border-style: solid;
+
+  &:focus {
+    border-color: rgb(77, 144, 254);
+    outline: none;
+  }
+}

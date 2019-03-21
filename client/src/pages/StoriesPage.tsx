@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import queryString from 'query-string'
 
+import Title from 'shared/components/Title'
+import Button from 'shared/components/Button'
+import s from './StoriesPage.scss'
+
 interface Story {
   id: number
   isRead: boolean
@@ -26,15 +30,24 @@ export default function StoriesPage() {
   }, [])
 
   return (
-    <div>
-      <h1>Stories</h1>
-      <button onClick={() => fetchStories(setStories, { refresh: true })}>Refresh</button>
+    <div className={s.component}>
+      <Title>Stories</Title>
+      <Button onClick={() => fetchStories(setStories, { refresh: true })}>Refresh</Button>
       {stories && (
-        <ul>
+        <ul className={s.list}>
           {stories.map(story => (
-            <li key={story.id}>
-              <a href={story.url}>{story.title}</a> - <Link to={`/story?page=${story.url}`}>Reader mode</Link>
-            </li>
+            <>
+              <li className={s.story} key={story.id}>
+                <div>
+                <a className={s.link} href={story.url}>
+                  {story.title}
+                </a>
+              </div>
+                <div className={s.actions}>
+                  <Link to={`/story?page=${story.url}`}>Read</Link>
+                </div>
+              </li>
+            </>
           ))}
         </ul>
       )}

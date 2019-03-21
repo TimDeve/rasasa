@@ -9,7 +9,7 @@
     "start:dev:ts": "tsc --watch",
     "build": "webpack",
     "lint": "npm run lint:prettier && npm run lint:ts && npm run lint:tslint",
-    "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write",
+    "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json,scss,css} --write",
     "lint:ts": "tsc"
   },
   "babel": {
@@ -54,6 +54,7 @@
     "@types/react-dom": "^16.0.11",
     "@types/react-router-dom": "^4.3.1",
     "babel-loader": "^8.0.5",
+    "classnames": "^2.2.6",
     "css-loader": "^2.1.1",
     "html-webpack-plugin": "^3.2.0",
     "node-sass": "^4.11.0",
@@ -71,5 +72,8 @@
     "webpack": "^4.28.4",
     "webpack-cli": "^3.2.1",
     "webpack-dev-server": "^3.1.14"
+  },
+  "dependencies": {
+    "@types/classnames": "^2.2.7"
   }
 }

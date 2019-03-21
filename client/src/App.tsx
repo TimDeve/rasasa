@@ -12,7 +12,7 @@ import s from './App.scss'
 
 function App() {
   return (
-    <div className={s.root}>
+      <div className={s.root}>
       <Router>
         <>
           <Nav />

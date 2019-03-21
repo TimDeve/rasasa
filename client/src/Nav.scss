@@ -1,0 +1,17 @@
+.nav {
+  ul {
+    display: flex;
+    list-style: none;
+  }
+
+  a {
+    display: block;
+    padding: 1em;
+    text-decoration: none;
+    color: black;
+
+    &:visited {
+      color: black;
+    }
+  }
+}

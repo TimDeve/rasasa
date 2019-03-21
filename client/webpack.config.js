@@ -30,11 +30,11 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx$/,
+        test: /\.tsx?$/,
         use: ['babel-loader', 'react-hot-loader/webpack'],
       },
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         use: ['source-map-loader'],
         enforce: 'pre',
       },
@@ -62,7 +62,7 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx'],
     modules: [path.resolve('src'), path.resolve('node_modules')],
     alias: {
       'react-dom': '@hot-loader/react-dom',

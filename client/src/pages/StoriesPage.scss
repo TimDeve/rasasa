@@ -1,0 +1,36 @@
+.component {
+  margin-right: 1em;
+  margin-left: 1em;
+}
+
+.list {
+  list-style: none;
+  margin-top: 1rem;
+  margin-top: 1rem;
+}
+
+.story {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+
+  border-style: solid;
+  border-width: 0;
+  border-bottom-width: 1px;
+  border-color: black;
+}
+
+.link {
+  color: black;
+  text-decoration: none;
+}
+
+.actions {
+  a {
+    color: grey;
+    text-decoration: none;
+    display: block;
+    padding-right: 0.5rem;
+    padding-top: 0.5rem;
+  }
+}
+
