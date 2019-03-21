@@ -2,6 +2,11 @@
 cd "$(dirname "$0")" || exit
 source scripts/runner.sh
 
+task_default() {
+  runner_colorize blue "Available tasks:"
+  runner_get_defined_tasks
+}
+
 task_server:build() {
   cd server || return
   cargo build --release
