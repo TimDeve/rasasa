@@ -21,16 +21,26 @@ struct StoriesResponse {
     stories: Vec<Story>,
 }
 
+#[derive(Response)]
+struct StoryResponse(Story);
+
 #[derive(Extract)]
 struct GetStoriesQueryString {
     refresh: Option<bool>,
 }
 
+#[derive(Extract)]
+struct PatchStoryBody {
+    #[serde(rename = "isRead")]
+    is_read: Option<bool>
+}
+
 impl_web! {
     impl StoriesResource {
+
         #[get("/v0/stories")]
         #[content_type("json")]
-        fn get_news(&self, query_string: GetStoriesQueryString) -> Result<StoriesResponse, ()> {
+        fn get_stories(&self, query_string: GetStoriesQueryString) -> Result<StoriesResponse, ()> {
             use crate::schema::stories::dsl::*;
             use crate::schema::feeds::dsl::*;
 
@@ -62,6 +72,21 @@ impl_web! {
             Ok(StoriesResponse {
                 stories: results
             })
+        }
+
+        #[patch("/v0/stories/:story_id")]
+        #[content_type("json")]
+        fn patch_story(&self, story_id: i32, body: PatchStoryBody) -> Result<StoryResponse, ()> {
+            let connection = establish_db_connection();
+
+            let story = StoryUpdate {
+                id: story_id,
+                is_read: body.is_read
+            };
+
+            let updated_story = story.save_changes(&connection);
+
+            Ok(StoryResponse(updated_story.unwrap()))
         }
 
     }

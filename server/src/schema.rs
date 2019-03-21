@@ -19,7 +19,4 @@ table! {
 
 joinable!(stories -> feeds (feed_id));
 
-allow_tables_to_appear_in_same_query!(
-    feeds,
-    stories,
-);
+allow_tables_to_appear_in_same_query!(feeds, stories,);
