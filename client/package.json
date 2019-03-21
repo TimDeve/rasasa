@@ -10,8 +10,7 @@
     "build": "webpack",
     "lint": "npm run lint:prettier && npm run lint:ts && npm run lint:tslint",
     "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write",
-    "lint:ts": "tsc",
-    "lint:tslint": "npx tslint src/**/*.{ts,tsx,js,jsx,json}"
+    "lint:ts": "tsc"
   },
   "babel": {
     "presets": [
@@ -68,9 +67,6 @@
     "sass-loader": "^7.1.0",
     "source-map-loader": "^0.2.4",
     "style-loader": "^0.23.1",
-    "tslint": "^5.12.1",
-    "tslint-config-prettier": "^1.17.0",
-    "tslint-react": "^3.6.0",
     "typescript": "^3.2.2",
     "webpack": "^4.28.4",
     "webpack-cli": "^3.2.1",
