@@ -38,6 +38,27 @@ module.exports = {
         use: ['source-map-loader'],
         enforce: 'pre',
       },
+      {
+        test: /\.scss$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+              localIdentName: '[name]__[local]___[hash:base64:5]',
+              camelCase: true,
+              sourceMap: true,
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
+      },
     ],
   },
   resolve: {

@@ -8,20 +8,23 @@ import FeedsPage from 'pages/FeedsPage'
 import Nav from './Nav'
 import StoriesPage from 'pages/StoriesPage'
 import StoryPage from 'pages/StoryPage'
+import s from './App.scss'
 
 function App() {
   return (
-    <Router>
-      <>
-        <Nav />
-        <Switch>
-          <Route exact path="/" component={StoriesPage} />
-          <Route exact path="/feeds" component={FeedsPage} />
-          <Route exact path="/story" component={StoryPage} />
-          <Redirect to="/" />
-        </Switch>
-      </>
-    </Router>
+    <div className={s.root}>
+      <Router>
+        <>
+          <Nav />
+          <Switch>
+            <Route exact path="/" component={StoriesPage} />
+            <Route exact path="/feeds" component={FeedsPage} />
+            <Route exact path="/story" component={StoryPage} />
+            <Redirect to="/" />
+          </Switch>
+        </>
+      </Router>
+    </div>
   )
 }
 
