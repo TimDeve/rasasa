@@ -35,6 +35,9 @@ struct PatchStoryBody {
     is_read: Option<bool>
 }
 
+#[derive(Extract)]
+struct PatchStoriesBody(Vec<StoryUpdate>);
+
 impl_web! {
     impl StoriesResource {
 
@@ -87,6 +90,20 @@ impl_web! {
             let updated_story = story.save_changes(&connection);
 
             Ok(StoryResponse(updated_story.unwrap()))
+        }
+
+        #[patch("/v0/stories")]
+        #[content_type("json")]
+        fn patch_stories(&self, body: PatchStoriesBody) -> Result<StoriesResponse, ()> {
+            let connection = establish_db_connection();
+
+            let PatchStoriesBody(stories) = body;
+
+            let updated_stories = stories.iter()
+                .map(|item| item.save_changes(&connection).unwrap())
+                .collect();
+
+            Ok(StoriesResponse { stories: updated_stories})
         }
 
     }

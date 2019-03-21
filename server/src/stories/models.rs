@@ -30,9 +30,10 @@ pub struct Story {
     pub published_date: DateTime<chrono::Utc>,
 }
 
-#[derive(AsChangeset, Identifiable)]
+#[derive(AsChangeset, Identifiable, Deserialize, Debug)]
 #[table_name = "stories"]
 pub struct StoryUpdate {
     pub id: i32,
+    #[serde(rename = "isRead")]
     pub is_read: Option<bool>,
 }
