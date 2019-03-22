@@ -72,9 +72,12 @@ export default function StoriesPage() {
         </Button>
       </div>
       {stories && (
-        <ul className={s.list}>
-          {stories.map(story => (
-            <>
+        <>
+          {stories.length === 0 && (
+            <p className={s.noStoriesMessage}>There are no stories here. Try to refresh.</p>
+          )}
+          <ul className={s.list}>
+            {stories.map(story => (
               <li className={s.story} key={story.id}>
                 <div>
                   <a
@@ -95,9 +98,9 @@ export default function StoriesPage() {
                   </Link>
                 </div>
               </li>
-            </>
-          ))}
-        </ul>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   )
