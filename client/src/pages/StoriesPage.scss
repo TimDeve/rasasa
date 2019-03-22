@@ -3,6 +3,10 @@
   margin-left: 1em;
 }
 
+.button {
+  margin-right: 1rem;
+}
+
 .list {
   list-style: none;
   margin-top: 1rem;
@@ -20,8 +24,13 @@
 }
 
 .link {
+  display: block;
   color: black;
   text-decoration: none;
+
+  &Read {
+    color: grey;
+  }
 }
 
 .actions {
@@ -33,4 +42,3 @@
     padding-top: 0.5rem;
   }
 }
-
