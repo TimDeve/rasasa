@@ -68,6 +68,7 @@ impl_web! {
 
 
             let results = stories
+                .filter(is_read.eq(false))
                 .order(published_date.desc())
                 .load::<Story>(&connection)
                 .expect("Error loading stories");
