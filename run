@@ -2,6 +2,10 @@
 cd "$(dirname "$0")" || exit
 source scripts/runner.sh
 
+setup_nvm() {
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+}
+
 task_default() {
   runner_colorize blue "Available tasks:"
   runner_get_defined_tasks
@@ -27,9 +31,42 @@ task_server:watch:run() {
   cargo watch --no-gitignore -w .watchtrigger -x run
 }
 
+task_client:install() {
+  setup_nvm
+  cd client || return
+  npm run install
+}
+
+task_client:install:ci() {
+  setup_nvm
+  cd client || return
+  npm ci
+}
+
 task_client:build() {
+  setup_nvm
   cd client || return
   npm run build
+}
+
+task_read:install() {
+  setup_nvm
+  cd read-server || return
+  npm run install
+}
+
+task_read:install:ci() {
+  setup_nvm
+  cd read-server || return
+  npm ci
+}
+
+task_install() {
+  runner_parallel client:install read:install
+}
+
+task_install:ci() {
+  runner_parallel client:install:ci read:install:ci
 }
 
 task_build() {
@@ -37,7 +74,7 @@ task_build() {
 }
 
 task_dist() {
-  runner_sequence dist:clean build
+  runner_sequence dist:clean install:ci build
   mkdir dist
   cp Caddyfile dist
 
@@ -49,7 +86,8 @@ task_dist() {
   mkdir dist/read-server
   cp read-server/package.json dist/read-server
   cp read-server/package-lock.json dist/read-server
-  cp -r read-server/src dist/read-server 
+  cp -r read-server/src dist/read-server
+  cp -r read-server/node_modules dist/read-server
 }
 
 task_dist:clean() {
