@@ -2,7 +2,8 @@ pub mod models;
 
 use crate::diesel::prelude::*;
 use crate::helpers::establish_db_connection;
-use models::*;
+
+use crate::feeds::models::*;
 
 #[derive(Clone, Debug)]
 pub struct FeedsResource;

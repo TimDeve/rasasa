@@ -16,6 +16,11 @@ task_server:build() {
   cargo build --release
 }
 
+task_server:check() {
+  cd server || return
+  cargo check
+}
+
 task_server:watch() {
   runner_parallel server:watch:check server:watch:run
 }
@@ -77,6 +82,7 @@ task_dist() {
   runner_sequence dist:clean install:ci build
   mkdir dist
   cp Caddyfile dist
+  cp start-dist dist
 
   mkdir dist/public
   cp client/dist/* dist/public

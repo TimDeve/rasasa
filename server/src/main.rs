@@ -17,8 +17,8 @@ use dotenv::dotenv;
 use tower_web::middleware::log::LogMiddleware;
 use tower_web::ServiceBuilder;
 
-use feeds::FeedsResource;
-use stories::StoriesResource;
+use crate::feeds::FeedsResource;
+use crate::stories::StoriesResource;
 
 pub fn main() {
     dotenv().ok();

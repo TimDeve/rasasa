@@ -11,7 +11,8 @@ use diesel::insert_into;
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
 use crate::helpers::{establish_db_connection, fetch_stories};
-use models::*;
+
+use crate::stories::models::*;
 
 #[derive(Clone, Debug)]
 pub struct StoriesResource;
@@ -32,7 +33,7 @@ struct GetStoriesQueryString {
 #[derive(Extract)]
 struct PatchStoryBody {
     #[serde(rename = "isRead")]
-    is_read: Option<bool>
+    is_read: Option<bool>,
 }
 
 #[derive(Extract)]
