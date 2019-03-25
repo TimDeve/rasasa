@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react'
 
 import { getInputValuesFromFormEvent } from 'shared/helpers'
+import Title from 'shared/components/Title'
+import TextInput from 'shared/components/TextInput'
+import Button from 'shared/components/Button'
+import s from './FeedsPage.scss'
 
 interface Feed {
   id: number
@@ -44,8 +48,8 @@ function FeedsPage() {
   }, [])
 
   return (
-    <div>
-      <h1>Feeds</h1>
+    <div className={s.component}>
+      <Title>Feeds</Title>
 
       <div>
         <span>Add a feed:</span>
@@ -55,23 +59,25 @@ function FeedsPage() {
             addFeed(inputs, () => fetchFeeds(setFeeds))
           }}
         >
-          <input type="text" name="name" placeholder="Name" />
+          <TextInput name="name" placeholder="Name" />
           <br />
-          <input type="text" name="url" placeholder="Url" />
+          <TextInput type="text" name="url" placeholder="Url" />
           <br />
-          <button>Add</button>
+          <Button>Add</Button>
         </form>
       </div>
 
       {feeds && (
-        <ul>
+        <ul className={s.feeds}>
           {feeds.map(feed => (
-            <li key={feed.id}>
-              Name: {feed.name}
-              <br />
-              Url: <a href={feed.url}>{feed.url}</a>
-              <br />
-              <button onClick={() => removeFeed(feed.id, feeds, setFeeds)}>Remove</button>
+            <li key={feed.id} className={s.feed}>
+              <div>{feed.name}</div>
+              <div>
+                <a href={feed.url}>{feed.url}</a>
+              </div>
+              <div className={s.feedButtons}>
+                <Button onClick={() => removeFeed(feed.id, feeds, setFeeds)}>Remove</Button>
+              </div>
             </li>
           ))}
         </ul>

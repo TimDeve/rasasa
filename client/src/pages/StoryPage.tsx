@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react'
 import queryString from 'query-string'
 import { RouteComponentProps } from 'react-router-dom'
 
+import s from './StoryPage.scss'
+import Title from 'shared/components/Title'
+
 interface Story {
   readable: boolean
   title?: String
@@ -42,11 +45,11 @@ function StoryPage({ history }: StoryPageProps) {
   }
 
   return (
-    <>
-      <h1>{story.title}</h1>
+    <div className={s.component}>
+      <Title>{story.title}</Title>
       <p style={{ fontWeight: 'bold' }}>{story.byline}</p>
-      <div dangerouslySetInnerHTML={{ __html: story.content }} />
-    </>
+      <div className={s.article} dangerouslySetInnerHTML={{ __html: story.content }} />
+    </div>
   )
 }
 
