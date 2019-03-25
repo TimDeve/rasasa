@@ -9,7 +9,7 @@ const REDIS_PREFIX = 'rasasa-read'
 
 bluebird.promisifyAll(redis.RedisClient.prototype)
 bluebird.promisifyAll(redis.Multi.prototype)
-const redisClient = redis.createClient()
+const redisClient = redis.createClient(process.env["REDIS_URL"])
 
 const fastify = require('fastify')({
   logger: true,
