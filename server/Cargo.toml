@@ -5,16 +5,17 @@ authors = ["Tim Deve <timdeve@users.noreply.github.com>"]
 edition = "2018"
 
 [dependencies]
-rss              = "1.6"
-http             = "0.1"
-tokio            = "0.1"
-serde            = "1.0"
-dotenv           = "0.10"
-diesel           = { version = "1.4", features = ["postgres", "chrono"] }
-chrono           = { version = "0.4", features = ["serde"] }
-reqwest          = "0.9"
-openssl          = { version = "0.10", features = ["vendored"] }
-tower-web        = "0.3"
-env_logger       = "0.6"
-atom_syndication = "0.6"
+rss               = "1.6"
+http              = "0.1"
+tokio             = "0.1"
+serde             = "1.0"
+dotenv            = "0.10"
+diesel            = { version = "1.4", features = ["postgres", "chrono"] }
+chrono            = { version = "0.4", features = ["serde"] }
+reqwest           = "0.9"
+openssl           = { version = "0.10", features = ["vendored"] }
+tower-web         = "0.3"
+env_logger        = "0.6"
+atom_syndication  = "0.6"
+diesel_migrations = "1.4"
 
