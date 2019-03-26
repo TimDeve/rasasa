@@ -57,6 +57,7 @@ RUN mkdir /root/app
 WORKDIR /root/app
 RUN curl https://getcaddy.com | bash -s personal
 ADD ./read-server ./read-server
+RUN npm install -g concurrently
 WORKDIR ./read-server
 RUN npm ci
 WORKDIR /root/app
@@ -65,4 +66,14 @@ COPY --from=rust-builder /root/app/server/target/debug/rasasa-server .
 ADD start-dist .
 ADD Caddyfile .
 EXPOSE 8090
-CMD ["./start-dist"]
+CMD [\
+  "concurrently",\
+  "-n 'Caddy,Server,Read'",\
+  "-c 'yellow,cyan,magenta'",\
+  "--kill-others",\
+  "caddy",\
+  "./rasasa-server",\
+  "node read-server/src/index.js"\
+]
+
+
