@@ -9,10 +9,11 @@ pub mod models;
 use diesel::insert_into;
 
 use crate::diesel::prelude::*;
-use crate::feeds::models::*;
-use crate::helpers::{establish_db_connection, fetch_stories};
 
+use crate::feeds::models::*;
+use crate::helpers::fetch_stories;
 use crate::stories::models::*;
+use crate::Connection;
 
 #[derive(Clone, Debug)]
 pub struct StoriesResource;
@@ -44,16 +45,14 @@ impl_web! {
 
         #[get("/v0/stories")]
         #[content_type("json")]
-        fn get_stories(&self, query_string: GetStoriesQueryString) -> Result<StoriesResponse, ()> {
+        fn get_stories(&self, query_string: GetStoriesQueryString, Connection(conn): Connection) -> Result<StoriesResponse, ()> {
             use crate::schema::stories::dsl::*;
             use crate::schema::feeds::dsl::*;
-
-            let connection = establish_db_connection();
 
             if let Some(refresh) = query_string.refresh {
                 if refresh {
                     let results = feeds
-                        .load::<Feed>(&connection)
+                        .load::<Feed>(&conn)
                         .expect("Error loading feeds");
 
                     let stories_list: Vec<NewStory> = results.iter()
@@ -63,7 +62,7 @@ impl_web! {
                     insert_into(stories)
                         .values(stories_list)
                         .on_conflict_do_nothing()
-                        .execute(&connection).unwrap();
+                        .execute(&conn).unwrap();
                 }
             }
 
@@ -71,7 +70,7 @@ impl_web! {
             let results = stories
                 .filter(is_read.eq(false))
                 .order(published_date.desc())
-                .load::<Story>(&connection)
+                .load::<Story>(&conn)
                 .expect("Error loading stories");
 
             Ok(StoriesResponse {
@@ -81,28 +80,24 @@ impl_web! {
 
         #[patch("/v0/stories/:story_id")]
         #[content_type("json")]
-        fn patch_story(&self, story_id: i32, body: PatchStoryBody) -> Result<StoryResponse, ()> {
-            let connection = establish_db_connection();
-
+        fn patch_story(&self, story_id: i32, body: PatchStoryBody, Connection(conn): Connection) -> Result<StoryResponse, ()> {
             let story = StoryUpdate {
                 id: story_id,
                 is_read: body.is_read
             };
 
-            let updated_story = story.save_changes(&connection);
+            let updated_story = story.save_changes(&*conn);
 
             Ok(StoryResponse(updated_story.unwrap()))
         }
 
         #[patch("/v0/stories")]
         #[content_type("json")]
-        fn patch_stories(&self, body: PatchStoriesBody) -> Result<StoriesResponse, ()> {
-            let connection = establish_db_connection();
-
+        fn patch_stories(&self, body: PatchStoriesBody, Connection(conn): Connection) -> Result<StoriesResponse, ()> {
             let PatchStoriesBody(stories) = body;
 
             let updated_stories = stories.iter()
-                .map(|item| item.save_changes(&connection).unwrap())
+                .map(|item| item.save_changes(&*conn).unwrap())
                 .collect();
 
             Ok(StoriesResponse { stories: updated_stories})

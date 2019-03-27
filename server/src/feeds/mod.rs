@@ -1,9 +1,8 @@
 pub mod models;
 
 use crate::diesel::prelude::*;
-use crate::helpers::establish_db_connection;
-
 use crate::feeds::models::*;
+use crate::Connection;
 
 #[derive(Clone, Debug)]
 pub struct FeedsResource;
@@ -18,12 +17,11 @@ impl_web! {
 
         #[get("/v0/feeds")]
         #[content_type("json")]
-        fn get_feeds(&self) -> Result<FeedsResponse, ()> {
+        fn get_feeds(&self, Connection(conn): Connection) -> Result<FeedsResponse, ()> {
             use crate::schema::feeds::dsl::*;
 
-            let connection = establish_db_connection();
             let results = feeds
-                .load::<Feed>(&connection)
+                .load::<Feed>(&conn)
                 .expect("Error loading feeds");
 
             Ok(FeedsResponse {
@@ -32,14 +30,12 @@ impl_web! {
         }
 
         #[post("/v0/feeds")]
-        fn create_feed(&self, body: NewFeed) -> Result<http::Response<&'static str>, ()> {
+        fn create_feed(&self, body: NewFeed, Connection(conn): Connection) -> Result<http::Response<&'static str>, ()> {
             use crate::schema::feeds;
-
-            let connection = establish_db_connection();
 
             diesel::insert_into(feeds::table)
                 .values(&body)
-                .execute(&connection)
+                .execute(&conn)
                 .expect("Error saving new post");
 
             Ok(http::Response::builder()
@@ -49,13 +45,11 @@ impl_web! {
         }
 
         #[delete("/v0/feeds/:feed_id")]
-        fn delete_feed(&self, feed_id: i32) -> Result<http::Response<&'static str>, ()> {
+        fn delete_feed(&self, feed_id: i32, Connection(conn): Connection) -> Result<http::Response<&'static str>, ()> {
             use crate::schema::feeds::dsl::*;
 
-            let connection = establish_db_connection();
-
             diesel::delete(feeds.filter(id.eq(feed_id)))
-                .execute(&connection)
+                .execute(&conn)
                 .expect("Error deleting feed");
 
             Ok(http::Response::builder()

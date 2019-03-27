@@ -1,9 +1,6 @@
 use atom_syndication::Feed;
 use chrono::DateTime;
-use diesel::pg::PgConnection;
-use diesel::prelude::*;
 use rss::Channel;
-use std::env;
 
 use crate::stories::models::NewStory;
 
@@ -12,11 +9,6 @@ pub enum FeedType {
     Rss(Channel),
     Atom(Feed),
     None,
-}
-
-pub fn establish_db_connection() -> PgConnection {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env_var must be set");
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
 }
 
 pub fn fetch_stories(url: &String, feed_id: i32) -> Result<Vec<NewStory>, Box<std::error::Error>> {
