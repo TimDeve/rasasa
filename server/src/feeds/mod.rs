@@ -1,8 +1,8 @@
 pub mod models;
 
+use crate::config::Connection;
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
-use crate::Connection;
 
 #[derive(Clone, Debug)]
 pub struct FeedsResource;

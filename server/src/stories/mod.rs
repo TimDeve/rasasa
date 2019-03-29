@@ -10,10 +10,10 @@ use diesel::insert_into;
 
 use crate::diesel::prelude::*;
 
+use crate::config::Connection;
 use crate::feeds::models::*;
 use crate::helpers::fetch_stories;
 use crate::stories::models::*;
-use crate::Connection;
 
 #[derive(Clone, Debug)]
 pub struct StoriesResource;
