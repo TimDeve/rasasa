@@ -43,6 +43,19 @@ struct PatchStoriesBody(Vec<StoryUpdate>);
 impl_web! {
     impl StoriesResource {
 
+        #[get("/v0/stories/:story_id")]
+        #[content_type("json")]
+        fn get_story(&self, story_id: i32,  Connection(conn): Connection) -> Result<StoryResponse, ()> {
+            use crate::schema::stories::dsl::*;
+
+            let story = stories
+                .filter(id.eq(story_id))
+                .first::<Story>(&conn)
+                .expect("Error loading story");
+
+            Ok(StoryResponse(story))
+        }
+
         #[get("/v0/stories")]
         #[content_type("json")]
         fn get_stories(&self, query_string: GetStoriesQueryString, Connection(conn): Connection) -> Result<StoriesResponse, ()> {
