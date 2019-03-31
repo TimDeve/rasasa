@@ -8,9 +8,8 @@ pub mod models;
 
 use diesel::insert_into;
 
-use crate::diesel::prelude::*;
-
 use crate::config::Connection;
+use crate::diesel::prelude::*;
 use crate::feeds::models::*;
 use crate::helpers::fetch_stories;
 use crate::stories::models::*;
