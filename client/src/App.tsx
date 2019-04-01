@@ -4,10 +4,10 @@ import React from 'react'
 import { hot } from 'react-hot-loader/root'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
 
-import FeedsPage from 'pages/FeedsPage'
+import FeedsPage from 'feeds/FeedsPage'
 import Nav from './Nav'
-import StoriesPage from 'pages/StoriesPage'
-import StoryPage from 'pages/StoryPage'
+import StoriesPage from 'stories/StoriesPage'
+import StoryPage from 'stories/StoryPage'
 import s from './App.scss'
 
 function App() {
