@@ -4,18 +4,12 @@ import { RouteComponentProps } from 'react-router-dom'
 
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
+import { Article, Story } from './storiesModel'
 
-interface Read {
-  readable: boolean
-  title?: String
-  byline?: String
-  content?: string
-}
+interface StoryPageProps extends RouteComponentProps<{storyId: string}> {}
 
-interface StoryPageProps extends RouteComponentProps<{}> {}
-
-function fetchRead(page: String): Read | null {
-  const [story, setStory] = useState<Read | null>(null)
+function fetchArticle(page: String): Article | null {
+  const [article, setArticle] = useState<Article | null>(null)
 
   useEffect(
     () => {
@@ -25,34 +19,57 @@ function fetchRead(page: String): Read | null {
 
           const json = await res.json()
 
-          setStory(json)
+          setArticle(json)
         }
       })()
     },
     [page]
   )
 
+  return article
+}
+
+function fetchStory(id: String): Story | null {
+  const [story, setStory] = useState<Story | null>(null)
+
+  useEffect(
+    () => {
+      ;(async () => {
+        if (id) {
+        const res = await fetch(`/api/v0/stories/${id}`)
+
+          const json = await res.json()
+
+          setStory(json)
+        }
+      })()
+    },
+    [id]
+  )
+
   return story
 }
 
-function StoryPage({ history }: StoryPageProps) {
-  const { page } = queryString.parse(history.location.search)
+function StoryPage(props: StoryPageProps) {
+  const id = props.match.params.storyId || ''
 
-  let read = fetchRead(typeof page === 'string' ? page : '')
+  const story = fetchStory(id)
 
-  if (!read) {
+  const article = fetchArticle(story ? story.url : '')
+
+  if (!article) {
     return null
   }
 
-  if (!read.readable || !read.content) {
+  if (!article.readable || !article.content) {
     return <>Sorry this page is not readable</>
   }
 
   return (
     <div className={s.component}>
-      <Title>{read.title}</Title>
-      <p style={{ fontWeight: 'bold' }}>{read.byline}</p>
-      <div className={s.article} dangerouslySetInnerHTML={{ __html: read.content }} />
+      <Title>{article.title}</Title>
+      <p style={{ fontWeight: 'bold' }}>{article.byline}</p>
+      <div className={s.article} dangerouslySetInnerHTML={{ __html: article.content }} />
     </div>
   )
 }

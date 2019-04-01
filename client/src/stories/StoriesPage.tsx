@@ -5,15 +5,8 @@ import cn from 'classnames'
 
 import Title from 'shared/components/Title'
 import Button from 'shared/components/Button'
+import { Story } from './storiesModel'
 import s from './StoriesPage.scss'
-
-interface Story {
-  id: number
-  isRead: boolean
-  url: string
-  title: string
-  publishedDate: string
-}
 
 async function fetchStories(setStories: (stories: Story[]) => void, options: { refresh?: boolean } = {}) {
   const res = await fetch('/api/v0/stories?' + queryString.stringify(options))
@@ -91,7 +84,7 @@ export default function StoriesPage() {
                 </div>
                 <div className={s.actions}>
                   <Link
-                    to={`/story?page=${story.url}`}
+                    to={`/story/${story.id}`}
                     onClick={() => setStoryToRead(stories, setStories, story.id)}
                   >
                     Read

@@ -12,14 +12,14 @@ import s from './App.scss'
 
 function App() {
   return (
-      <div className={s.root}>
+    <div className={s.root}>
       <Router>
         <>
           <Nav />
           <Switch>
             <Route exact path="/" component={StoriesPage} />
             <Route exact path="/feeds" component={FeedsPage} />
-            <Route exact path="/story" component={StoryPage} />
+            <Route exact path="/story/:storyId" component={StoryPage} />
             <Redirect to="/" />
           </Switch>
         </>

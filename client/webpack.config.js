@@ -26,6 +26,7 @@ module.exports = {
   },
   output: {
     filename: 'index.js',
+    publicPath: '/',
   },
   module: {
     rules: [
