@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
 import queryString from 'query-string'
+import React, { useState, useEffect } from 'react'
 import { RouteComponentProps } from 'react-router-dom'
 
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
 
-interface Story {
+interface Read {
   readable: boolean
   title?: String
   byline?: String
@@ -14,41 +14,45 @@ interface Story {
 
 interface StoryPageProps extends RouteComponentProps<{}> {}
 
-async function fetchStory(page: String, setStory: (story: Story) => void) {
-  const res = await fetch('/api/v0/read?' + queryString.stringify({ page }))
+function fetchRead(page: String): Read | null {
+  const [story, setStory] = useState<Read | null>(null)
 
-  const json = await res.json()
+  useEffect(
+    () => {
+      ;(async () => {
+        if (page) {
+          const res = await fetch('/api/v0/read?' + queryString.stringify({ page }))
 
-  setStory(json)
+          const json = await res.json()
+
+          setStory(json)
+        }
+      })()
+    },
+    [page]
+  )
+
+  return story
 }
 
 function StoryPage({ history }: StoryPageProps) {
   const { page } = queryString.parse(history.location.search)
 
-  const [story, setStory] = useState<Story | null>(null)
+  let read = fetchRead(typeof page === 'string' ? page : '')
 
-  useEffect(
-    () => {
-      if (typeof page === 'string') {
-        fetchStory(page, setStory)
-      }
-    },
-    [page]
-  )
-
-  if (!story) {
+  if (!read) {
     return null
   }
 
-  if (!story.readable || !story.content) {
+  if (!read.readable || !read.content) {
     return <>Sorry this page is not readable</>
   }
 
   return (
     <div className={s.component}>
-      <Title>{story.title}</Title>
-      <p style={{ fontWeight: 'bold' }}>{story.byline}</p>
-      <div className={s.article} dangerouslySetInnerHTML={{ __html: story.content }} />
+      <Title>{read.title}</Title>
+      <p style={{ fontWeight: 'bold' }}>{read.byline}</p>
+      <div className={s.article} dangerouslySetInnerHTML={{ __html: read.content }} />
     </div>
   )
 }
