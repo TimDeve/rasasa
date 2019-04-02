@@ -2,11 +2,21 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+
+const isDev = process.env.NODE_ENV !== 'production'
 
 module.exports = {
   target: 'web',
-  entry: path.resolve('src/index.tsx'),
-  mode: 'development',
+  entry: {
+    index: path.resolve('src/index.tsx'),
+  },
+  mode: isDev ? 'development' : 'production',
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
+  },
   devServer: {
     port: 8090,
     hot: true,
@@ -26,7 +36,7 @@ module.exports = {
     ],
   },
   output: {
-    filename: 'index.js',
+    filename: '[name].js',
     publicPath: '/',
   },
   module: {
@@ -43,7 +53,7 @@ module.exports = {
       {
         test: /\.scss$/,
         use: [
-          'style-loader',
+          MiniCssExtractPlugin.loader,
           {
             loader: 'css-loader',
             options: {
@@ -73,6 +83,10 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({ template: path.resolve('src/index.html') }),
     new webpack.HotModuleReplacementPlugin(),
-    new CopyPlugin([{from: 'static'}])
+    new CopyPlugin([{ from: 'static' }, { from: 'src/sw.js' }]),
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+      chunkFilename: '[id].css',
+    }),
   ],
 }
