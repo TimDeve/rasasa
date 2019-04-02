@@ -15,7 +15,7 @@ ADD run .
 ADD ./scripts ./scripts
 ADD ./client ./client
 RUN ./run client:install:ci
-RUN ./run client:build
+RUN NODE_ENV=production ./run client:build
 
 
 #
@@ -65,6 +65,6 @@ COPY --from=node-builder /root/app/client/dist ./public
 COPY --from=rust-builder /root/app/server/target/debug/rasasa-server .
 ADD Caddyfile .
 EXPOSE 8090
-CMD concurrently -n 'Caddy,Server,Read' -c 'yellow,cyan,magenta' --kill-others 'caddy' 'RUST_LOG=info,rasasa-server=info ./rasasa-server' 'node read-server/src/index.js'
+CMD concurrently -n 'Caddy,Server,Read' -c 'yellow,cyan,magenta' --kill-others 'caddy' 'RUST_LOG=info,rasasa-server=info ./rasasa-server' 'NODE_ENV=production node read-server/src/index.js'
 
 
