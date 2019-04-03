@@ -46,6 +46,19 @@ async function setStoriesToRead(stories: Story[], setStories: (stories: Story[])
   setStories(json.stories)
 }
 
+async function cacheStoriesAndArticles(stories: Story[]) {
+  window.caches
+    .open('rasasa-dynamic')
+    .then(cache => {
+      const urlToCache = stories
+        .map(s => [`/api/v0/stories/${s.id}`, `/api/v0/read?page=${encodeURIComponent(s.url)}`])
+        .flat()
+      cache.addAll(urlToCache)
+    })
+    .then(() => console.log('Chached stories'))
+    .catch(() => console.log('Failed to cache stories'))
+}
+
 export default function StoriesPage() {
   const [stories, setStories] = useState<Story[] | null>(null)
 
@@ -62,6 +75,9 @@ export default function StoriesPage() {
         </Button>
         <Button className={s.button} onClick={() => setStoriesToRead(stories || [], setStories)}>
           Mark all as read
+        </Button>
+        <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
+          Cache all
         </Button>
       </div>
       {stories && (

@@ -7,7 +7,7 @@
     "module": "commonjs",
     "noImplicitReturns": true,
     "jsx": "react",
-    "lib": ["ES2018", "DOM"],
+    "lib": ["esnext.array", "ES2018", "DOM"],
     "baseUrl": "./src",
     "rootDir": "./src"
   },
