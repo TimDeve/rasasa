@@ -57,8 +57,6 @@ function StoryPage(props: StoryPageProps) {
 
   const article = fetchArticle(story ? story.url : '')
 
-  console.log(story)
-
   if (!story || !article) {
     return null
   }
