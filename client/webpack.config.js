@@ -12,11 +12,6 @@ module.exports = {
     index: path.resolve('src/index.tsx'),
   },
   mode: isDev ? 'development' : 'production',
-  optimization: {
-    splitChunks: {
-      chunks: 'all',
-    },
-  },
   devServer: {
     port: 8090,
     hot: true,

@@ -11,9 +11,9 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', function(event) {
   const requestUrl = new URL(event.request.url)
 
-  if (requestUrl.origin === location.origin) {
+  if (requestUrl.origin === location.origin && requestUrl.pathname.indexOf('/api') === -1) {
     event.respondWith(
-      caches.open('rasasa-dynamic').then(function(cache) {
+      caches.open('rasasa-static').then(function(cache) {
         return fetch(event.request)
           .then(function(response) {
             cache.put(event.request, response.clone())

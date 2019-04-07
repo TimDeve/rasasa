@@ -7,16 +7,44 @@ import Title from 'shared/components/Title'
 import Button from 'shared/components/Button'
 import { Story } from './storiesModel'
 import s from './StoriesPage.scss'
+import db from './StoriesDb'
 
 async function fetchStories(setStories: (stories: Story[]) => void, options: { refresh?: boolean } = {}) {
-  const res = await fetch('/api/v0/stories?' + queryString.stringify(options))
+  try {
+    const res = await fetch('/api/v0/stories?' + queryString.stringify(options))
 
-  const json = await res.json()
+    const json = await res.json()
 
-  setStories(json.stories)
+    setStories(json.stories)
+
+    try {
+      await db.stories.clear()
+      await db.stories.bulkAdd(json.stories)
+    } catch (e) {
+      console.error('Failed to cache stories', e)
+    }
+  } catch (e) {
+    console.log('Network failed serving cached stories')
+    const stories = await db.stories
+      .orderBy('id')
+      .reverse()
+      .toArray()
+    setStories(stories)
+  }
 }
 
 async function setStoryToRead(stories: Story[], setStories: (stories: Story[]) => void, storyId: number) {
+  try {
+    await db.stories
+      .where('id')
+      .equals(storyId)
+      .modify({ isRead: true })
+  } catch (e) {
+    console.error('Failed to cache read status of story', e)
+  }
+
+  setStories(stories.map(story => (story.id === storyId ? { ...story, isRead: true } : story)))
+
   const res = await fetch(`/api/v0/stories/${storyId}`, {
     method: 'PATCH',
     headers: {
@@ -26,13 +54,20 @@ async function setStoryToRead(stories: Story[], setStories: (stories: Story[]) =
       isRead: true,
     }),
   })
-
-  const json = await res.json()
-
-  setStories(stories.map(story => (story.id === json.id ? json : story)))
 }
 
 async function setStoriesToRead(stories: Story[], setStories: (stories: Story[]) => void) {
+  try {
+    await db.stories
+      .where('id')
+      .anyOf(stories.map(s => s.id))
+      .modify({ isRead: true })
+  } catch (e) {
+    console.error('Failed to cache read status of stories', e)
+  }
+
+  setStories(stories.map(s => ({ ...s, isRead: true })))
+
   const res = await fetch(`/api/v0/stories`, {
     method: 'PATCH',
     headers: {
@@ -40,23 +75,24 @@ async function setStoriesToRead(stories: Story[], setStories: (stories: Story[])
     },
     body: JSON.stringify(stories.map(({ id }) => ({ id, isRead: true }))),
   })
-
-  const json = await res.json()
-
-  setStories(json.stories)
 }
 
 async function cacheStoriesAndArticles(stories: Story[]) {
-  window.caches
-    .open('rasasa-dynamic')
-    .then(cache => {
-      const urlToCache = stories
-        .map(s => [`/api/v0/stories/${s.id}`, `/api/v0/read?page=${encodeURIComponent(s.url)}`])
-        .flat()
-      cache.addAll(urlToCache)
-    })
-    .then(() => console.log('Chached stories'))
-    .catch(() => console.log('Failed to cache stories'))
+  for (const story of stories) {
+    const fetchStory = async function() {
+      const res = await fetch('/api/v0/read?' + queryString.stringify({ page: story.url }))
+
+      const json = await res.json()
+
+      try {
+        await db.articles.add({ ...json, timestamp: new Date().getTime() })
+      } catch (e) {
+        console.error('Failed to cache article', e)
+      }
+    }
+
+    fetchStory()
+  }
 }
 
 export default function StoriesPage() {
@@ -76,9 +112,9 @@ export default function StoriesPage() {
         <Button className={s.button} onClick={() => setStoriesToRead(stories || [], setStories)}>
           Mark all as read
         </Button>
-        <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
-          Cache all
-        </Button>
+          <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
+            Cache all
+          </Button>
       </div>
       {stories && (
         <>

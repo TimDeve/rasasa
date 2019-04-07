@@ -5,21 +5,34 @@ import { RouteComponentProps } from 'react-router-dom'
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
 import { Article, Story } from './storiesModel'
+import db from './StoriesDb'
 
 interface StoryPageProps extends RouteComponentProps<{ storyId: string }> {}
 
-function fetchArticle(page: String): Article | null {
+function fetchArticle(page: string): Article | null {
   const [article, setArticle] = useState<Article | null>(null)
 
   useEffect(
     () => {
       ;(async () => {
         if (page) {
-          const res = await fetch('/api/v0/read?' + queryString.stringify({ page }))
+          const cachedArticle = await db.articles.get(page)
 
-          const json = await res.json()
+          if (cachedArticle) {
+            setArticle(cachedArticle)
+          } else {
+            const res = await fetch('/api/v0/read?' + queryString.stringify({ page }))
 
-          setArticle(json)
+            const json = await res.json()
+
+            setArticle(json)
+
+            try {
+              await db.articles.add({ ...json, timestamp: new Date().getTime() })
+            } catch (e) {
+              console.error('Failed to cache article', e)
+            }
+          }
         }
       })()
     },
@@ -29,18 +42,32 @@ function fetchArticle(page: String): Article | null {
   return article
 }
 
-function fetchStory(id: String): Story | null {
+function fetchStory(id: string): Story | null {
   const [story, setStory] = useState<Story | null>(null)
 
   useEffect(
     () => {
       ;(async () => {
         if (id) {
-          const res = await fetch(`/api/v0/stories/${id}`)
+          const cachedStory = await db.stories.get(parseInt(id))
 
-          const json = await res.json()
+          if (cachedStory) {
+            setStory(cachedStory)
+          } else {
+            const res = await fetch(`/api/v0/stories/${id}`)
 
-          setStory(json)
+            if (res.ok) {
+              const json = await res.json()
+
+              setStory(json)
+
+              try {
+                await db.stories.add(json)
+              } catch (e) {
+                console.error('Failed to cache story', e)
+              }
+            }
+          }
         }
       })()
     },

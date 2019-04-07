@@ -48,7 +48,7 @@ fastify.get('/v0/read', async (request, reply) => {
   const readable = isProbablyReaderable(doc.window.document)
   if (!readable) {
     reply.type('application/json').code(200)
-    const payload = { readable: false }
+    const payload = { readable: false, url: page }
     cacheResponse(page, payload)
     return payload
   }
@@ -62,6 +62,7 @@ fastify.get('/v0/read', async (request, reply) => {
     title: article.title,
     byline: article.byline,
     content: article.content,
+    url: page
   }
   cacheResponse(page, payload)
   return payload
