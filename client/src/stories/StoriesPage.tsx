@@ -112,9 +112,9 @@ export default function StoriesPage() {
         <Button className={s.button} onClick={() => setStoriesToRead(stories || [], setStories)}>
           Mark all as read
         </Button>
-          <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
-            Cache all
-          </Button>
+        <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
+          Cache all
+        </Button>
       </div>
       {stories && (
         <>
