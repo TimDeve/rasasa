@@ -38,7 +38,7 @@ pub fn delete_old_stories(conn: PgPooledConnection) {
     use crate::schema::stories::dsl::*;
     use diesel::dsl::{now, IntervalDsl};
 
-    let result = diesel::delete(stories.filter(created_at.lt(now - 30_i32.days()))).execute(&conn);
+    let result = diesel::delete(stories.filter(created_at.lt(now - 15_i32.days()))).execute(&conn);
 
     match result {
         Ok(n) => info!("Number of old stories deleted: {}", n),
