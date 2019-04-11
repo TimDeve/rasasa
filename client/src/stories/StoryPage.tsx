@@ -1,6 +1,8 @@
+import React, { useState, useEffect, ReactNode } from 'react'
 import queryString from 'query-string'
-import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { RouteComponentProps } from 'react-router-dom'
+import ScrollLock, { TouchScrollable } from 'react-scrolllock'
 
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
@@ -77,6 +79,24 @@ function fetchStory(id: string): Story | null {
   return story
 }
 
+function Wrapper({ children }: { children?: ReactNode }) {
+  return (
+    <>
+      <ScrollLock />
+      <TouchScrollable>
+        <div className={s.component}>
+          <div className={s.wrapper}>
+            <div className={s.nav}>
+              <Link to="/">Back to stories</Link>
+            </div>
+            {children}
+          </div>
+        </div>
+      </TouchScrollable>
+    </>
+  )
+}
+
 function StoryPage(props: StoryPageProps) {
   const id = props.match.params.storyId || ''
 
@@ -85,24 +105,24 @@ function StoryPage(props: StoryPageProps) {
   const article = fetchArticle(story ? story.url : '')
 
   if (!story || !article) {
-    return null
+    return <Wrapper />
   }
 
   if (!article.readable || !article.content) {
     return (
-      <div className={s.component}>
+      <Wrapper>
         <Title>
           <a style={{ color: 'black', textDecoration: 'none' }} href={story.url}>
             {story.title}
           </a>
         </Title>
         <>Sorry this page is not readable</>
-      </div>
+      </Wrapper>
     )
   }
 
   return (
-    <div className={s.component}>
+    <Wrapper>
       <Title>
         <a style={{ color: 'black', textDecoration: 'none' }} href={story.url}>
           {article.title}
@@ -110,7 +130,7 @@ function StoryPage(props: StoryPageProps) {
       </Title>
       <p style={{ fontWeight: 'bold' }}>{article.byline}</p>
       <div className={s.article} dangerouslySetInnerHTML={{ __html: article.content }} />
-    </div>
+    </Wrapper>
   )
 }
 

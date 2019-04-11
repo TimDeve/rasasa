@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, RouteComponentProps } from 'react-router-dom'
 import queryString from 'query-string'
 import cn from 'classnames'
 
 import Title from 'shared/components/Title'
 import Button from 'shared/components/Button'
 import { Story } from './storiesModel'
+import StoryPage from './StoryPage'
 import s from './StoriesPage.scss'
 import db from './StoriesDb'
 
@@ -95,7 +96,7 @@ async function cacheStoriesAndArticles(stories: Story[]) {
   }
 }
 
-export default function StoriesPage() {
+export default function StoriesPage(props: RouteComponentProps<{ storyId: string }>) {
   const [stories, setStories] = useState<Story[] | null>(null)
 
   useEffect(() => {
@@ -103,50 +104,53 @@ export default function StoriesPage() {
   }, [])
 
   return (
-    <div className={s.component}>
-      <Title>Stories</Title>
-      <div>
-        <Button className={s.button} onClick={() => fetchStories(setStories, { refresh: true })}>
-          Refresh
-        </Button>
-        <Button className={s.button} onClick={() => setStoriesToRead(stories || [], setStories)}>
-          Mark all as read
-        </Button>
-        <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
-          Cache all
-        </Button>
+    <>
+      {props.location.pathname.indexOf('/story/') !== -1 && <StoryPage {...props} />}
+      <div className={s.component}>
+        <Title>Stories</Title>
+        <div>
+          <Button className={s.button} onClick={() => fetchStories(setStories, { refresh: true })}>
+            Refresh
+          </Button>
+          <Button className={s.button} onClick={() => setStoriesToRead(stories || [], setStories)}>
+            Mark all as read
+          </Button>
+          <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
+            Cache all
+          </Button>
+        </div>
+        {stories && (
+          <>
+            {stories.length === 0 && (
+              <p className={s.noStoriesMessage}>There are no stories here. Try to refresh.</p>
+            )}
+            <ul className={s.list}>
+              {stories.map(story => (
+                <li className={s.story} key={story.id}>
+                  <div>
+                    <a
+                      className={cn(s.link, { [s.linkRead]: story.isRead })}
+                      target="_blank"
+                      href={story.url}
+                      onClick={() => setStoryToRead(stories, setStories, story.id)}
+                    >
+                      {story.title}
+                    </a>
+                  </div>
+                  <div className={s.actions}>
+                    <Link
+                      to={`/story/${story.id}`}
+                      onClick={() => setStoryToRead(stories, setStories, story.id)}
+                    >
+                      Read
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
-      {stories && (
-        <>
-          {stories.length === 0 && (
-            <p className={s.noStoriesMessage}>There are no stories here. Try to refresh.</p>
-          )}
-          <ul className={s.list}>
-            {stories.map(story => (
-              <li className={s.story} key={story.id}>
-                <div>
-                  <a
-                    className={cn(s.link, { [s.linkRead]: story.isRead })}
-                    target="_blank"
-                    href={story.url}
-                    onClick={() => setStoryToRead(stories, setStories, story.id)}
-                  >
-                    {story.title}
-                  </a>
-                </div>
-                <div className={s.actions}>
-                  <Link
-                    to={`/story/${story.id}`}
-                    onClick={() => setStoryToRead(stories, setStories, story.id)}
-                  >
-                    Read
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </div>
+    </>
   )
 }

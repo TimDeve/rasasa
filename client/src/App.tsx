@@ -17,9 +17,8 @@ function App() {
         <>
           <Nav />
           <Switch>
-            <Route exact path="/" component={StoriesPage} />
+            <Route exact path="/(|story/:storyId)" component={StoriesPage} />
             <Route exact path="/feeds" component={FeedsPage} />
-            <Route exact path="/story/:storyId" component={StoryPage} />
             <Redirect to="/" />
           </Switch>
         </>

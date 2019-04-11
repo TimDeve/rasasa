@@ -1,12 +1,27 @@
 .component {
+  height: 100vh;
+  width: 100vw;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: white;
+}
+
+.wrapper {
   max-width: 680px;
-  margin-left: auto;
-  margin-right: auto;
   padding-right: 1em;
   padding-left: 1em;
+  margin-left: auto;
+  margin-right: auto;
+  padding-bottom: 2em;
 }
 
 .article {
+  iframe {
+    max-width: 100%;
+  }
+
   img {
     max-width: 100%;
     margin-top: 1em;
@@ -30,5 +45,19 @@
 
   ol {
     margin-left: 1em;
+  }
+}
+
+.nav {
+  a {
+    display: block;
+    padding-top: 1em;
+    padding-bottom: 1em;
+    text-decoration: none;
+    color: black;
+
+    &:visited {
+      color: black;
+    }
   }
 }
