@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
 import queryString from 'query-string'
+import { PoseGroup } from 'react-pose'
 import cn from 'classnames'
+import posed from 'react-pose'
 
 import Title from 'shared/components/Title'
 import Button from 'shared/components/Button'
@@ -96,6 +98,11 @@ async function cacheStoriesAndArticles(stories: Story[]) {
   }
 }
 
+const Component = posed.div({
+  enter: { opacity: 1 },
+  exit: { opacity: 0 },
+})
+
 export default function StoriesPage(props: RouteComponentProps<{ storyId: string }>) {
   const [stories, setStories] = useState<Story[] | null>(null)
 
@@ -103,9 +110,12 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
     fetchStories(setStories)
   }, [])
 
+  // {props.location.pathname.indexOf('/story/') !== -1 && <Component key="hell">Hello</Component>}
   return (
     <>
-      {props.location.pathname.indexOf('/story/') !== -1 && <StoryPage {...props} />}
+      <PoseGroup>
+        {props.location.pathname.indexOf('/story/') !== -1 && <StoryPage key="hello" {...props} />}
+      </PoseGroup>
       <div className={s.component}>
         <Title>Stories</Title>
         <div>

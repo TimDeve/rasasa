@@ -1,8 +1,9 @@
-import React, { useState, useEffect, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode, forwardRef } from 'react'
 import queryString from 'query-string'
 import { Link } from 'react-router-dom'
 import { RouteComponentProps } from 'react-router-dom'
 import ScrollLock, { TouchScrollable } from 'react-scrolllock'
+import posed from 'react-pose'
 
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
@@ -79,12 +80,12 @@ function fetchStory(id: string): Story | null {
   return story
 }
 
-function Wrapper({ children }: { children?: ReactNode }) {
+function Wrapper({ children, Aniref }: { children?: ReactNode }) {
   return (
     <>
       <ScrollLock />
       <TouchScrollable>
-        <div className={s.component}>
+        <div ref={Aniref} className={s.component}>
           <div className={s.wrapper}>
             <div className={s.nav}>
               <Link to="/">Back to stories</Link>
@@ -105,12 +106,12 @@ function StoryPage(props: StoryPageProps) {
   const article = fetchArticle(story ? story.url : '')
 
   if (!story || !article) {
-    return <Wrapper />
+    return <Wrapper Aniref={props.Aniref} />
   }
 
   if (!article.readable || !article.content) {
     return (
-      <Wrapper>
+      <Wrapper Aniref={props.Aniref}>
         <Title>
           <a style={{ color: 'black', textDecoration: 'none' }} href={story.url}>
             {story.title}
@@ -122,7 +123,7 @@ function StoryPage(props: StoryPageProps) {
   }
 
   return (
-    <Wrapper>
+    <Wrapper Aniref={props.Aniref}>
       <Title>
         <a style={{ color: 'black', textDecoration: 'none' }} href={story.url}>
           {article.title}
@@ -134,4 +135,26 @@ function StoryPage(props: StoryPageProps) {
   )
 }
 
-export default StoryPage
+const AnimatedStoryPage = forwardRef((props, ref) => <StoryPage Aniref={ref} {...props} />)
+
+export default posed(AnimatedStoryPage)({
+  enter: {
+    x: 0,
+    transition: {
+      duration: 300,
+      ease: 'easeIn',
+    },
+  },
+  flip: {
+    transition: {
+      ease: 'easeIn',
+    },
+  },
+  exit: {
+    x: '100vw',
+    transition: {
+      duration: 300,
+      ease: 'easeOut',
+    },
+  },
+})
