@@ -1,28 +1,7 @@
-const filesToCache = ['/', 'index.css', 'index.js']
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.2.0/workbox-sw.js')
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open('rasasa-static').then(cache => {
-      return cache.addAll(filesToCache)
-    })
-  )
-})
-
-self.addEventListener('fetch', function(event) {
-  const requestUrl = new URL(event.request.url)
-
-  if (requestUrl.origin === location.origin && requestUrl.pathname.indexOf('/api') === -1) {
-    event.respondWith(
-      caches.open('rasasa-static').then(function(cache) {
-        return fetch(event.request)
-          .then(function(response) {
-            cache.put(event.request, response.clone())
-            return response
-          })
-          .catch(function() {
-            return cache.match(event.request)
-          })
-      })
-    )
-  }
-})
+if (workbox) {
+  workbox.precaching.precacheAndRoute(self.__precacheManifest || [])
+} else {
+  console.error('Workbox failed to load.')
+}

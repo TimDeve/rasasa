@@ -3,6 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const WorkboxPlugin = require('workbox-webpack-plugin')
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -78,10 +79,13 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({ template: path.resolve('src/index.html') }),
     new webpack.HotModuleReplacementPlugin(),
-    new CopyPlugin([{ from: 'static' }, { from: 'src/sw.js' }]),
+    new CopyPlugin([{ from: 'static' }]),
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
+    }),
+    new WorkboxPlugin.InjectManifest({
+      swSrc: 'src/sw.js',
     }),
   ],
 }
