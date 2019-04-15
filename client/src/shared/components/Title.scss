@@ -3,4 +3,8 @@
   margin-top: 0.625em;
   margin-bottom: 0.625em;
   line-height: 1.2em;
+
+  &:active {
+    color: grey;
+  }
 }

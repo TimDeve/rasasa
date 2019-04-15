@@ -78,6 +78,27 @@ async function setStoriesToRead(stories: Story[], setStories: (stories: Story[])
   })
 }
 
+async function clearStories(stories: Story[], setStories: (stories: Story[]) => void) {
+  try {
+    await db.stories
+      .where('id')
+      .anyOf(stories.map(s => s.id))
+      .delete()
+  } catch (e) {
+    console.error('Failed to delete cached stories', e)
+  }
+
+  setStories([])
+
+  const res = await fetch(`/api/v0/stories`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(stories.map(({ id }) => ({ id, isRead: true }))),
+  })
+}
+
 async function cacheStoriesAndArticles(stories: Story[]) {
   for (const story of stories) {
     const fetchStory = async function() {
@@ -107,11 +128,8 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
     <>
       {props.location.pathname.indexOf('/story/') !== -1 && <StoryPage {...props} />}
       <div className={s.component}>
-        <Title>Stories</Title>
+        <Title onClick={() => fetchStories(setStories, { refresh: true })}>Stories</Title>
         <div>
-          <Button className={s.button} onClick={() => fetchStories(setStories, { refresh: true })}>
-            Refresh
-          </Button>
           <Button className={s.button} onClick={() => setStoriesToRead(stories || [], setStories)}>
             Mark all as read
           </Button>
@@ -119,37 +137,40 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
             Cache all
           </Button>
         </div>
-        {stories && (
-          <>
-            {stories.length === 0 && (
-              <p className={s.noStoriesMessage}>There are no stories here. Try to refresh.</p>
-            )}
-            <ul className={s.list}>
-              {stories.map(story => (
-                <li className={s.story} key={story.id}>
-                  <div>
-                    <a
-                      className={cn(s.link, { [s.linkRead]: story.isRead })}
-                      target="_blank"
-                      href={story.url}
-                      onClick={() => setStoryToRead(stories, setStories, story.id)}
-                    >
-                      {story.title}
-                    </a>
-                  </div>
-                  <div className={s.actions}>
-                    <Link
-                      to={`/story/${story.id}`}
-                      onClick={() => setStoryToRead(stories, setStories, story.id)}
-                    >
-                      Read
-                    </Link>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
+        {stories &&
+          (stories.length === 0 ? (
+            <p className={s.noStoriesMessage}>There are no stories here. Try to refresh.</p>
+          ) : (
+            <>
+              <ul className={s.stories}>
+                {stories.map(story => (
+                  <li className={s.story} key={story.id}>
+                    <div>
+                      <a
+                        className={cn(s.link, { [s.linkRead]: story.isRead })}
+                        target="_blank"
+                        href={story.url}
+                        onClick={() => setStoryToRead(stories, setStories, story.id)}
+                      >
+                        {story.title}
+                      </a>
+                    </div>
+                    <div className={s.actions}>
+                      <Link
+                        to={`/story/${story.id}`}
+                        onClick={() => setStoryToRead(stories, setStories, story.id)}
+                      >
+                        Read
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <Button className={s.bottomButton} onClick={() => clearStories(stories || [], setStories)}>
+                Clear stories
+              </Button>
+            </>
+          ))}
       </div>
     </>
   )

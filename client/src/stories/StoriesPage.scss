@@ -1,10 +1,15 @@
 .component {
   margin-right: 1em;
   margin-left: 1em;
+  margin-bottom: 2em;
 }
 
 .button {
   margin-right: 1rem;
+}
+
+.bottomButton {
+  width: 100%;
 }
 
 .noStoriesMessage {
@@ -12,10 +17,10 @@
   margin-bottom: 2em;
 }
 
-.list {
+.stories {
   list-style: none;
   margin-top: 1rem;
-  margin-top: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .story {
@@ -26,6 +31,10 @@
   border-width: 0;
   border-bottom-width: 1px;
   border-color: black;
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .link {

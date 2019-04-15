@@ -13,4 +13,9 @@
     border-color: rgb(77, 144, 254);
     outline: none;
   }
+
+  &:active {
+    color: grey;
+    border-color: grey;
+  }
 }
