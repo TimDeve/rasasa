@@ -31,7 +31,7 @@ use tower_web::ServiceBuilder;
 use crate::feeds::FeedsResource;
 use crate::stories::StoriesResource;
 use config::Config;
-use scheduler::setup_scheduler;
+use scheduler::{run_startup_jobs, setup_scheduler};
 
 embed_migrations!("migrations");
 
@@ -48,6 +48,7 @@ pub fn main() {
     embedded_migrations::run_with_output(&connection, &mut std::io::stdout()).unwrap();
 
     let _thread_handle = setup_scheduler(pool.clone());
+    run_startup_jobs(pool.clone());
 
     let addr = "127.0.0.1:8091".parse().expect("Invalid address");
     println!("Listening on http://{}", addr);

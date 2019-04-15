@@ -34,11 +34,15 @@ pub fn setup_scheduler(pool: PgPool) -> clokwerk::ScheduleHandle {
     scheduler.watch_thread(Duration::from_millis(1000))
 }
 
+pub fn run_startup_jobs(pool: PgPool) {
+    delete_old_stories(pool.clone().get().unwrap());
+}
+
 pub fn delete_old_stories(conn: PgPooledConnection) {
     use crate::schema::stories::dsl::*;
     use diesel::dsl::{now, IntervalDsl};
 
-    let result = diesel::delete(stories.filter(created_at.lt(now - 15_i32.days()))).execute(&conn);
+    let result = diesel::delete(stories.filter(created_at.lt(now - 7_i32.days()))).execute(&conn);
 
     match result {
         Ok(n) => info!("Number of old stories deleted: {}", n),
