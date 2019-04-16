@@ -22,37 +22,3 @@
   margin-top: 1rem;
   margin-bottom: 0.6rem;
 }
-
-.story {
-  padding-top: 1.2rem;
-  padding-bottom: 1.2rem;
-
-  border-style: solid;
-  border-width: 0;
-  border-bottom-width: 1px;
-  border-color: black;
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.link {
-  display: block;
-  color: black;
-  text-decoration: none;
-
-  &Read {
-    color: grey;
-  }
-}
-
-.actions {
-  a {
-    color: grey;
-    text-decoration: none;
-    display: block;
-    padding-right: 0.5rem;
-    padding-top: 0.5rem;
-  }
-}

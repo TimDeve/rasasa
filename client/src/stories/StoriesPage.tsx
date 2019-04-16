@@ -7,6 +7,7 @@ import Title from 'shared/components/Title'
 import Button from 'shared/components/Button'
 import { Story } from './storiesModel'
 import StoryPage from './StoryPage'
+import StoryListItem from './StoryListItem'
 import s from './StoriesPage.scss'
 import db from './StoriesDb'
 
@@ -144,26 +145,11 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
             <>
               <ul className={s.stories}>
                 {stories.map(story => (
-                  <li className={s.story} key={story.id}>
-                    <div>
-                      <a
-                        className={cn(s.link, { [s.linkRead]: story.isRead })}
-                        target="_blank"
-                        href={story.url}
-                        onClick={() => setStoryToRead(stories, setStories, story.id)}
-                      >
-                        {story.title}
-                      </a>
-                    </div>
-                    <div className={s.actions}>
-                      <Link
-                        to={`/story/${story.id}`}
-                        onClick={() => setStoryToRead(stories, setStories, story.id)}
-                      >
-                        Read
-                      </Link>
-                    </div>
-                  </li>
+                  <StoryListItem
+                    {...story}
+                    key={story.id}
+                    markAsRead={() => setStoryToRead(stories, setStories, story.id)}
+                  />
                 ))}
               </ul>
               <Button className={s.bottomButton} onClick={() => clearStories(stories || [], setStories)}>
