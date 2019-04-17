@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import cn from 'classnames'
 import { Link } from 'react-router-dom'
 
@@ -26,7 +26,13 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead }: StoryLis
           {title}
         </Link>
         <div className={s.actions}>
-          {content && <Chevron direction={hasContent ? "up" : "down"} onClick={toggleContent} color={isRead ? 'grey' : 'black'} />}
+          {content && (
+            <Chevron
+              direction={hasContent ? 'up' : 'down'}
+              onClick={toggleContent}
+              color={isRead ? 'grey' : 'black'}
+            />
+          )}
           <a href={url} target="_blank" rel="noopener noreferrer" onClick={markAsRead}>
             <BoxArrow color={isRead ? 'grey' : 'black'} />
           </a>
