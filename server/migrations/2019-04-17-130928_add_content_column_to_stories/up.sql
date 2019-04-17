@@ -1,0 +1,2 @@
+ALTER TABLE stories ADD COLUMN content TEXT NOT NULL DEFAULT '';
+

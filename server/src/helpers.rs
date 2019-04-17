@@ -43,9 +43,16 @@ fn marshal_atom_feed_into_stories(feed: Feed, feed_id: i32) -> Vec<NewStory> {
                 (Some(date), _) => DateTime::parse_from_rfc3339(date).unwrap(),
                 (_, date) => DateTime::parse_from_rfc3339(date).unwrap(),
             };
+
+            let content = match entry.content() {
+                Some(content) => content.value().unwrap_or(""),
+                None => "",
+            };
+
             NewStory {
                 is_read: false,
                 feed_id,
+                content: content.to_string(),
                 url: entry.links()[0].href().to_string(),
                 title: entry.title().to_string(),
                 published_date,
@@ -60,6 +67,7 @@ fn marshal_rss_feed_into_stories(feed: Channel, feed_id: i32) -> Vec<NewStory> {
         .map(|entry| NewStory {
             is_read: false,
             feed_id,
+            content: entry.description().unwrap_or("").to_string(),
             url: entry.link().unwrap().to_string(),
             title: entry.title().unwrap().to_string(),
             published_date: DateTime::parse_from_rfc2822(entry.pub_date().unwrap()).unwrap(),

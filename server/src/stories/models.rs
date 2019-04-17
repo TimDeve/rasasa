@@ -12,6 +12,7 @@ pub struct NewStory {
     pub title: String,
     pub url: String,
     pub is_read: bool,
+    pub content: String,
     pub published_date: DateTime<FixedOffset>,
 }
 
@@ -24,6 +25,7 @@ pub struct Story {
     pub feed_id: i32,
     pub title: String,
     pub url: String,
+    pub content: String,
     #[serde(rename = "isRead")]
     pub is_read: bool,
     #[serde(rename = "publishedDate")]
