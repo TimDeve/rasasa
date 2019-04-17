@@ -1,29 +1,38 @@
-import React from 'react'
+import React, {useState} from 'react'
 import cn from 'classnames'
 import { Link } from 'react-router-dom'
 
 import s from './StoryListItem.scss'
 import BoxArrow from 'shared/icons/BoxArrow'
+import Chevron from 'shared/icons/Chevron'
+import useToggle from 'shared/useToggle'
 
 interface StoryListItemProps {
   id: number | string
   url: string
   title: string
+  content: string
   isRead: boolean
   markAsRead: () => void
 }
 
-function StoryListItem({ id, url, title, isRead, markAsRead }: StoryListItemProps) {
+function StoryListItem({ id, url, title, isRead, content, markAsRead }: StoryListItemProps) {
+  const [hasContent, toggleContent] = useToggle(false)
+
   return (
     <li className={s.component}>
-      <Link to={`/story/${id}`} className={cn(s.link, { [s.linkRead]: isRead })}  onClick={markAsRead}>
-        {title}
-      </Link>
-      <div className={s.actions}>
-        <a href={url} target="_blank" rel="noopener noreferrer" onClick={markAsRead}>
-          <BoxArrow color={isRead ? "grey" : "black"}/>
-        </a>
+      <div className={s.titleContainer}>
+        <Link to={`/story/${id}`} className={cn(s.link, { [s.linkRead]: isRead })} onClick={markAsRead}>
+          {title}
+        </Link>
+        <div className={s.actions}>
+          {content && <Chevron direction={hasContent ? "up" : "down"} onClick={toggleContent} color={isRead ? 'grey' : 'black'} />}
+          <a href={url} target="_blank" rel="noopener noreferrer" onClick={markAsRead}>
+            <BoxArrow color={isRead ? 'grey' : 'black'} />
+          </a>
+        </div>
       </div>
+      {hasContent && <div className={s.storyContent} dangerouslySetInnerHTML={{ __html: content }} />}
     </li>
   )
 }

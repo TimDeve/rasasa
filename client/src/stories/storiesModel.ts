@@ -10,6 +10,7 @@ export interface Story {
   isRead: boolean
   url: string
   title: string
+  content: string
   publishedDate: string
   article?: Article
 }
