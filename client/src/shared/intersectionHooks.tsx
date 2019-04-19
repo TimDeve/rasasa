@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useContext } from 'rea
 
 export function useElementHasExitedTopScreen(callback: () => void) {
   const [node, setNode] = useState<Element | null>(null)
+  const [wasTriggered, setWasTriggered] = useState<boolean>(false)
 
   const ref = useCallback(node => {
     if (node !== null) {
@@ -12,9 +13,10 @@ export function useElementHasExitedTopScreen(callback: () => void) {
   useEffect(
     () => {
       let observer: IntersectionObserver | null = null
-      if (node !== null) {
+      if (!wasTriggered && node !== null) {
         observer = new IntersectionObserver(val => {
           if ((val[0].boundingClientRect as DOMRect).y < 0) {
+            setWasTriggered(true)
             callback()
           }
         })
@@ -26,7 +28,7 @@ export function useElementHasExitedTopScreen(callback: () => void) {
         observer && observer.disconnect()
       }
     },
-    [node, callback]
+    [node, callback, wasTriggered]
   )
 
   return ref

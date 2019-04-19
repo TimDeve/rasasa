@@ -10,14 +10,25 @@ import StoryPage from './StoryPage'
 import StoryListItem from './StoryListItem'
 import s from './StoriesPage.scss'
 import db from './StoriesDb'
+import {
+  StoriesDispatch,
+  useStories,
+  markStoryAsRead,
+  markAllStoriesAsRead,
+  setAllStories,
+  setStoriesLoading,
+  clearStories as clearStoriesAction,
+} from './StoriesPageState'
 
-async function fetchStories(setStories: (stories: Story[]) => void, options: { refresh?: boolean } = {}) {
+async function fetchStories(dispatch: StoriesDispatch, options: { refresh?: boolean } = {}) {
   try {
+    dispatch(setStoriesLoading(true))
     const res = await fetch('/api/v0/stories?' + queryString.stringify(options))
 
     const json = await res.json()
 
-    setStories(json.stories)
+    dispatch(setAllStories(json.stories))
+    dispatch(setStoriesLoading(false))
 
     try {
       await db.stories.clear()
@@ -31,11 +42,12 @@ async function fetchStories(setStories: (stories: Story[]) => void, options: { r
       .orderBy('id')
       .reverse()
       .toArray()
-    setStories(stories)
+    dispatch(setAllStories(stories))
+    dispatch(setStoriesLoading(false))
   }
 }
 
-async function setStoryToRead(stories: Story[], setStories: (stories: Story[]) => void, storyId: number) {
+async function setStoryToRead(dispatch: StoriesDispatch, storyId: number) {
   try {
     await db.stories
       .where('id')
@@ -45,7 +57,7 @@ async function setStoryToRead(stories: Story[], setStories: (stories: Story[]) =
     console.error('Failed to cache read status of story', e)
   }
 
-  setStories(stories.map(story => (story.id === storyId ? { ...story, isRead: true } : story)))
+  dispatch(markStoryAsRead(storyId))
 
   const res = await fetch(`/api/v0/stories/${storyId}`, {
     method: 'PATCH',
@@ -58,7 +70,7 @@ async function setStoryToRead(stories: Story[], setStories: (stories: Story[]) =
   })
 }
 
-async function setStoriesToRead(stories: Story[], setStories: (stories: Story[]) => void) {
+async function setStoriesToRead(stories: Story[], dispatch: StoriesDispatch) {
   try {
     await db.stories
       .where('id')
@@ -68,7 +80,7 @@ async function setStoriesToRead(stories: Story[], setStories: (stories: Story[])
     console.error('Failed to cache read status of stories', e)
   }
 
-  setStories(stories.map(s => ({ ...s, isRead: true })))
+  dispatch(markAllStoriesAsRead())
 
   const res = await fetch(`/api/v0/stories`, {
     method: 'PATCH',
@@ -79,7 +91,7 @@ async function setStoriesToRead(stories: Story[], setStories: (stories: Story[])
   })
 }
 
-async function clearStories(stories: Story[], setStories: (stories: Story[]) => void) {
+async function clearStories(stories: Story[], dispatch: StoriesDispatch) {
   try {
     await db.stories
       .where('id')
@@ -89,14 +101,14 @@ async function clearStories(stories: Story[], setStories: (stories: Story[]) => 
     console.error('Failed to delete cached stories', e)
   }
 
-  setStories([])
+  dispatch(clearStoriesAction())
 
   const res = await fetch(`/api/v0/stories`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(stories.map(({ id }) => ({ id, isRead: true }))),
+    body: JSON.stringify(stories.filter(({ isRead }) => !isRead).map(({ id }) => ({ id, isRead: true }))),
   })
 }
 
@@ -119,26 +131,26 @@ async function cacheStoriesAndArticles(stories: Story[]) {
 }
 
 export default function StoriesPage(props: RouteComponentProps<{ storyId: string }>) {
-  const [stories, setStories] = useState<Story[] | null>(null)
+  const [{ stories, loading }, dispatch] = useStories()
 
   useEffect(() => {
-    fetchStories(setStories)
+    fetchStories(dispatch)
   }, [])
 
   return (
     <>
       {props.location.pathname.indexOf('/story/') !== -1 && <StoryPage {...props} />}
       <div className={s.component}>
-        <Title onClick={() => fetchStories(setStories, { refresh: true })}>Stories</Title>
+        <Title onClick={() => fetchStories(dispatch, { refresh: true })}>Stories</Title>
         <div>
-          <Button className={s.button} onClick={() => setStoriesToRead(stories || [], setStories)}>
+          <Button className={s.button} onClick={() => setStoriesToRead(stories, dispatch)}>
             Mark all as read
           </Button>
-          <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories || [])}>
+          <Button className={s.button} onClick={() => cacheStoriesAndArticles(stories)}>
             Cache all
           </Button>
         </div>
-        {stories &&
+        {!loading &&
           (stories.length === 0 ? (
             <p className={s.noStoriesMessage}>There are no stories here. Try to refresh.</p>
           ) : (
@@ -148,11 +160,11 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
                   <StoryListItem
                     {...story}
                     key={story.id}
-                    markAsRead={() => setStoryToRead(stories, setStories, story.id)}
+                    markAsRead={() => setStoryToRead(dispatch, story.id)}
                   />
                 ))}
               </ul>
-              <Button className={s.bottomButton} onClick={() => clearStories(stories || [], setStories)}>
+              <Button className={s.bottomButton} onClick={() => clearStories(stories, dispatch)}>
                 Clear stories
               </Button>
             </>

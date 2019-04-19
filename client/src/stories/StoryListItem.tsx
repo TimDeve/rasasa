@@ -20,14 +20,11 @@ interface StoryListItemProps {
 function StoryListItem({ id, url, title, isRead, content, markAsRead }: StoryListItemProps) {
   const [hasContent, toggleContent] = useToggle(false)
 
-  const ref = useElementHasExitedTopScreen(
-    useCallback(
-      () => {
-        !isRead && markAsRead()
-      },
-      [isRead, markAsRead]
-    )
-  )
+  const ref = useElementHasExitedTopScreen(() => {
+    if (!isRead) {
+      markAsRead()
+    }
+  })
 
   return (
     <li className={s.component} ref={ref}>
