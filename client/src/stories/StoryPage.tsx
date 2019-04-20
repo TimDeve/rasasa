@@ -124,7 +124,12 @@ function StoryPage(props: StoryPageProps) {
   return (
     <Wrapper>
       <Title>
-        <a style={{ color: 'black', textDecoration: 'none' }} href={story.url}>
+        <a
+          style={{ color: 'black', textDecoration: 'none' }}
+          href={story.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           {article.title}
         </a>
       </Title>

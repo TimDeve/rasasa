@@ -29,7 +29,7 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead }: StoryLis
   return (
     <li className={s.component} ref={ref}>
       <div className={s.titleContainer}>
-        <Link to={`/story/${id}`} className={cn(s.link, { [s.linkRead]: isRead })} onClick={markAsRead}>
+        <Link to={`/story/${id}`} className={cn(s.link, { [s.linkRead]: isRead })}>
           {title}
         </Link>
         <div className={s.actions}>
@@ -40,7 +40,7 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead }: StoryLis
               color={isRead ? 'grey' : 'black'}
             />
           )}
-          <a href={url} target="_blank" rel="noopener noreferrer" onClick={markAsRead}>
+          <a href={url} target="_blank" rel="noopener noreferrer">
             <BoxArrow color={isRead ? 'grey' : 'black'} />
           </a>
         </div>
