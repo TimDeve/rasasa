@@ -1,6 +1,7 @@
 const redis = require('redis')
 const bluebird = require('bluebird')
 const fetch = require('node-fetch')
+const sanitizeHtml = require('sanitize-html');
 const { JSDOM } = require('jsdom')
 const Readability = require('readability')
 const { isProbablyReaderable } = require('readability/Readability-readerable')
@@ -61,7 +62,9 @@ fastify.get('/v0/read', async (request, reply) => {
     readable,
     title: article.title,
     byline: article.byline,
-    content: article.content,
+    content: sanitizeHtml(article.content, {
+      allowedIframeHostnames: ['www.youtube.com']
+    }),
     url: page
   }
   cacheResponse(page, payload)
