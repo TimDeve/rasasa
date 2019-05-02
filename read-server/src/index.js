@@ -63,6 +63,7 @@ fastify.get('/v0/read', async (request, reply) => {
     title: article.title,
     byline: article.byline,
     content: sanitizeHtml(article.content, {
+      allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ]),
       allowedIframeHostnames: ['www.youtube.com']
     }),
     url: page
