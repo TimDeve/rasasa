@@ -98,6 +98,14 @@
     padding-left: 0.9em;
     border-left: 1px solid black;
   }
+
+  pre {
+    font-family: monospace;
+    background: black;
+    padding: 0.5em;
+    color: white;
+    overflow-x: auto;
+  }
 }
 
 .nav {
