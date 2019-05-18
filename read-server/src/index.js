@@ -12,7 +12,7 @@ bluebird.promisifyAll(redis.Multi.prototype)
 const REDIS_PREFIX = 'rasasa-read'
 
 const sanitizeHtmlOptions = {
-  allowedTags: [...sanitizeHtml.defaults.allowedTags, 'img', 'video', 'picture', 'source'],
+  allowedTags: [...sanitizeHtml.defaults.allowedTags,'h1', 'h2', 'img', 'video', 'picture', 'source'],
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
     video: ['src', 'type'],
