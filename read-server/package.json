@@ -9,7 +9,9 @@
     "start": "node src/index.js",
     "start:dev": "nodemon src/index.js",
     "lint": "npm run lint:prettier",
-    "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write"
+    "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "prettier": {
     "printWidth": 110,
@@ -32,6 +34,7 @@
     "sanitize-html": "^1.20.1"
   },
   "devDependencies": {
+    "jest": "^24.8.0",
     "nodemon": "^1.18.10",
     "prettier": "^1.16.4"
   }

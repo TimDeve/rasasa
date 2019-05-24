@@ -1,25 +1,16 @@
 const redis = require('redis')
 const bluebird = require('bluebird')
 const fetch = require('node-fetch')
-const sanitizeHtml = require('sanitize-html')
 const { JSDOM } = require('jsdom')
 const Readability = require('readability')
 const { isProbablyReaderable } = require('readability/Readability-readerable')
+
+const transformHtml = require('./transformHtml')
 
 bluebird.promisifyAll(redis.RedisClient.prototype)
 bluebird.promisifyAll(redis.Multi.prototype)
 
 const REDIS_PREFIX = 'rasasa-read'
-
-const sanitizeHtmlOptions = {
-  allowedTags: [...sanitizeHtml.defaults.allowedTags,'h1', 'h2', 'img', 'video', 'picture', 'source'],
-  allowedAttributes: {
-    ...sanitizeHtml.defaults.allowedAttributes,
-    video: ['src', 'type'],
-    source: ['srcset', 'media', 'type'],
-  },
-  allowedIframeHostnames: ['www.youtube.com'],
-}
 
 const redisClient = redis.createClient(process.env['REDIS_URL'])
 
@@ -73,7 +64,7 @@ fastify.get('/v0/read', async (request, reply) => {
     readable,
     title: article.title,
     byline: article.byline,
-    content: sanitizeHtml(article.content, sanitizeHtmlOptions),
+    content: transformHtml(article.content, page),
     url: page,
   }
   cacheResponse(page, payload)
