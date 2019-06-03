@@ -14,20 +14,14 @@ module.exports = {
   },
   mode: isDev ? 'development' : 'production',
   devServer: {
-    port: 8090,
+    port: 8089,
     hot: true,
     historyApiFallback: true,
     host: '0.0.0.0',
     proxy: [
       {
-        context: ['/api/**', '!**/read'],
-        target: 'http://localhost:8091',
-        pathRewrite: { '^/api': '' },
-      },
-      {
-        context: ['/api/v0/read'],
-        target: 'http://localhost:8092',
-        pathRewrite: { '^/api': '' },
+        context: ['/api/**'],
+        target: 'http://localhost:8090',
       },
     ],
   },
