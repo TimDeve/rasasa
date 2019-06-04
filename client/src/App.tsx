@@ -7,7 +7,7 @@ import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-d
 import FeedsPage from 'feeds/FeedsPage'
 import Nav from './Nav'
 import StoriesPage from 'stories/StoriesPage'
-import StoryPage from 'stories/StoryPage'
+import LoginPage from 'login/LoginPage'
 import s from './App.scss'
 
 function App() {
@@ -17,6 +17,7 @@ function App() {
         <>
           <Nav />
           <Switch>
+            <Route exact path="/login" component={LoginPage} />
             <Route exact path="/(|story/:storyId)" component={StoriesPage} />
             <Route exact path="/feeds" component={FeedsPage} />
             <Redirect to="/" />

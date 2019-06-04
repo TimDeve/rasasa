@@ -14,6 +14,11 @@ function Nav() {
           <Link to="/feeds">Feeds</Link>
         </li>
       </ul>
+      <ul>
+        <li>
+          <Link to="/login">Login</Link>
+        </li>
+      </ul>
     </nav>
   )
 }
