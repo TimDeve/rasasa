@@ -117,6 +117,10 @@ func initSession() {
 	redisURL, err := url.Parse(os.Getenv("REDIS_URL"))
 	if err == nil {
 		redisOptions.Addr = redisURL.Host
+		pass, ok := redisURL.User.Password()
+		if ok {
+			redisOptions.Password = pass
+		}
 	}
 
 	session.InitManager(
