@@ -113,17 +113,14 @@ func restrictedProxy(target string) func(http.ResponseWriter, *http.Request) {
 }
 
 func initSession() {
-	var redisAddr string
-	redisURL := os.Getenv("REDIS_URL")
-	if redisURL != "" {
-		redisAddr = redisURL[8:]
+	redisOptions := redis.Options{DB: 1}
+	redisURL, err := url.Parse(os.Getenv("REDIS_URL"))
+	if err == nil {
+		redisOptions.Addr = redisURL.Host
 	}
 
 	session.InitManager(
-		session.SetStore(redis.NewRedisStore(&redis.Options{
-			Addr: redisAddr,
-			DB:   1,
-		})),
+		session.SetStore(redis.NewRedisStore(&redisOptions)),
 	)
 }
 
