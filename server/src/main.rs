@@ -23,7 +23,6 @@ pub mod stories;
 
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
-use dotenv::dotenv;
 use std::env;
 use tower_web::middleware::log::LogMiddleware;
 use tower_web::ServiceBuilder;
@@ -36,8 +35,6 @@ use scheduler::{run_startup_jobs, setup_scheduler};
 embed_migrations!("migrations");
 
 pub fn main() {
-    dotenv().ok();
-
     env_logger::init();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env_var must be set");

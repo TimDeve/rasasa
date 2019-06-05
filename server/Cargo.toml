@@ -10,7 +10,6 @@ log               = "0.4"
 http              = "0.1"
 tokio             = "0.1"
 serde             = "1.0"
-dotenv            = "0.10"
 diesel            = { version = "1.4", features = ["postgres", "chrono", "r2d2"] }
 chrono            = { version = "0.4", features = ["serde"] }
 reqwest           = "0.9"
