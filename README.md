@@ -26,6 +26,9 @@ docker run -it -p 8090:8090 \
 --env "REDIS_URL=redis://host.docker.internal:6379" \
 --env "RASASA_USER=username" \
 --env "RASASA_PASS=alongpassword" \
+--env "GATEWAY_URL=http://:8090" \
+--env "SERVER_URL=http://localhost:8091" \
+--env "READ_URL=http://localhost:8092" \
 rasasa:latest
 ```
 

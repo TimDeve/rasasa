@@ -23,8 +23,8 @@ var adminLogin = login{
 	Password: &adminPassword,
 }
 
-var rasasaServer = "http://localhost:8091"
-var readServer = "http://localhost:8092"
+var rasasaServer = os.Getenv("SERVER_URL")
+var readServer = os.Getenv("READ_URL")
 
 func main() {
 	initSession()
@@ -43,8 +43,7 @@ func main() {
 	n := negroni.Classic()
 	n.UseHandler(r)
 
-	fmt.Println("Listening on 8090")
-	http.ListenAndServe(os.Getenv("TARGET_HOST")+":8090", n)
+	serve(n)
 }
 
 func loginHandler(wr http.ResponseWriter, req *http.Request) {
@@ -90,7 +89,7 @@ func proxy(target string) func(http.ResponseWriter, *http.Request) {
 	}
 }
 
-func restricted(handler func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+func restricted(handler http.HandlerFunc) http.HandlerFunc {
 	return func(wr http.ResponseWriter, req *http.Request) {
 		store, err := session.Start(context.Background(), wr, req)
 		if err != nil {
@@ -108,8 +107,17 @@ func restricted(handler func(http.ResponseWriter, *http.Request)) func(http.Resp
 	}
 }
 
-func restrictedProxy(target string) func(http.ResponseWriter, *http.Request) {
+func restrictedProxy(target string) http.HandlerFunc {
 	return restricted(proxy(target))
+}
+
+func serve(handler http.Handler) {
+	gatewayURL, err := url.Parse(os.Getenv("GATEWAY_URL"))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Listening on " + gatewayURL.Host)
+	http.ListenAndServe(gatewayURL.Host, handler)
 }
 
 func initSession() {

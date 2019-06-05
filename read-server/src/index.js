@@ -71,7 +71,9 @@ fastify.get('/v0/read', async (request, reply) => {
   return payload
 })
 
-fastify.listen(8092, (err, address) => {
+const readUrl = new URL(process.env['READ_URL'])
+
+fastify.listen(readUrl.port, (err, address) => {
   if (err) throw err
   fastify.log.info(`server listening on ${address}`)
 })

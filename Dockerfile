@@ -69,10 +69,10 @@ RUN cargo build
 # RUNNER
 #
 FROM node:lts
+RUN npm install -g concurrently
 RUN mkdir /root/app
 WORKDIR /root/app
 ADD ./read-server ./read-server
-RUN npm install -g concurrently
 WORKDIR ./read-server
 RUN npm ci
 WORKDIR /root/app
