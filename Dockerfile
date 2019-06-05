@@ -1,4 +1,20 @@
 #
+# GOLANG BUILDER
+#
+FROM golang:1.12 as golang-builder
+LABEL builder=true
+
+RUN mkdir -p /root/app
+
+ADD ./gateway /root/app/gateway
+
+WORKDIR /root/app/gateway
+
+RUN go get -d -v ./...
+
+RUN go build -o rasasa-gateway ./...
+
+#
 # NODE BUILDER
 #
 FROM node:10.15-alpine as node-builder
@@ -55,7 +71,6 @@ RUN cargo build
 FROM node:lts
 RUN mkdir /root/app
 WORKDIR /root/app
-RUN curl https://getcaddy.com | bash -s personal
 ADD ./read-server ./read-server
 RUN npm install -g concurrently
 WORKDIR ./read-server
@@ -63,9 +78,12 @@ RUN npm ci
 WORKDIR /root/app
 COPY --from=node-builder /root/app/client/dist ./public
 COPY --from=rust-builder /root/app/server/target/debug/rasasa-server .
+COPY --from=golang-builder /root/app/gateway/rasasa-gateway .
 ADD Caddyfile .
 ADD Procfile .
 EXPOSE 8090
-CMD concurrently -n 'Caddy,Server,Read' -c 'yellow,cyan,magenta' --kill-others 'caddy' 'RUST_LOG=info,rasasa-server=info ./rasasa-server' 'NODE_ENV=production node read-server/src/index.js'
+CMD concurrently -n 'Gateway,Server,Read' \
+  -c 'yellow,cyan,magenta' \
+  --kill-others './rasasa-gateway' 'RUST_LOG=info,rasasa-server=info ./rasasa-server' 'NODE_ENV=production node read-server/src/index.js'
 
 

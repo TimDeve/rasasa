@@ -1,4 +1,6 @@
 .git
 .cache
 server/target
-node_modules
+client/node_modules
+read-server/node_modules
+gateway/tmp

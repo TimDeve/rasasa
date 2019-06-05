@@ -43,14 +43,15 @@ func main() {
 	n := negroni.Classic()
 	n.UseHandler(r)
 
-	fmt.Println("Listening on localhost:8090")
-	http.ListenAndServe("localhost:8090", n)
+	fmt.Println("Listening on 8090")
+	http.ListenAndServe(os.Getenv("TARGET_HOST")+":8090", n)
 }
 
 func loginHandler(wr http.ResponseWriter, req *http.Request) {
 	store, err := session.Start(context.Background(), wr, req)
 	if err != nil {
-		http.Error(wr, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(wr, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	d := json.NewDecoder(req.Body)
@@ -93,15 +94,17 @@ func restricted(handler func(http.ResponseWriter, *http.Request)) func(http.Resp
 	return func(wr http.ResponseWriter, req *http.Request) {
 		store, err := session.Start(context.Background(), wr, req)
 		if err != nil {
-			http.Error(wr, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			http.Error(wr, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		isAuthenticated, ok := store.Get("authenticated")
-		if !ok || !isAuthenticated.(bool) {
-			http.Error(wr, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		if ok && isAuthenticated.(bool) {
+			handler(wr, req)
 			return
 		}
-		handler(wr, req)
+
+		http.Error(wr, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 	}
 }
 
@@ -110,9 +113,15 @@ func restrictedProxy(target string) func(http.ResponseWriter, *http.Request) {
 }
 
 func initSession() {
+	var redisAddr string
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL != "" {
+		redisAddr = redisURL[8:]
+	}
+
 	session.InitManager(
 		session.SetStore(redis.NewRedisStore(&redis.Options{
-			Addr: os.Getenv("REDIS_URL"),
+			Addr: redisAddr,
 			DB:   1,
 		})),
 	)
