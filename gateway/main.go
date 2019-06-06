@@ -40,7 +40,10 @@ func main() {
 		http.ServeFile(w, r, "public/index.html")
 	})
 
-	n := negroni.Classic()
+	n := negroni.New()
+	n.Use(negroni.NewRecovery())
+	n.Use(noCacheStatic(negroni.NewStatic(http.Dir("public"))))
+	n.Use(negroni.NewLogger())
 	n.UseHandler(r)
 
 	serve(n)
@@ -109,6 +112,15 @@ func restricted(handler http.HandlerFunc) http.HandlerFunc {
 
 func restrictedProxy(target string) http.HandlerFunc {
 	return restricted(proxy(target))
+}
+
+func noCacheStatic(s *negroni.Static) negroni.HandlerFunc {
+	return negroni.HandlerFunc(func(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+		w.Header().Set("Cache-Control", "max-age=0, no-cache, no-store, must-revalidate")
+		w.Header().Set("Pragma", "no-cache")
+		w.Header().Set("Expires", "0")
+		s.ServeHTTP(w, r, next)
+	})
 }
 
 func serve(handler http.Handler) {
