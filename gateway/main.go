@@ -143,9 +143,12 @@ func initSession() {
 		}
 	}
 
+	aMonthInSeconds := 60 * 60 * 24 * 30
+
 	session.InitManager(
-		session.SetStore(redis.NewRedisStore(&redisOptions)),
-	)
+		session.SetExpired(int64(aMonthInSeconds)),
+		session.SetCookieLifeTime(aMonthInSeconds),
+		session.SetStore(redis.NewRedisStore(&redisOptions)))
 }
 
 type login struct {
