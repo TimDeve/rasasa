@@ -26,12 +26,15 @@ var adminLogin = login{
 var rasasaServer = os.Getenv("SERVER_URL")
 var readServer = os.Getenv("READ_URL")
 
+var emptyHandler = func(_ http.ResponseWriter, _ *http.Request) {}
+
 func main() {
 	initSession()
 
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/v0/login", loginHandler).Methods("POST")
+	r.HandleFunc("/api/v0/authenticated", restricted(emptyHandler))
 
 	r.HandleFunc("/api/{proxyPath:v0/read.*}", restrictedProxy(readServer))
 	r.HandleFunc("/api/{proxyPath:.*}", restrictedProxy(rasasaServer))
