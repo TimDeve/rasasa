@@ -21,6 +21,8 @@
   display: block;
   color: black;
   text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &Read {
     color: grey;
