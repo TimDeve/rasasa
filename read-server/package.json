@@ -25,18 +25,18 @@
   },
   "license": "UNLICENSED",
   "dependencies": {
-    "bluebird": "^3.5.3",
-    "fastify": "^2.1.0",
-    "jsdom": "^14.0.0",
-    "node-fetch": "^2.3.0",
-    "pino-pretty": "^3.1.0",
+    "bluebird": "^3.7.0",
+    "fastify": "^2.9.0",
+    "jsdom": "^14.1.0",
+    "node-fetch": "^2.6.0",
+    "pino-pretty": "^3.2.1",
     "readability": "git+https://github.com/TimDeve/readability.git",
     "redis": "^2.8.0",
     "sanitize-html": "^1.20.1"
   },
   "devDependencies": {
-    "jest": "^24.8.0",
-    "nodemon": "^1.18.10",
-    "prettier": "^1.16.4"
+    "jest": "^24.9.0",
+    "nodemon": "^1.19.3",
+    "prettier": "^1.18.2"
   }
 }
