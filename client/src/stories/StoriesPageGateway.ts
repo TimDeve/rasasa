@@ -1,5 +1,6 @@
 import db from './StoriesDb'
 import queryString from 'query-string'
+import uuid from 'uuid/v4'
 
 import { Story } from './storiesModel'
 import {
@@ -105,19 +106,34 @@ export async function clearStories(stories: Story[], dispatch: StoriesDispatch) 
 }
 
 export async function cacheStoriesAndArticles(stories: Story[]) {
-  for (const story of stories) {
-    const fetchStory = async function() {
-      const res = await fetch('/api/v0/read?' + queryString.stringify({ page: story.url }))
-
-      const json = await res.json()
-
+  if ('BackgroundFetchManager' in self) {
+    navigator.serviceWorker.ready.then(async (swReg: any) => { // Uses 'any' because backgroundFetch doesn't have a typedef yet
       try {
-        await db.articles.add({ ...json, timestamp: new Date().getTime() })
+        const urls = stories.map(story => '/api/v0/read?' + queryString.stringify({ page: story.url }))
+        await swReg.backgroundFetch.fetch(
+          'articles-fetch:' + uuid(),
+          urls, {
+          title: 'Fetching articles',
+        })
       } catch (e) {
-        console.error('Failed to cache article', e)
+        console.log(e)
       }
-    }
+    })
+  } else {
+    for (const story of stories) {
+      const fetchStory = async function () {
+        const res = await fetch('/api/v0/read?' + queryString.stringify({ page: story.url }))
 
-    fetchStory()
+        const json = await res.json()
+
+        try {
+          await db.articles.add({ ...json, timestamp: new Date().getTime() })
+        } catch (e) {
+          console.error('Failed to cache article', e)
+        }
+      }
+
+      fetchStory()
+    }
   }
 }
