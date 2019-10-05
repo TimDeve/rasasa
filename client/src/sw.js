@@ -1,19 +1,24 @@
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/4.2.0/workbox-sw.js')
+importScripts("/assets-manifest.js");
 
-if (workbox) {
-  workbox.precaching.precacheAndRoute(self.__precacheManifest || [])
+import { registerRoute } from 'workbox-routing'
+import { NetworkOnly } from 'workbox-strategies'
+import { Plugin } from 'workbox-background-sync'
+import { precacheAndRoute } from 'workbox-precaching'
+import { skipWaiting, clientsClaim } from 'workbox-core'
 
-  const bgSyncPlugin = new workbox.backgroundSync.Plugin('updateQueue', {
-    maxRetentionTime: 48 * 60,
-  })
+skipWaiting()
+clientsClaim()
 
-  workbox.routing.registerRoute(
-    /\/api\/v0\/.+/,
-    new workbox.strategies.NetworkOnly({
-      plugins: [bgSyncPlugin],
-    }),
-    'PATCH'
-  )
-} else {
-  console.error('Workbox failed to load.')
-}
+precacheAndRoute(self.__precacheManifest || [])
+
+const bgSyncPlugin = new Plugin('updateQueue', {
+  maxRetentionTime: 48 * 60,
+})
+
+registerRoute(
+  /\/api\/v0\/.+/,
+  new NetworkOnly({
+    plugins: [bgSyncPlugin],
+  }),
+  'PATCH'
+)

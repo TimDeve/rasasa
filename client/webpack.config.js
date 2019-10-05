@@ -3,7 +3,9 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-const WorkboxPlugin = require('workbox-webpack-plugin')
+const { HotModuleReplacementFilterPlugin } = require('hmr-filter-webpack-plugin')
+const ManifestPlugin = require('webpack-manifest-plugin')
+const uuidv4 = require('uuid/v4')
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -72,14 +74,25 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({ template: path.resolve('src/index.html') }),
+    new HotModuleReplacementFilterPlugin((compilation) => {
+      const { name } = compilation.compiler;
+      return name && name.includes('worker');
+    }),
     new webpack.HotModuleReplacementPlugin(),
     new CopyPlugin([{ from: 'static' }]),
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
     }),
-    new WorkboxPlugin.InjectManifest({
-      swSrc: 'src/sw.js',
-    }),
+    new ManifestPlugin({
+      fileName: 'assets-manifest.js',
+      serialize(obj) {
+        return `
+          self.__precacheManifest = (self.__precacheManifest || []).concat([
+            ${Object.values(obj).map(file => `{"url": "${file}", "revision": "${uuidv4()}"}`).join(",")}
+          ]);
+        `
+      }
+    })
   ],
 }
