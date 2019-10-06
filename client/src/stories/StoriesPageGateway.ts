@@ -107,12 +107,11 @@ export async function clearStories(stories: Story[], dispatch: StoriesDispatch) 
 
 export async function cacheStoriesAndArticles(stories: Story[]) {
   if ('BackgroundFetchManager' in self) {
-    navigator.serviceWorker.ready.then(async (swReg: any) => { // Uses 'any' because backgroundFetch doesn't have a typedef yet
+    navigator.serviceWorker.ready.then(async (swReg: any) => {
+      // Uses 'any' because backgroundFetch doesn't have a typedef yet
       try {
         const urls = stories.map(story => '/api/v0/read?' + queryString.stringify({ page: story.url }))
-        await swReg.backgroundFetch.fetch(
-          'articles-fetch:' + uuid(),
-          urls, {
+        await swReg.backgroundFetch.fetch('articles-fetch:' + uuid(), urls, {
           title: 'Fetching articles',
         })
       } catch (e) {
@@ -121,7 +120,7 @@ export async function cacheStoriesAndArticles(stories: Story[]) {
     })
   } else {
     for (const story of stories) {
-      const fetchStory = async function () {
+      const fetchStory = async function() {
         const res = await fetch('/api/v0/read?' + queryString.stringify({ page: story.url }))
 
         const json = await res.json()

@@ -1,4 +1,4 @@
-importScripts("/assets-manifest.js");
+importScripts('/assets-manifest.js')
 
 import { registerRoute } from 'workbox-routing'
 import { NetworkOnly } from 'workbox-strategies'
@@ -28,25 +28,22 @@ registerRoute(
 async function retrieveAndStoreArticles(event) {
   const bgFetch = event.registration
 
-  if (bgFetch.id.includes("articles-fetch")) {
+  if (bgFetch.id.includes('articles-fetch')) {
     event.waitUntil(
-      (async function () {
-        const articleRequests = await bgFetch.matchAll();
+      (async function() {
+        const articleRequests = await bgFetch.matchAll()
 
-        const articleResponses = articleRequests.map(
-          async articleRequest => {
-            const response = await articleRequest.responseReady;
-            if (response.ok) {
-              const article = await response.json()
-              try {
-                await db.articles.add({ ...article, timestamp: new Date().getTime() })
-              } catch { }
-            }
-            else {
-              console.error("Failed to fetch", response)
-            }
+        const articleResponses = articleRequests.map(async articleRequest => {
+          const response = await articleRequest.responseReady
+          if (response.ok) {
+            const article = await response.json()
+            try {
+              await db.articles.add({ ...article, timestamp: new Date().getTime() })
+            } catch {}
+          } else {
+            console.error('Failed to fetch', response)
           }
-        )
+        })
 
         Promise.all(articleResponses)
       })()
@@ -55,19 +52,19 @@ async function retrieveAndStoreArticles(event) {
 }
 
 addEventListener('backgroundfetchsuccess', event => {
-  console.log('[Service Worker]: Background Fetch Success', event.registration);
+  console.log('[Service Worker]: Background Fetch Success', event.registration)
 
   retrieveAndStoreArticles(event)
 })
 
 addEventListener('backgroundfetchfail', event => {
-  console.error('[Service Worker]: Background Fetch Error', event.registration);
+  console.error('[Service Worker]: Background Fetch Error', event.registration)
 
   retrieveAndStoreArticles(event)
 })
 
 addEventListener('backgroundfetchabort', event => {
-  console.error('[Service Worker]: Background Fetch Abort', event.registration);
+  console.error('[Service Worker]: Background Fetch Abort', event.registration)
 
   retrieveAndStoreArticles(event)
 })

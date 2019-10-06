@@ -10,26 +10,23 @@ export function useElementHasExitedTopScreen(callback: () => void) {
     }
   }, [])
 
-  useEffect(
-    () => {
-      let observer: IntersectionObserver | null = null
-      if (!wasTriggered && node !== null) {
-        observer = new IntersectionObserver(val => {
-          if ((val[0].boundingClientRect as DOMRect).y < 0) {
-            setWasTriggered(true)
-            callback()
-          }
-        })
+  useEffect(() => {
+    let observer: IntersectionObserver | null = null
+    if (!wasTriggered && node !== null) {
+      observer = new IntersectionObserver(val => {
+        if ((val[0].boundingClientRect as DOMRect).y < 0) {
+          setWasTriggered(true)
+          callback()
+        }
+      })
 
-        observer.observe(node)
-      }
+      observer.observe(node)
+    }
 
-      return () => {
-        observer && observer.disconnect()
-      }
-    },
-    [node, callback, wasTriggered]
-  )
+    return () => {
+      observer && observer.disconnect()
+    }
+  }, [node, callback, wasTriggered])
 
   return ref
 }

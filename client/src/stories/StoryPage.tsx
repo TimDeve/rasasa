@@ -14,32 +14,29 @@ interface StoryPageProps extends RouteComponentProps<{ storyId: string }> {}
 function fetchArticle(page: string): Article | null {
   const [article, setArticle] = useState<Article | null>(null)
 
-  useEffect(
-    () => {
-      ;(async () => {
-        if (page) {
-          const cachedArticle = await db.articles.get(page)
+  useEffect(() => {
+    ;(async () => {
+      if (page) {
+        const cachedArticle = await db.articles.get(page)
 
-          if (cachedArticle) {
-            setArticle(cachedArticle)
-          } else {
-            const res = await fetch('/api/v0/read?' + queryString.stringify({ page }))
+        if (cachedArticle) {
+          setArticle(cachedArticle)
+        } else {
+          const res = await fetch('/api/v0/read?' + queryString.stringify({ page }))
 
-            const json = await res.json()
+          const json = await res.json()
 
-            setArticle(json)
+          setArticle(json)
 
-            try {
-              await db.articles.add({ ...json, timestamp: new Date().getTime() })
-            } catch (e) {
-              console.error('Failed to cache article', e)
-            }
+          try {
+            await db.articles.add({ ...json, timestamp: new Date().getTime() })
+          } catch (e) {
+            console.error('Failed to cache article', e)
           }
         }
-      })()
-    },
-    [page]
-  )
+      }
+    })()
+  }, [page])
 
   return article
 }
@@ -47,34 +44,31 @@ function fetchArticle(page: string): Article | null {
 function fetchStory(id: string): Story | null {
   const [story, setStory] = useState<Story | null>(null)
 
-  useEffect(
-    () => {
-      ;(async () => {
-        if (id) {
-          const cachedStory = await db.stories.get(parseInt(id))
+  useEffect(() => {
+    ;(async () => {
+      if (id) {
+        const cachedStory = await db.stories.get(parseInt(id))
 
-          if (cachedStory) {
-            setStory(cachedStory)
-          } else {
-            const res = await fetch(`/api/v0/stories/${id}`)
+        if (cachedStory) {
+          setStory(cachedStory)
+        } else {
+          const res = await fetch(`/api/v0/stories/${id}`)
 
-            if (res.ok) {
-              const json = await res.json()
+          if (res.ok) {
+            const json = await res.json()
 
-              setStory(json)
+            setStory(json)
 
-              try {
-                await db.stories.add(json)
-              } catch (e) {
-                console.error('Failed to cache story', e)
-              }
+            try {
+              await db.stories.add(json)
+            } catch (e) {
+              console.error('Failed to cache story', e)
             }
           }
         }
-      })()
-    },
-    [id]
-  )
+      }
+    })()
+  }, [id])
 
   return story
 }
