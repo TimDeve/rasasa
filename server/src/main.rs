@@ -1,5 +1,5 @@
 #[macro_use]
-extern crate tower_web;
+extern crate serde;
 #[macro_use]
 extern crate diesel;
 #[macro_use]
@@ -14,26 +14,26 @@ extern crate openssl;
 extern crate rss;
 extern crate tokio;
 
-pub mod config;
 pub mod feeds;
 pub mod helpers;
 mod scheduler;
 pub mod schema;
 pub mod stories;
 
+use actix_web::{middleware, App, HttpServer};
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
+use scheduler::{run_startup_jobs, setup_scheduler};
 use std::env;
 use std::io;
 
+use crate::feeds::feeds_config;
 use crate::stories::stories_config;
-use actix_web::{middleware, App, HttpServer};
-use scheduler::{run_startup_jobs, setup_scheduler};
 
 embed_migrations!("migrations");
 
 pub fn main() -> io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_web=debug");
+    std::env::set_var("RUST_LOG", "info,rasasa_server=info,actix_web=debug");
     env_logger::init();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env_var must be set");
@@ -46,15 +46,13 @@ pub fn main() -> io::Result<()> {
     let _thread_handle = setup_scheduler(pool.clone());
     run_startup_jobs(pool.clone());
 
-    let addr = "127.0.0.1:8091";
-    println!("Listening on http://{}", addr);
-
     HttpServer::new(move || {
         App::new()
             .data(pool.clone())
             .wrap(middleware::Logger::default())
             .configure(stories_config)
+            .configure(feeds_config)
     })
-    .bind(addr)?
+    .bind("127.0.0.1:8091")?
     .run()
 }

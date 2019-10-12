@@ -2,7 +2,7 @@ use diesel::*;
 
 use crate::schema::feeds;
 
-#[derive(Insertable, Extract)]
+#[derive(Insertable, Deserialize)]
 #[table_name = "feeds"]
 pub struct NewFeed {
     pub name: String,

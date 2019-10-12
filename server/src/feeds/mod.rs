@@ -1,61 +1,81 @@
 pub mod models;
 
-use crate::config::Connection;
+use actix_web::{web, Error, HttpResponse};
+use diesel::r2d2::{ConnectionManager, Pool};
+use futures::Future;
+
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
 
-#[derive(Clone, Debug)]
-pub struct FeedsResource;
-
-#[derive(Response)]
+#[derive(Serialize)]
 struct FeedsResponse {
     feeds: Vec<Feed>,
 }
 
-impl_web! {
-    impl FeedsResource {
+type DbPool = Pool<ConnectionManager<PgConnection>>;
 
-        #[get("/v0/feeds")]
-        #[content_type("json")]
-        fn get_feeds(&self, Connection(conn): Connection) -> Result<FeedsResponse, ()> {
-            use crate::schema::feeds::dsl::*;
+fn get_feeds(pool: web::Data<DbPool>) -> Result<Vec<Feed>, diesel::result::Error> {
+    use crate::schema::feeds::dsl::*;
 
-            let results = feeds
-                .load::<Feed>(&conn)
-                .expect("Error loading feeds");
+    let conn: &PgConnection = &pool.get().unwrap();
 
-            Ok(FeedsResponse {
-                feeds: results
-            })
-        }
+    Ok(feeds.load::<Feed>(conn)?)
+}
 
-        #[post("/v0/feeds")]
-        fn create_feed(&self, body: NewFeed, Connection(conn): Connection) -> Result<http::Response<&'static str>, ()> {
-            use crate::schema::feeds;
+fn get_feeds_handler(pool: web::Data<DbPool>) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || get_feeds(pool)).then(|res| match res {
+        Ok(feeds) => Ok(HttpResponse::Ok().json(FeedsResponse { feeds })),
+        Err(_) => Ok(HttpResponse::InternalServerError().into()),
+    })
+}
 
-            diesel::insert_into(feeds::table)
-                .values(&body)
-                .execute(&conn)
-                .expect("Error saving new post");
+fn create_feed(body: NewFeed, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
+    use crate::schema::feeds;
 
-            Ok(http::Response::builder()
-                .status(201)
-                .body("")
-                .unwrap())
-        }
+    let conn: &PgConnection = &pool.get().unwrap();
 
-        #[delete("/v0/feeds/:feed_id")]
-        fn delete_feed(&self, feed_id: i32, Connection(conn): Connection) -> Result<http::Response<&'static str>, ()> {
-            use crate::schema::feeds::dsl::*;
+    diesel::insert_into(feeds::table)
+        .values(&body)
+        .execute(conn)?;
 
-            diesel::delete(feeds.filter(id.eq(feed_id)))
-                .execute(&conn)
-                .expect("Error deleting feed");
+    Ok(())
+}
 
-            Ok(http::Response::builder()
-                .status(200)
-                .body("")
-                .unwrap())
-        }
-    }
+fn create_feed_handler(
+    web::Json(body): web::Json<NewFeed>,
+    pool: web::Data<DbPool>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || create_feed(body, pool)).then(|res| match res {
+        Ok(_) => Ok(HttpResponse::Created().body("")),
+        Err(_) => Ok(HttpResponse::InternalServerError().into()),
+    })
+}
+
+fn delete_feed(feed_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
+    use crate::schema::feeds::dsl::*;
+
+    let conn: &PgConnection = &pool.get().unwrap();
+
+    diesel::delete(feeds.filter(id.eq(feed_id))).execute(conn)?;
+
+    Ok(())
+}
+
+fn delete_feed_handler(
+    story_id: web::Path<i32>,
+    pool: web::Data<DbPool>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || delete_feed(story_id.into_inner(), pool)).then(|res| match res {
+        Ok(_) => Ok(HttpResponse::NoContent().body("")),
+        Err(_) => Ok(HttpResponse::InternalServerError().into()),
+    })
+}
+
+pub fn feeds_config(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::resource("/v0/feeds")
+            .route(web::get().to_async(get_feeds_handler))
+            .route(web::post().to_async(create_feed_handler)),
+    )
+    .service(web::resource("/v0/feeds/{id}").route(web::delete().to_async(delete_feed_handler)));
 }
