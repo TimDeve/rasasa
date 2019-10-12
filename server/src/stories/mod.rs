@@ -30,6 +30,11 @@ struct PatchStoryBody {
 }
 
 #[derive(Serialize)]
+struct StoriesWithFeedResponse {
+    stories: Vec<StoryWithFeed>,
+}
+
+#[derive(Serialize)]
 struct StoriesResponse {
     stories: Vec<Story>,
 }
@@ -40,7 +45,7 @@ struct PatchStoriesBody(Vec<StoryUpdate>);
 fn get_stories(
     query: web::Query<GetStoriesQueryString>,
     pool: web::Data<DbPool>,
-) -> Result<Vec<Story>, diesel::result::Error> {
+) -> Result<Vec<StoryWithFeed>, diesel::result::Error> {
     use crate::schema::feeds::dsl::*;
     use crate::schema::stories::dsl::*;
 
@@ -60,10 +65,19 @@ fn get_stories(
             .execute(conn)?;
     }
 
-    Ok(stories
+    let stories_with_feeds: Vec<(Story, Feed)> = stories
         .filter(is_read.eq(false))
         .order(published_date.desc())
-        .load::<Story>(conn)?)
+        .inner_join(crate::schema::feeds::table)
+        .load(conn)?;
+
+    Ok(stories_with_feeds
+        .into_iter()
+        .map(|(story, feed)| StoryWithFeed {
+            story,
+            feed: Some(feed),
+        })
+        .collect())
 }
 
 fn get_stories_handler(
@@ -71,7 +85,7 @@ fn get_stories_handler(
     pool: web::Data<DbPool>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || get_stories(query, pool)).then(|res| match res {
-        Ok(stories) => Ok(HttpResponse::Ok().json(StoriesResponse { stories })),
+        Ok(stories) => Ok(HttpResponse::Ok().json(StoriesWithFeedResponse { stories })),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
     })
 }

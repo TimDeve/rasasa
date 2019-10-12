@@ -34,6 +34,14 @@ pub struct Story {
     pub created_at: NaiveDateTime,
 }
 
+#[derive(Serialize, Debug)]
+pub struct StoryWithFeed {
+    #[serde(flatten)]
+    pub story: Story,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub feed: Option<Feed>,
+}
+
 #[derive(AsChangeset, Identifiable, Deserialize, Debug)]
 #[table_name = "stories"]
 pub struct StoryUpdate {

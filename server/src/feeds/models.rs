@@ -9,7 +9,7 @@ pub struct NewFeed {
     pub url: String,
 }
 
-#[derive(Identifiable, Associations, Queryable, Serialize)]
+#[derive(Identifiable, Associations, Queryable, Serialize, Debug)]
 #[table_name = "feeds"]
 pub struct Feed {
     pub id: i32,
