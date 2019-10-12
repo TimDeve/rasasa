@@ -51,7 +51,7 @@ pub fn main() -> io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .data(pool.clone()) // <- store db pool in app state
+            .data(pool.clone())
             .wrap(middleware::Logger::default())
             .configure(stories_config)
     })

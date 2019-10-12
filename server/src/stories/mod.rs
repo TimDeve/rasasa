@@ -58,15 +58,33 @@ fn get_stories_handler(
     query: web::Query<GetStoriesQueryString>,
     pool: web::Data<DbPool>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
-    // execute sync code in threadpool
     web::block(move || get_stories(query, pool)).then(|res| match res {
-        Ok(user) => Ok(HttpResponse::Ok().json(user)),
+        Ok(stories) => Ok(HttpResponse::Ok().json(stories)),
+        Err(_) => Ok(HttpResponse::InternalServerError().into()),
+    })
+}
+
+fn get_story(story_id: i32, pool: web::Data<DbPool>) -> Result<Story, diesel::result::Error> {
+    use crate::schema::stories::dsl::*;
+
+    let conn: &PgConnection = &pool.get().unwrap();
+
+    Ok(stories.filter(id.eq(story_id)).first::<Story>(conn)?)
+}
+
+fn get_story_handler(
+    story_id: web::Path<i32>,
+    pool: web::Data<DbPool>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || get_story(story_id.into_inner(), pool)).then(|res| match res {
+        Ok(story) => Ok(HttpResponse::Ok().json(story)),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
     })
 }
 
 pub fn stories_config(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::resource("/v0/stories").route(web::get().to_async(get_stories_handler)));
+    cfg.service(web::resource("/v0/stories").route(web::get().to_async(get_stories_handler)))
+        .service(web::resource("/v0/stories/{id}").route(web::get().to_async(get_story_handler)));
 }
 
 // #[derive(Clone, Debug)]
