@@ -24,17 +24,16 @@ pub mod stories;
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
 use std::env;
-use tower_web::middleware::log::LogMiddleware;
-use tower_web::ServiceBuilder;
+use std::io;
 
-use crate::feeds::FeedsResource;
-use crate::stories::StoriesResource;
-use config::Config;
+use crate::stories::stories_config;
+use actix_web::{middleware, web, App, HttpServer};
 use scheduler::{run_startup_jobs, setup_scheduler};
 
 embed_migrations!("migrations");
 
-pub fn main() {
+pub fn main() -> io::Result<()> {
+    std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env_var must be set");
@@ -47,14 +46,15 @@ pub fn main() {
     let _thread_handle = setup_scheduler(pool.clone());
     run_startup_jobs(pool.clone());
 
-    let addr = "127.0.0.1:8091".parse().expect("Invalid address");
+    let addr = "127.0.0.1:8091";
     println!("Listening on http://{}", addr);
 
-    ServiceBuilder::new()
-        .config(Config { pool })
-        .resource(FeedsResource)
-        .resource(StoriesResource)
-        .middleware(LogMiddleware::new("rasasa-server::web"))
-        .run(&addr)
-        .unwrap();
+    HttpServer::new(move || {
+        App::new()
+            .data(pool.clone()) // <- store db pool in app state
+            .wrap(middleware::Logger::default())
+            .configure(stories_config)
+    })
+    .bind(addr)?
+    .run()
 }

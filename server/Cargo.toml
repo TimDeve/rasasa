@@ -12,11 +12,13 @@ tokio             = "0.1"
 serde             = "1.0"
 diesel            = { version = "1.4", features = ["postgres", "chrono", "r2d2"] }
 chrono            = { version = "0.4", features = ["serde"] }
-reqwest           = "=0.9.17"
+reqwest           = "0.9"
 openssl           = { version = "0.10", features = ["vendored"] }
 clokwerk          = "0.2"
+actix-web         = "1.0"
 tower-web         = "0.3"
 env_logger        = "0.6"
 atom_syndication  = "0.6"
 diesel_migrations = "1.4"
+futures = "0.1"
 
