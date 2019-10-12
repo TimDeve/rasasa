@@ -27,7 +27,7 @@ use std::env;
 use std::io;
 
 use crate::stories::stories_config;
-use actix_web::{middleware, web, App, HttpServer};
+use actix_web::{middleware, App, HttpServer};
 use scheduler::{run_startup_jobs, setup_scheduler};
 
 embed_migrations!("migrations");
