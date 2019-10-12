@@ -2,7 +2,6 @@ extern crate chrono;
 extern crate diesel;
 extern crate http;
 extern crate rss;
-extern crate tokio;
 
 pub mod models;
 

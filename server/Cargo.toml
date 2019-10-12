@@ -19,5 +19,4 @@ openssl           = { version = "0.10", features = ["vendored"] }
 reqwest           = "0.9"
 rss               = "1.6"
 serde             = "1.0"
-tokio             = "0.1"
 

@@ -12,7 +12,6 @@ extern crate env_logger;
 extern crate http;
 extern crate openssl;
 extern crate rss;
-extern crate tokio;
 
 pub mod feeds;
 pub mod helpers;
