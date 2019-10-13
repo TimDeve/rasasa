@@ -11,6 +11,14 @@ const isDev = process.env.NODE_ENV !== 'production'
 
 module.exports = {
   target: 'web',
+  stats: isDev
+    ? {
+        all: false,
+        errors: true,
+        warnings: true,
+        builtAt: true,
+      }
+    : 'normal',
   entry: {
     index: path.resolve('src/index.tsx'),
   },
@@ -74,9 +82,9 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({ template: path.resolve('src/index.html') }),
-    new HotModuleReplacementFilterPlugin((compilation) => {
-      const { name } = compilation.compiler;
-      return name && name.includes('worker');
+    new HotModuleReplacementFilterPlugin(compilation => {
+      const { name } = compilation.compiler
+      return name && name.includes('worker')
     }),
     new webpack.HotModuleReplacementPlugin(),
     new CopyPlugin([{ from: 'static' }]),
@@ -89,10 +97,12 @@ module.exports = {
       serialize(obj) {
         return `
           self.__precacheManifest = (self.__precacheManifest || []).concat([
-            ${Object.values(obj).map(file => `{"url": "${file}", "revision": "${uuidv4()}"}`).join(",")}
+            ${Object.values(obj)
+              .map(file => `{"url": "${file}", "revision": "${uuidv4()}"}`)
+              .join(',')}
           ]);
         `
-      }
-    })
+      },
+    }),
   ],
 }

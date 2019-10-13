@@ -18,11 +18,13 @@
 }
 
 .link {
-  display: block;
+  width: 100%;
   color: black;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  flex-direction: column;
 
   &Read {
     color: grey;
@@ -49,6 +51,14 @@
   }
 }
 
+.feedTitle {
+  display: block;
+  width: 100%;
+  font-size: 0.8em;
+  order: 2;
+    color: grey;
+}
+
 @media only screen and (min-width: 800px) {
   .titleContainer {
     justify-content: inherit;
@@ -56,6 +66,7 @@
 
   .link {
     order: 2;
+    display: block;
   }
 
   .actions {
@@ -66,5 +77,16 @@
       padding-left: 0;
       padding-right: 0.5em;
     }
+  }
+
+  .feedTitle {
+    display: inline-block;
+    overflow: hidden;
+    padding-right: 1em;
+    text-overflow: ellipsis;
+    vertical-align: bottom;
+    white-space: nowrap;
+    width: 10%;
+    font-size: 1em;
   }
 }

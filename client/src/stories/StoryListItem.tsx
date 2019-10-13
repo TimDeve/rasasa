@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import cn from 'classnames'
 import { Link } from 'react-router-dom'
 
+import { Feed } from '../feeds/feedsModel'
 import s from './StoryListItem.scss'
 import BoxArrow from 'shared/icons/BoxArrow'
 import Chevron from 'shared/icons/Chevron'
@@ -14,10 +15,11 @@ interface StoryListItemProps {
   title: string
   content: string
   isRead: boolean
+  feed?: Feed
   markAsRead: () => void
 }
 
-function StoryListItem({ id, url, title, isRead, content, markAsRead }: StoryListItemProps) {
+function StoryListItem({ id, url, title, isRead, content, markAsRead, feed }: StoryListItemProps) {
   const [hasContent, toggleContent] = useToggle(false)
 
   const ref = useElementHasExitedTopScreen(() => {
@@ -30,7 +32,8 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead }: StoryLis
     <li className={s.component} ref={ref}>
       <div className={s.titleContainer}>
         <Link to={`/story/${id}`} className={cn(s.link, { [s.linkRead]: isRead })}>
-          {title}
+          <span className={s.feedTitle}>{feed && feed.name}</span>
+          <span>{title}</span>
         </Link>
         <div className={s.actions}>
           {content && (

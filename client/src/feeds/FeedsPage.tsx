@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react'
 
 import { getInputValuesFromFormEvent } from 'shared/helpers'
+import { Feed } from './feedsModel'
 import Title from 'shared/components/Title'
 import TextInput from 'shared/components/TextInput'
 import Button from 'shared/components/Button'
 import s from './FeedsPage.scss'
-
-interface Feed {
-  id: number
-  name: string
-  url: string
-}
 
 async function fetchFeeds(setFeeds: (feeds: Feed[]) => void) {
   const res = await fetch('/api/v0/feeds')

@@ -1,3 +1,5 @@
+import { Feed } from '../feeds/feedsModel'
+
 export interface Article {
   readable: boolean
   title?: String
@@ -13,4 +15,5 @@ export interface Story {
   content: string
   publishedDate: string
   article?: Article
+  feed?: Feed
 }
