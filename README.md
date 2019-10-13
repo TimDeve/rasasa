@@ -1,12 +1,14 @@
-![Screenshot of the rasasa](./misc/readme-header.png)
+![Screenshot of Rasasa](./misc/readme-header.png)
 # Rasasa
 A PWA to read RSS feeds, once the articles are cached the application can be used offline.
 
 The frontend is built with Typescript and React.
 
-The main server is built using Rust and [Tower Web](https://github.com/carllerche/tower-web).
+The main server is built using Rust and [Actix Web](https://github.com/actix/actix-web).
 
 The article cleanup server is writen in Node to leverage Mozilla's [Readability](https://github.com/mozilla/readability).
+
+The gateway server is built using Go.
 
 ## WARNING
 While the app is functional and I use it every day, this repo is mostly a playground to try out new patterns and tech. Error handling is basically non-existent and there are no tests. Here be dragons 🐉
