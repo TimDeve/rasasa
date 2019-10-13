@@ -18,6 +18,7 @@ type DbPool = Pool<ConnectionManager<PgConnection>>;
 #[derive(Debug, Deserialize)]
 struct GetStoriesQueryString {
     refresh: Option<bool>,
+    read: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -64,6 +65,8 @@ fn get_stories(
 
     let stories_with_feeds: Vec<(Story, Feed)> = stories
         .filter(is_read.eq(false))
+        .or_filter(is_read.eq(query.read.unwrap_or(false)))
+        .limit(500)
         .order(published_date.desc())
         .inner_join(crate::schema::feeds::table)
         .load(conn)?;
