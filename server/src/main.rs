@@ -26,9 +26,6 @@ use scheduler::{run_startup_jobs, setup_scheduler};
 use std::env;
 use std::io;
 
-use crate::feeds::feeds_config;
-use crate::stories::stories_config;
-
 embed_migrations!("migrations");
 
 pub fn main() -> io::Result<()> {
@@ -49,8 +46,8 @@ pub fn main() -> io::Result<()> {
         App::new()
             .data(pool.clone())
             .wrap(middleware::Logger::default())
-            .configure(stories_config)
-            .configure(feeds_config)
+            .configure(stories::handlers::config)
+            .configure(feeds::handlers::config)
     })
     .bind("127.0.0.1:8091")?
     .run()

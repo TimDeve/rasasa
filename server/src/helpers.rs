@@ -11,7 +11,10 @@ pub enum FeedType {
     None,
 }
 
-pub fn fetch_stories(url: &String, feed_id: i32) -> Result<Vec<NewStory>, Box<std::error::Error>> {
+pub fn fetch_stories(
+    url: &String,
+    feed_id: i32,
+) -> Result<Vec<NewStory>, Box<dyn std::error::Error>> {
     let content = reqwest::get(url)?.text()?;
 
     let feed = extract_feed(content);
