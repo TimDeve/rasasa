@@ -12,10 +12,10 @@ table! {
         feed_id -> Int4,
         title -> Text,
         url -> Text,
-        content -> Text,
         is_read -> Bool,
         published_date -> Timestamptz,
         created_at -> Timestamp,
+        content -> Text,
     }
 }
 

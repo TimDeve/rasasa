@@ -25,13 +25,13 @@ pub struct Story {
     pub feed_id: i32,
     pub title: String,
     pub url: String,
-    pub content: String,
     #[serde(rename = "isRead")]
     pub is_read: bool,
     #[serde(rename = "publishedDate")]
     pub published_date: DateTime<chrono::Utc>,
     #[serde(skip_serializing)]
     pub created_at: NaiveDateTime,
+    pub content: String,
 }
 
 #[derive(Serialize, Debug)]
