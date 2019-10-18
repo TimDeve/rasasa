@@ -15,6 +15,7 @@ extern crate rss;
 
 pub mod feeds;
 pub mod helpers;
+pub mod lists;
 mod scheduler;
 pub mod schema;
 pub mod stories;
@@ -48,6 +49,7 @@ pub fn main() -> io::Result<()> {
             .wrap(middleware::Logger::default())
             .configure(stories::handlers::config)
             .configure(feeds::handlers::config)
+            .configure(lists::handlers::config)
     })
     .bind("127.0.0.1:8091")?
     .run()
