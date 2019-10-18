@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import cn from 'classnames'
 import { Link } from 'react-router-dom'
+import sanitizeHtml from 'sanitize-html'
 
 import { Feed } from '../feeds/feedsModel'
 import s from './StoryListItem.scss'
@@ -48,7 +49,9 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feed }: St
           </a>
         </div>
       </div>
-      {hasContent && <div className={s.storyContent} dangerouslySetInnerHTML={{ __html: content }} />}
+      {hasContent && (
+        <div className={s.storyContent} dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }} />
+      )}
     </li>
   )
 }
