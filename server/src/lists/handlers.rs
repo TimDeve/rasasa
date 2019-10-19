@@ -42,6 +42,60 @@ fn get_lists_handler(pool: web::Data<DbPool>) -> impl Future<Item = HttpResponse
     })
 }
 
+fn create_list(new_list: NewList, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
+    let conn: &PgConnection = &pool.get().unwrap();
+
+    diesel::insert_into(lists::table)
+        .values(&new_list)
+        .execute(conn)?;
+
+    Ok(())
+}
+
+fn create_list_handler(
+    web::Json(body): web::Json<NewList>,
+    pool: web::Data<DbPool>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || create_list(body, pool)).then(|res| match res {
+        Ok(_) => Ok(HttpResponse::Created().body("")),
+        Err(_) => Ok(HttpResponse::InternalServerError().into()),
+    })
+}
+
+fn add_feed_to_list(
+    feed_id: i32,
+    list_id: i32,
+    pool: web::Data<DbPool>,
+) -> Result<(), diesel::result::Error> {
+    let conn: &PgConnection = &pool.get().unwrap();
+
+    diesel::insert_into(feed_lists::table)
+        .values(&NewFeedList { feed_id, list_id })
+        .execute(conn)?;
+
+    Ok(())
+}
+
+fn add_feed_to_list_handler(
+    web::Json(body): web::Json<NewFeedForList>,
+    list_id: web::Path<i32>,
+    pool: web::Data<DbPool>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || add_feed_to_list(body.feed_id, list_id.into_inner(), pool)).then(|res| {
+        match res {
+            Ok(_) => Ok(HttpResponse::Created().body("")),
+            Err(_) => Ok(HttpResponse::InternalServerError().into()),
+        }
+    })
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::resource("/v0/lists").route(web::get().to_async(get_lists_handler)));
+    cfg.service(
+        web::resource("/v0/lists")
+            .route(web::get().to_async(get_lists_handler))
+            .route(web::post().to_async(create_list_handler)),
+    )
+    .service(
+        web::resource("/v0/lists/{id}/feed").route(web::post().to_async(add_feed_to_list_handler)),
+    );
 }
