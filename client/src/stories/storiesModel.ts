@@ -14,6 +14,6 @@ export interface Story {
   title: string
   content: string
   publishedDate: string
+  feedId: number
   article?: Article
-  feed?: Feed
 }

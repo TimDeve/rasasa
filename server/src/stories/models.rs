@@ -22,7 +22,6 @@ pub struct NewStory {
 #[serde(rename_all = "camelCase")]
 pub struct Story {
     pub id: i32,
-    #[serde(skip_serializing)]
     pub feed_id: i32,
     pub title: String,
     pub url: String,
@@ -31,14 +30,6 @@ pub struct Story {
     #[serde(skip_serializing)]
     pub created_at: NaiveDateTime,
     pub content: String,
-}
-
-#[derive(Serialize, Debug)]
-pub struct StoryWithFeed {
-    #[serde(flatten)]
-    pub story: Story,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub feed: Option<Feed>,
 }
 
 #[derive(AsChangeset, Identifiable, Deserialize, Debug)]

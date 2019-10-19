@@ -5,7 +5,8 @@ import s from './Button.scss'
 import Refresh from 'shared/icons/Refresh'
 
 interface ButtonProps extends React.HTMLProps<HTMLButtonElement> {
-  loading?: boolean
+  loading?: boolean,
+  type?: "button" | "submit" | "reset"
 }
 
 function Button({ loading, className, children, ...rest }: ButtonProps) {

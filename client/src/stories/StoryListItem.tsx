@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback, useContext } from 'react'
 import cn from 'classnames'
 import { Link } from 'react-router-dom'
 import sanitizeHtml from 'sanitize-html'
@@ -9,6 +9,7 @@ import BoxArrow from 'shared/icons/BoxArrow'
 import Chevron from 'shared/icons/Chevron'
 import useToggle from 'shared/useToggle'
 import { useElementHasExitedTopScreen } from 'shared/intersectionHooks'
+import {FeedsContext} from 'feeds/feedsContext'
 
 interface StoryListItemProps {
   id: number | string
@@ -16,11 +17,13 @@ interface StoryListItemProps {
   title: string
   content: string
   isRead: boolean
+  feedId: number
   feed?: Feed
   markAsRead: () => void
 }
 
-function StoryListItem({ id, url, title, isRead, content, markAsRead, feed }: StoryListItemProps) {
+function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: StoryListItemProps) {
+  const {feeds} = useContext(FeedsContext)
   const [hasContent, toggleContent] = useToggle(false)
 
   const ref = useElementHasExitedTopScreen(() => {
@@ -33,7 +36,7 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feed }: St
     <li className={s.component} ref={ref}>
       <div className={s.titleContainer}>
         <Link to={`/story/${id}`} className={cn(s.link, { [s.linkRead]: isRead })}>
-          <span className={s.feedTitle}>{feed && feed.name}</span>
+          <span className={s.feedTitle}>{feeds[feedId] && feeds[feedId].name}</span>
           <span>{title}</span>
         </Link>
         <div className={s.actions}>

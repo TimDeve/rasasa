@@ -31,11 +31,6 @@ struct PatchStoryBody {
 }
 
 #[derive(Serialize)]
-struct StoriesWithFeedResponse {
-    stories: Vec<StoryWithFeed>,
-}
-
-#[derive(Serialize)]
 struct StoriesResponse {
     stories: Vec<Story>,
 }
@@ -46,7 +41,7 @@ struct PatchStoriesBody(Vec<StoryUpdate>);
 fn get_stories(
     query: web::Query<GetStoriesQueryString>,
     pool: web::Data<DbPool>,
-) -> Result<Vec<StoryWithFeed>, diesel::result::Error> {
+) -> Result<Vec<Story>, diesel::result::Error> {
     use crate::schema::feeds::dsl::*;
     use crate::schema::lists::dsl::*;
     use crate::schema::stories::dsl::*;
@@ -67,7 +62,9 @@ fn get_stories(
             .execute(conn)?;
     }
 
-    let stories_with_feeds: Vec<(Story, Feed)> = if let Some(list_id) = query.list_id {
+    let mut boxed_stories = stories.into_boxed();
+
+    if let Some(list_id) = query.list_id {
         use diesel::pg::expression::dsl::any;
 
         let list = lists.find(list_id).first::<List>(conn)?;
@@ -76,37 +73,17 @@ fn get_stories(
             .select(crate::schema::feed_lists::feed_id)
             .load::<i32>(conn)?;
 
-        stories
-            .filter(feed_id.eq(any(feed_ids)))
-            .filter(
-                is_read
-                    .eq(false)
-                    .or(is_read.eq(query.read.unwrap_or(false))),
-            )
-            .limit(500)
-            .order(published_date.desc())
-            .inner_join(crate::schema::feeds::table)
-            .load(conn)?
-    } else {
-        stories
-            .filter(
-                is_read
-                    .eq(false)
-                    .or(is_read.eq(query.read.unwrap_or(false))),
-            )
-            .limit(500)
-            .order(published_date.desc())
-            .inner_join(crate::schema::feeds::table)
-            .load(conn)?
-    };
+        boxed_stories = boxed_stories.filter(feed_id.eq(any(feed_ids)))
+    }
 
-    Ok(stories_with_feeds
-        .into_iter()
-        .map(|(story, feed)| StoryWithFeed {
-            story,
-            feed: Some(feed),
-        })
-        .collect())
+    if !query.read.unwrap_or(false) {
+        boxed_stories = boxed_stories.filter(is_read.eq(false))
+    }
+
+    Ok(boxed_stories
+        .limit(500)
+        .order(published_date.desc())
+        .load(conn)?)
 }
 
 fn get_stories_handler(
@@ -114,7 +91,7 @@ fn get_stories_handler(
     pool: web::Data<DbPool>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
     web::block(move || get_stories(query, pool)).then(|res| match res {
-        Ok(stories) => Ok(HttpResponse::Ok().json(StoriesWithFeedResponse { stories })),
+        Ok(stories) => Ok(HttpResponse::Ok().json(StoriesResponse { stories })),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
     })
 }
