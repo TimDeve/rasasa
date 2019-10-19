@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react'
 
-import { getInputValuesFromFormEvent } from 'shared/helpers'
+import { getInputValuesFromFormEvent, resetForm } from 'shared/helpers'
 import { Feed } from './feedsModel'
 import { FeedsContext } from './feedsContext'
 import Title from 'shared/components/Title'
@@ -42,6 +42,7 @@ function FeedsPage() {
         <form
           onSubmit={(e: React.ChangeEvent<HTMLFormElement>) => {
             const inputs = getInputValuesFromFormEvent(e)
+            resetForm(e)
             addFeed(inputs, refreshListsAndFeeds)
           }}
         >

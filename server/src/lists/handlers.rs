@@ -11,6 +11,12 @@ struct ListsResponse {
     lists: Vec<ListWithFeedIds>,
 }
 
+#[derive(Deserialize)]
+struct DeleteFeedFromListRequest {
+    list_id: i32,
+    feed_id: i32,
+}
+
 type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 fn get_lists(pool: web::Data<DbPool>) -> Result<Vec<ListWithFeedIds>, diesel::result::Error> {
@@ -89,6 +95,37 @@ fn add_feed_to_list_handler(
     })
 }
 
+fn delete_feed_from_list(
+    list_id: i32,
+    feed_id: i32,
+    pool: web::Data<DbPool>,
+) -> Result<(), diesel::result::Error> {
+    let conn: &PgConnection = &pool.get().unwrap();
+
+    diesel::delete(
+        feed_lists::table.filter(
+            feed_lists::dsl::list_id
+                .eq(list_id)
+                .and(feed_lists::dsl::feed_id.eq(feed_id)),
+        ),
+    )
+    .execute(conn)?;
+
+    Ok(())
+}
+
+fn delete_feed_from_list_handler(
+    ids: web::Path<DeleteFeedFromListRequest>,
+    pool: web::Data<DbPool>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || delete_feed_from_list(ids.list_id, ids.feed_id, pool)).then(
+        |res| match res {
+            Ok(_) => Ok(HttpResponse::NoContent().body("")),
+            Err(_) => Ok(HttpResponse::InternalServerError().into()),
+        },
+    )
+}
+
 fn delete_list(list_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
     let conn: &PgConnection = &pool.get().unwrap();
 
@@ -116,5 +153,9 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     .service(web::resource("/v0/lists/{id}").route(web::delete().to_async(delete_list_handler)))
     .service(
         web::resource("/v0/lists/{id}/feed").route(web::post().to_async(add_feed_to_list_handler)),
+    )
+    .service(
+        web::resource("/v0/lists/{list_id}/feed/{feed_id}")
+            .route(web::delete().to_async(delete_feed_from_list_handler)),
     );
 }

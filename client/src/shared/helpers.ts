@@ -24,3 +24,7 @@ export function getInputValuesFromFormEvent(
     {} as InputValues
   )
 }
+
+export function resetForm(e: React.ChangeEvent<HTMLFormElement>) {
+  e.target.reset()
+}
