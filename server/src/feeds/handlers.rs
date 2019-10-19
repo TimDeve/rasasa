@@ -60,10 +60,10 @@ fn delete_feed(feed_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::resu
 }
 
 fn delete_feed_handler(
-    story_id: web::Path<i32>,
+    list_id: web::Path<i32>,
     pool: web::Data<DbPool>,
 ) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || delete_feed(story_id.into_inner(), pool)).then(|res| match res {
+    web::block(move || delete_feed(list_id.into_inner(), pool)).then(|res| match res {
         Ok(_) => Ok(HttpResponse::NoContent().body("")),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
     })

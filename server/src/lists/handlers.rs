@@ -89,12 +89,31 @@ fn add_feed_to_list_handler(
     })
 }
 
+fn delete_list(list_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
+    let conn: &PgConnection = &pool.get().unwrap();
+
+    diesel::delete(lists::table.filter(lists::dsl::id.eq(list_id))).execute(conn)?;
+
+    Ok(())
+}
+
+fn delete_list_handler(
+    list_id: web::Path<i32>,
+    pool: web::Data<DbPool>,
+) -> impl Future<Item = HttpResponse, Error = Error> {
+    web::block(move || delete_list(list_id.into_inner(), pool)).then(|res| match res {
+        Ok(_) => Ok(HttpResponse::NoContent().body("")),
+        Err(_) => Ok(HttpResponse::InternalServerError().into()),
+    })
+}
+
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/v0/lists")
             .route(web::get().to_async(get_lists_handler))
             .route(web::post().to_async(create_list_handler)),
     )
+    .service(web::resource("/v0/lists/{id}").route(web::delete().to_async(delete_list_handler)))
     .service(
         web::resource("/v0/lists/{id}/feed").route(web::post().to_async(add_feed_to_list_handler)),
     );
