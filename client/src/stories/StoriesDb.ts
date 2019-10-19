@@ -20,6 +20,11 @@ export class StoriesDatabase extends Dexie {
       articles: 'url, timestamp',
     })
 
+    this.version(2).stores({
+      stories: 'id, publishedDate, feedId',
+      articles: 'url, timestamp',
+    })
+
     this.stories = this.table('stories')
     this.articles = this.table('articles')
   }

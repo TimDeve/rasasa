@@ -8,7 +8,7 @@ function Nav() {
     <nav className={s.nav}>
       <ul>
         <li>
-          <Link to="/">Stories</Link>
+          <Link to="/lists">Lists</Link>
         </li>
         <li>
           <Link to="/feeds">Feeds</Link>

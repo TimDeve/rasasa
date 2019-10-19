@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Link, RouteComponentProps } from 'react-router-dom'
+import React, { useEffect, useState, useContext } from 'react'
+import { RouteComponentProps } from 'react-router-dom'
 import cn from 'classnames'
 
 import Title from 'shared/components/Title'
@@ -17,19 +17,26 @@ import {
   clearStories,
 } from './StoriesPageGateway'
 import { useStories } from './StoriesPageState'
+import { FeedsContext } from 'feeds/feedsContext'
+import { get } from 'lodash-es'
 
-export default function StoriesPage(props: RouteComponentProps<{ storyId: string }>) {
+export default function StoriesPage(props: RouteComponentProps<{ storyId: string; listId: string }>) {
   const [{ stories, loading }, dispatch] = useStories()
+  const { feedLists } = useContext(FeedsContext)
+
+  const listId = get(props, 'match.params.listId')
 
   useEffect(() => {
-    fetchStories(dispatch)
-  }, [])
+    fetchStories(dispatch, { listId })
+  }, [listId])
 
   return (
     <>
-      {props.location.pathname.indexOf('/story/') !== -1 && <StoryPage {...props} />}
+      {props.location.pathname.indexOf('/stories/') !== -1 && <StoryPage {...props} />}
       <div className={s.component}>
-        <Title onClick={() => fetchStories(dispatch, { refresh: true })}>Stories</Title>
+        <Title onClick={() => fetchStories(dispatch, { refresh: true })}>
+          {get(feedLists, [listId, 'name']) || 'All stories'}
+        </Title>
         <div>
           <Button className={s.button} onClick={() => setStoriesToRead(stories, dispatch)}>
             Mark all as read

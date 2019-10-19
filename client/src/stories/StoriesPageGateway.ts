@@ -1,7 +1,8 @@
-import db from './StoriesDb'
 import queryString from 'query-string'
 import uuid from 'uuid/v4'
 
+import storiesDb from './StoriesDb'
+import feedsDb from 'feeds/FeedsDb'
 import { Story } from './storiesModel'
 import {
   StoriesDispatch,
@@ -13,7 +14,10 @@ import {
   clearStories as clearStoriesAction,
 } from './StoriesPageState'
 
-export async function fetchStories(dispatch: StoriesDispatch, options: { refresh?: boolean } = {}) {
+export async function fetchStories(
+  dispatch: StoriesDispatch,
+  options: { refresh?: boolean; listId?: string } = {}
+) {
   try {
     dispatch(setStoriesLoading(true))
     const res = await fetch('/api/v0/stories?' + queryString.stringify(options))
@@ -24,17 +28,32 @@ export async function fetchStories(dispatch: StoriesDispatch, options: { refresh
     dispatch(setStoriesLoading(false))
 
     try {
-      await db.stories.clear()
-      await db.stories.bulkAdd(json.stories)
+      await storiesDb.stories.clear()
+      await storiesDb.stories.bulkAdd(json.stories)
     } catch (e) {
       console.error('Failed to cache stories', e)
     }
   } catch (e) {
     console.log('Network failed serving cached stories')
-    const stories = await db.stories
-      .orderBy('id')
-      .reverse()
-      .toArray()
+    let stories
+
+    if (options.listId) {
+      const list = await feedsDb.feedLists
+        .where('id')
+        .equals(Number(options.listId))
+        .first()
+
+      stories = await storiesDb.stories
+        .where('feedId')
+        .anyOf(list ? list.feedIds : [])
+        .toArray()
+    } else {
+      stories = await storiesDb.stories
+        .orderBy('id')
+        .reverse()
+        .toArray()
+    }
+
     dispatch(setAllStories(stories))
     dispatch(setStoriesLoading(false))
   }
@@ -42,7 +61,7 @@ export async function fetchStories(dispatch: StoriesDispatch, options: { refresh
 
 export async function setStoryToRead(dispatch: StoriesDispatch, storyId: number) {
   try {
-    await db.stories
+    await storiesDb.stories
       .where('id')
       .equals(storyId)
       .modify({ isRead: true })
@@ -65,7 +84,7 @@ export async function setStoryToRead(dispatch: StoriesDispatch, storyId: number)
 
 export async function setStoriesToRead(stories: Story[], dispatch: StoriesDispatch) {
   try {
-    await db.stories
+    await storiesDb.stories
       .where('id')
       .anyOf(stories.map(s => s.id))
       .modify({ isRead: true })
@@ -86,7 +105,7 @@ export async function setStoriesToRead(stories: Story[], dispatch: StoriesDispat
 
 export async function clearStories(stories: Story[], dispatch: StoriesDispatch) {
   try {
-    await db.stories
+    await storiesDb.stories
       .where('id')
       .anyOf(stories.map(s => s.id))
       .delete()
@@ -126,7 +145,7 @@ export async function cacheStoriesAndArticles(stories: Story[]) {
         const json = await res.json()
 
         try {
-          await db.articles.add({ ...json, timestamp: new Date().getTime() })
+          await storiesDb.articles.add({ ...json, timestamp: new Date().getTime() })
         } catch (e) {
           console.error('Failed to cache article', e)
         }

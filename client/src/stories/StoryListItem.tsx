@@ -9,7 +9,7 @@ import BoxArrow from 'shared/icons/BoxArrow'
 import Chevron from 'shared/icons/Chevron'
 import useToggle from 'shared/useToggle'
 import { useElementHasExitedTopScreen } from 'shared/intersectionHooks'
-import {FeedsContext} from 'feeds/feedsContext'
+import { FeedsContext } from 'feeds/feedsContext'
 
 interface StoryListItemProps {
   id: number | string
@@ -23,7 +23,7 @@ interface StoryListItemProps {
 }
 
 function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: StoryListItemProps) {
-  const {feeds} = useContext(FeedsContext)
+  const { feeds } = useContext(FeedsContext)
   const [hasContent, toggleContent] = useToggle(false)
 
   const ref = useElementHasExitedTopScreen(() => {
@@ -35,7 +35,7 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: 
   return (
     <li className={s.component} ref={ref}>
       <div className={s.titleContainer}>
-        <Link to={`/story/${id}`} className={cn(s.link, { [s.linkRead]: isRead })}>
+        <Link to={`/stories/${id}`} className={cn(s.link, { [s.linkRead]: isRead })}>
           <span className={s.feedTitle}>{feeds[feedId] && feeds[feedId].name}</span>
           <span>{title}</span>
         </Link>
