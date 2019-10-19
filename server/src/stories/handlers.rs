@@ -11,14 +11,17 @@ use futures::Future;
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
 use crate::helpers::fetch_stories;
+use crate::lists::models::*;
 use crate::stories::models::*;
 
 type DbPool = Pool<ConnectionManager<PgConnection>>;
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct GetStoriesQueryString {
     refresh: Option<bool>,
     read: Option<bool>,
+    list_id: Option<i32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -45,14 +48,15 @@ fn get_stories(
     pool: web::Data<DbPool>,
 ) -> Result<Vec<StoryWithFeed>, diesel::result::Error> {
     use crate::schema::feeds::dsl::*;
+    use crate::schema::lists::dsl::*;
     use crate::schema::stories::dsl::*;
 
     let conn: &PgConnection = &pool.get().unwrap();
 
     if query.refresh.unwrap_or(false) {
-        let results = feeds.load::<Feed>(conn).expect("Error loading feeds");
+        let feeds_list = feeds.load::<Feed>(conn).expect("Error loading feeds");
 
-        let stories_list: Vec<NewStory> = results
+        let stories_list: Vec<NewStory> = feeds_list
             .iter()
             .flat_map(|feed| fetch_stories(&feed.url, feed.id).unwrap())
             .collect();
@@ -63,13 +67,38 @@ fn get_stories(
             .execute(conn)?;
     }
 
-    let stories_with_feeds: Vec<(Story, Feed)> = stories
-        .filter(is_read.eq(false))
-        .or_filter(is_read.eq(query.read.unwrap_or(false)))
-        .limit(500)
-        .order(published_date.desc())
-        .inner_join(crate::schema::feeds::table)
-        .load(conn)?;
+    let stories_with_feeds: Vec<(Story, Feed)> = if let Some(list_id) = query.list_id {
+        use diesel::pg::expression::dsl::any;
+
+        let list = lists.find(list_id).first::<List>(conn)?;
+
+        let feed_ids = FeedList::belonging_to(&list)
+            .select(crate::schema::feed_lists::feed_id)
+            .load::<i32>(conn)?;
+
+        stories
+            .filter(feed_id.eq(any(feed_ids)))
+            .filter(
+                is_read
+                    .eq(false)
+                    .or(is_read.eq(query.read.unwrap_or(false))),
+            )
+            .limit(500)
+            .order(published_date.desc())
+            .inner_join(crate::schema::feeds::table)
+            .load(conn)?
+    } else {
+        stories
+            .filter(
+                is_read
+                    .eq(false)
+                    .or(is_read.eq(query.read.unwrap_or(false))),
+            )
+            .limit(500)
+            .order(published_date.desc())
+            .inner_join(crate::schema::feeds::table)
+            .load(conn)?
+    };
 
     Ok(stories_with_feeds
         .into_iter()
