@@ -28,7 +28,7 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
 
   useEffect(() => {
     fetchStories(dispatch, { listId })
-  }, [listId])
+  }, [])
 
   return (
     <>
