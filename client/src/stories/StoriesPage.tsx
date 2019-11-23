@@ -18,13 +18,14 @@ import {
 } from './StoriesPageGateway'
 import { useStories } from './StoriesPageState'
 import { FeedsContext } from 'feeds/feedsContext'
-import { get } from 'lodash-es'
+
+const nonBreakinSpaceChar = '\u00a0'
 
 export default function StoriesPage(props: RouteComponentProps<{ storyId: string; listId: string }>) {
   const [{ stories, loading }, dispatch] = useStories()
   const { feedLists } = useContext(FeedsContext)
 
-  const listId = get(props, 'match.params.listId')
+  const listId = props?.match?.params?.listId
 
   useEffect(() => {
     fetchStories(dispatch, { listId })
@@ -35,7 +36,7 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
       {props.location.pathname.indexOf('/stories/') !== -1 && <StoryPage {...props} />}
       <div className={s.component}>
         <Title onClick={() => fetchStories(dispatch, { refresh: true })}>
-          {get(feedLists, [listId, 'name']) || 'All stories'}
+          {listId ? feedLists?.[parseInt(listId)]?.name ?? nonBreakinSpaceChar : 'All stories'}
         </Title>
         <div>
           <Button className={s.button} onClick={() => setStoriesToRead(stories, dispatch)}>
