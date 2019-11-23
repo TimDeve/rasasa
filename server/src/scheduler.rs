@@ -21,21 +21,28 @@ pub fn setup_scheduler(pool: PgPool) -> clokwerk::ScheduleHandle {
         scheduler
             .every(1.day())
             .at("3:00 am")
-            .run(move || delete_old_stories(pool.get().unwrap()));
+            .run(move || match pool.get() {
+                Ok(db_conn) => delete_old_stories(db_conn),
+                Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
+            });
     }
 
     {
         let pool = Box::new(pool.clone());
-        scheduler
-            .every(3.minute())
-            .run(move || fetch_new_stories(pool.get().unwrap()));
+        scheduler.every(3.minute()).run(move || match pool.get() {
+            Ok(db_conn) => fetch_new_stories(db_conn),
+            Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
+        });
     }
 
     scheduler.watch_thread(Duration::from_millis(1000))
 }
 
 pub fn run_startup_jobs(pool: PgPool) {
-    delete_old_stories(pool.clone().get().unwrap());
+    match pool.get() {
+        Ok(db_conn) => delete_old_stories(db_conn),
+        Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
+    }
 }
 
 pub fn delete_old_stories(conn: PgPooledConnection) {
@@ -54,18 +61,25 @@ pub fn fetch_new_stories(conn: PgPooledConnection) {
     use crate::schema::feeds::dsl::*;
     use crate::schema::stories::dsl::*;
 
-    let results = feeds.load::<Feed>(&conn).expect("Error loading feeds");
+    let results = feeds.load::<Feed>(&conn);
 
-    let stories_list: Vec<NewStory> = results
-        .iter()
-        .flat_map(|feed| fetch_stories(&feed.url, feed.id).unwrap())
-        .collect();
+    match results {
+        Err(e) => error!("Error loading feeds.\n{:?}", e),
+        Ok(loaded_feeds) => {
+            let stories_list: Vec<NewStory> = loaded_feeds
+                .iter()
+                .flat_map(|feed| fetch_stories(&feed.url, feed.id).unwrap_or(vec![]))
+                .collect();
 
-    insert_into(stories)
-        .values(stories_list)
-        .on_conflict_do_nothing()
-        .execute(&conn)
-        .unwrap();
+            let db_result = insert_into(stories)
+                .values(stories_list)
+                .on_conflict_do_nothing()
+                .execute(&conn);
 
-    info!("Fetched new stories")
+            match db_result {
+                Ok(_) => info!("Fetched new stories"),
+                Err(e) => error!("Failed to insert new stories in DB.\n{:?}", e),
+            }
+        }
+    }
 }
