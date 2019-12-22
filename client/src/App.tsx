@@ -10,26 +10,29 @@ import Nav from './Nav'
 import StoriesPage from 'stories/StoriesPage'
 import LoginPage from 'login/LoginPage'
 import { FeedsProvider } from 'feeds/feedsContext'
+import { LoggedInProvider } from 'shared/loggedInState/LoggedInContext'
 import s from './App.scss'
 
 function App() {
   return (
-    <FeedsProvider>
-      <div className={s.root}>
-        <Router>
-          <>
-            <Nav />
-            <Switch>
-              <Route exact path="/login" component={LoginPage} />
-              <Route exact path="/(|stories/:storyId|lists/:listId)" component={StoriesPage} />
-              <Route exact path="/feeds" component={FeedsPage} />
-              <Route exact path="/lists" component={ListsPage} />
-              <Redirect to="/" />
-            </Switch>
-          </>
-        </Router>
-      </div>
-    </FeedsProvider>
+    <LoggedInProvider>
+      <FeedsProvider>
+        <div className={s.root}>
+          <Router>
+            <>
+              <Nav />
+              <Switch>
+                <Route exact path="/login" component={LoginPage} />
+                <Route exact path="/(|stories/:storyId|lists/:listId)" component={StoriesPage} />
+                <Route exact path="/feeds" component={FeedsPage} />
+                <Route exact path="/lists" component={ListsPage} />
+                <Redirect to="/" />
+              </Switch>
+            </>
+          </Router>
+        </div>
+      </FeedsProvider>
+    </LoggedInProvider>
   )
 }
 
