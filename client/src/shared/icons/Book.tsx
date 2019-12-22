@@ -7,7 +7,7 @@ interface BookProps extends React.HTMLProps<SVGSVGElement> {
 function Book({ color, ...rest }: BookProps) {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
-      <path d="M12 21L4 18V4L12 6.5M12 21L20 18V4L12 6.5M12 21V6.5" stroke={color} />
+      <path d="M12 21L4 18V4L12 6M12 21L20 18V4L12 6M12 21V6" stroke={color} />
     </svg>
   )
 }
