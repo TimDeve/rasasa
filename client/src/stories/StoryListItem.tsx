@@ -22,6 +22,10 @@ interface StoryListItemProps {
   markAsRead: () => void
 }
 
+function EmptyIcon() {
+  return <span style={{ width: '24px' }} />
+}
+
 function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: StoryListItemProps) {
   const { feeds } = useContext(FeedsContext)
   const [hasContent, toggleContent] = useToggle(false)
@@ -40,10 +44,16 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: 
           <span>{title}</span>
         </Link>
         <div className={s.actions}>
-          {content && (
+          {content ? (
             <Chevron
               direction={hasContent ? 'up' : 'down'}
               onClick={toggleContent}
+              color={isRead ? 'grey' : 'black'}
+            />
+          ) : (
+            <Chevron
+              direction='flat'
+              className={s.disabled}
               color={isRead ? 'grey' : 'black'}
             />
           )}

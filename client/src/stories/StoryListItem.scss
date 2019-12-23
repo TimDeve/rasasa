@@ -41,6 +41,10 @@
     padding-left: 0.5em;
     cursor: pointer;
   }
+
+  & > .disabled {
+    cursor: inherit;
+  }
 }
 
 .storyContent {
