@@ -83,4 +83,4 @@ CMD concurrently -n 'Gateway,Server,Read' \
                  --kill-others \
                  './rasasa-gateway' \
                  './rasasa-server' \
-                 'node read-server/src/index.js'
+                 '(cd read-server && npm start)'

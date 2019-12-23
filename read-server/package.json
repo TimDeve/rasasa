@@ -6,7 +6,7 @@
   "author": "Timothee Deve",
   "scripts": {
     "precommit": "npm run lint",
-    "start": "node src/index.js",
+    "start": "NODE_ENV=production node src/index.js",
     "start:dev": "nodemon src/index.js",
     "lint": "npm run lint:prettier",
     "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write",
@@ -30,7 +30,7 @@
     "jsdom": "^14.1.0",
     "node-fetch": "^2.6.0",
     "pino-pretty": "^3.2.1",
-    "readability": "git+https://github.com/TimDeve/readability.git",
+    "readability": "git://github.com/TimDeve/readability.git#d6fc38c4b45d9bc337e3579b53ffa7c188cc4d77",
     "redis": "^2.8.0",
     "sanitize-html": "^1.20.1"
   },
