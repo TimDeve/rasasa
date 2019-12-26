@@ -1,0 +1,15 @@
+.path {
+  transition: d 0.25s;
+
+  &.up {
+    d: path('M4 17L12 7L20 17');
+  }
+
+  &.flat {
+    d: path('M4 12L12 12L20 12');
+  }
+
+  &.down {
+    d: path('M4 7L12 17L20 7');
+  }
+}
