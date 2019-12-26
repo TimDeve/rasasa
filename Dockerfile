@@ -77,5 +77,4 @@ COPY --from=node-builder /root/app/client/dist ./public
 COPY --from=rust-builder /root/app/server/target/release/rasasa-server .
 COPY --from=golang-builder /root/app/gateway/rasasa-gateway .
 EXPOSE 8090
-RUN du -sh rasasa-server
 CMD concurrently -n 'Gateway,Server,Read' -c 'yellow,cyan,magenta' --kill-others './rasasa-gateway' './rasasa-server' '(cd read-server && npm start)'
