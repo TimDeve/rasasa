@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { RouteComponentProps } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import cn from 'classnames'
 
 import Title from 'shared/components/Title'
@@ -26,6 +27,7 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
   const { feedLists } = useContext(FeedsContext)
 
   const listId = props?.match?.params?.listId
+  const title = listId ? feedLists?.[parseInt(listId)]?.name ?? nonBreakinSpaceChar : 'All stories'
 
   useEffect(() => {
     fetchStories(dispatch, { listId })
@@ -33,10 +35,13 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
 
   return (
     <>
+      <Helmet>
+        <title>Rasasa - {title}</title>
+      </Helmet>
       {props.location.pathname.indexOf('/stories/') !== -1 && <StoryPage {...props} />}
       <div className={s.component}>
         <Title onClick={() => fetchStories(dispatch, { refresh: true })}>
-          {listId ? feedLists?.[parseInt(listId)]?.name ?? nonBreakinSpaceChar : 'All stories'}
+          {title}
         </Title>
         <div>
           <Button className={s.button} onClick={() => setStoriesToRead(stories, dispatch)}>

@@ -3,6 +3,7 @@ import queryString from 'query-string'
 import { Link } from 'react-router-dom'
 import { RouteComponentProps } from 'react-router-dom'
 import ScrollLock, { TouchScrollable } from 'react-scrolllock'
+import { Helmet } from 'react-helmet-async'
 
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
@@ -73,9 +74,14 @@ function fetchStory(id: string): Story | null {
   return story
 }
 
-function Wrapper({ children }: { children?: ReactNode }) {
+function Wrapper({ title, children }: { title?: string; children?: ReactNode }) {
   return (
     <>
+      {title && (
+        <Helmet>
+          <title>Rasasa - {title}</title>
+        </Helmet>
+      )}
       <ScrollLock />
       <TouchScrollable>
         <div className={s.component}>
@@ -104,7 +110,7 @@ function StoryPage(props: StoryPageProps) {
 
   if (!article.readable || !article.content) {
     return (
-      <Wrapper>
+      <Wrapper title={story.title}>
         <Title>
           <a style={{ color: 'black', textDecoration: 'none' }} href={story.url}>
             {story.title}
@@ -116,7 +122,7 @@ function StoryPage(props: StoryPageProps) {
   }
 
   return (
-    <Wrapper>
+    <Wrapper title={article.title}>
       <Title>
         <a
           style={{ color: 'black', textDecoration: 'none' }}

@@ -21,7 +21,7 @@ export const FeedsContext = React.createContext<{
   refreshListsAndFeeds: () => {},
 })
 
-export function FeedsProvider({ children }: { children: ReactNode }) {
+export function FeedsProvider({ children }: { children?: ReactNode }) {
   const [feeds, setFeeds] = useState<Feeds>({})
   const [feedLists, setFeedLists] = useState<FeedLists>({})
 

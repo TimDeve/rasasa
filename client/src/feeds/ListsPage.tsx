@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 
 import Title from 'shared/components/Title'
 import Button from 'shared/components/Button'
@@ -61,6 +62,10 @@ function ListsPage() {
 
   return (
     <div className={s.component}>
+      <Helmet>
+        <title>Rasasa - Feed Lists</title>
+      </Helmet>
+
       <Title>Feed Lists</Title>
 
       <Button className={s.button} onClick={() => setInEditMode(!inEditMode)}>
@@ -93,7 +98,7 @@ function ListsPage() {
           </li>
           {lists.map(list => (
             <li key={list.id} className={s.list}>
-              <Link to={`/lists/${list.id}/${encodeURI(list.name.replace(/\s/g, "-"))}`}>
+              <Link to={`/lists/${list.id}/${encodeURI(list.name.replace(/\s/g, '-'))}`}>
                 <h2>{list.name}</h2>
               </Link>
               {inEditMode && (

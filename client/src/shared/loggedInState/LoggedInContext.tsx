@@ -8,7 +8,7 @@ export enum LoggedInState {
 
 export const LoggedInContext = React.createContext<LoggedInState>(LoggedInState.LoggedIn)
 
-export function LoggedInProvider({ children }: { children: ReactNode }) {
+export function LoggedInProvider({ children }: { children?: ReactNode }) {
   const [loggedInState, setLoggedInState] = useState<LoggedInState>(LoggedInState.LoggedIn)
 
   async function fetchPing() {

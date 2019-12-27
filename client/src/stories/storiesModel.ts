@@ -2,8 +2,8 @@ import { Feed } from '../feeds/feedsModel'
 
 export interface Article {
   readable: boolean
-  title?: String
-  byline?: String
+  title?: string
+  byline?: string
   content?: string
 }
 

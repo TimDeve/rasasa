@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
+import { Helmet } from 'react-helmet-async'
 
 import { getInputValuesFromFormEvent, resetForm } from 'shared/helpers'
 import { Feed } from './feedsModel'
@@ -35,6 +36,10 @@ function FeedsPage() {
 
   return (
     <div className={s.component}>
+      <Helmet>
+        <title>Rasasa - Feeds</title>
+      </Helmet>
+
       <Title>Feeds</Title>
 
       <div>
