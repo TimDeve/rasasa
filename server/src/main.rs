@@ -9,7 +9,6 @@ extern crate log;
 extern crate chrono;
 extern crate clokwerk;
 extern crate env_logger;
-extern crate http;
 extern crate openssl;
 extern crate rss;
 
@@ -29,7 +28,8 @@ use std::io;
 
 embed_migrations!("migrations");
 
-pub fn main() -> io::Result<()> {
+#[actix_rt::main]
+async fn main() -> io::Result<()> {
     std::env::set_var("RUST_LOG", "info,rasasa_server=info,actix_web=debug");
     env_logger::init();
 
@@ -53,4 +53,5 @@ pub fn main() -> io::Result<()> {
     })
     .bind("127.0.0.1:8091")?
     .run()
+    .await
 }

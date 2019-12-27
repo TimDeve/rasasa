@@ -1,12 +1,10 @@
 extern crate chrono;
 extern crate diesel;
-extern crate http;
 extern crate rss;
 
 use actix_web::{web, Error, HttpResponse};
 use diesel::insert_into;
 use diesel::r2d2::{ConnectionManager, Pool};
-use futures::Future;
 
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
@@ -86,14 +84,16 @@ fn get_stories(
         .load(conn)?)
 }
 
-fn get_stories_handler(
+async fn get_stories_handler(
     query: web::Query<GetStoriesQueryString>,
     pool: web::Data<DbPool>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || get_stories(query, pool)).then(|res| match res {
+) -> Result<HttpResponse, Error> {
+    let res = web::block(move || get_stories(query, pool)).await;
+
+    match res {
         Ok(stories) => Ok(HttpResponse::Ok().json(StoriesResponse { stories })),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
-    })
+    }
 }
 
 fn get_story(story_id: i32, pool: web::Data<DbPool>) -> Result<Story, diesel::result::Error> {
@@ -104,14 +104,16 @@ fn get_story(story_id: i32, pool: web::Data<DbPool>) -> Result<Story, diesel::re
     Ok(stories.filter(id.eq(story_id)).first::<Story>(conn)?)
 }
 
-fn get_story_handler(
+async fn get_story_handler(
     story_id: web::Path<i32>,
     pool: web::Data<DbPool>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || get_story(story_id.into_inner(), pool)).then(|res| match res {
+) -> Result<HttpResponse, Error> {
+    let res = web::block(move || get_story(story_id.into_inner(), pool)).await;
+
+    match res {
         Ok(story) => Ok(HttpResponse::Ok().json(story)),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
-    })
+    }
 }
 
 fn patch_stories(
@@ -130,14 +132,16 @@ fn patch_stories(
     Ok(updated_stories)
 }
 
-fn patch_stories_handler(
+async fn patch_stories_handler(
     web::Json(body): web::Json<PatchStoriesBody>,
     pool: web::Data<DbPool>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || patch_stories(body, pool)).then(|res| match res {
+) -> Result<HttpResponse, Error> {
+    let res = web::block(move || patch_stories(body, pool)).await;
+
+    match res {
         Ok(stories) => Ok(HttpResponse::Ok().json(StoriesResponse { stories })),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
-    })
+    }
 }
 
 fn patch_story(
@@ -157,27 +161,28 @@ fn patch_story(
     Ok(updated_story)
 }
 
-fn patch_story_handler(
+async fn patch_story_handler(
     story_id: web::Path<i32>,
     web::Json(body): web::Json<PatchStoryBody>,
     pool: web::Data<DbPool>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || patch_story(story_id.into_inner(), body.is_read, pool)).then(|res| match res
-    {
+) -> Result<HttpResponse, Error> {
+    let res = web::block(move || patch_story(story_id.into_inner(), body.is_read, pool)).await;
+
+    match res {
         Ok(story) => Ok(HttpResponse::Ok().json(story)),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
-    })
+    }
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/v0/stories")
-            .route(web::get().to_async(get_stories_handler))
-            .route(web::patch().to_async(patch_stories_handler)),
+            .route(web::get().to(get_stories_handler))
+            .route(web::patch().to(patch_stories_handler)),
     )
     .service(
         web::resource("/v0/stories/{id}")
-            .route(web::get().to_async(get_story_handler))
-            .route(web::patch().to_async(patch_story_handler)),
+            .route(web::get().to(get_story_handler))
+            .route(web::patch().to(patch_story_handler)),
     );
 }

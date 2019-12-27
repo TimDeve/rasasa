@@ -1,6 +1,5 @@
 use actix_web::{web, Error, HttpResponse};
 use diesel::r2d2::{ConnectionManager, Pool};
-use futures::Future;
 
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
@@ -20,11 +19,13 @@ fn get_feeds(pool: web::Data<DbPool>) -> Result<Vec<Feed>, diesel::result::Error
     Ok(feeds.load::<Feed>(conn)?)
 }
 
-fn get_feeds_handler(pool: web::Data<DbPool>) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || get_feeds(pool)).then(|res| match res {
+async fn get_feeds_handler(pool: web::Data<DbPool>) -> Result<HttpResponse, Error> {
+    let res = web::block(move || get_feeds(pool)).await;
+
+    match res {
         Ok(feeds) => Ok(HttpResponse::Ok().json(FeedsResponse { feeds })),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
-    })
+    }
 }
 
 fn create_feed(body: NewFeed, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
@@ -39,14 +40,16 @@ fn create_feed(body: NewFeed, pool: web::Data<DbPool>) -> Result<(), diesel::res
     Ok(())
 }
 
-fn create_feed_handler(
+async fn create_feed_handler(
     web::Json(body): web::Json<NewFeed>,
     pool: web::Data<DbPool>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || create_feed(body, pool)).then(|res| match res {
+) -> Result<HttpResponse,Error> {
+    let res = web::block(move || create_feed(body, pool)).await;
+
+    match res {
         Ok(_) => Ok(HttpResponse::Created().body("")),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
-    })
+    }
 }
 
 fn delete_feed(feed_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
@@ -59,21 +62,23 @@ fn delete_feed(feed_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::resu
     Ok(())
 }
 
-fn delete_feed_handler(
+async fn delete_feed_handler(
     list_id: web::Path<i32>,
     pool: web::Data<DbPool>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || delete_feed(list_id.into_inner(), pool)).then(|res| match res {
+) -> Result<HttpResponse, Error> {
+    let res = web::block(move || delete_feed(list_id.into_inner(), pool)).await;
+
+    match res {
         Ok(_) => Ok(HttpResponse::NoContent().body("")),
         Err(_) => Ok(HttpResponse::InternalServerError().into()),
-    })
+    }
 }
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::resource("/v0/feeds")
-            .route(web::get().to_async(get_feeds_handler))
-            .route(web::post().to_async(create_feed_handler)),
+            .route(web::get().to(get_feeds_handler))
+            .route(web::post().to(create_feed_handler)),
     )
-    .service(web::resource("/v0/feeds/{id}").route(web::delete().to_async(delete_feed_handler)));
+    .service(web::resource("/v0/feeds/{id}").route(web::delete().to(delete_feed_handler)));
 }

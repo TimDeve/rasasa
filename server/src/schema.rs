@@ -38,9 +38,4 @@ joinable!(feed_lists -> feeds (feed_id));
 joinable!(feed_lists -> lists (list_id));
 joinable!(stories -> feeds (feed_id));
 
-allow_tables_to_appear_in_same_query!(
-    feed_lists,
-    feeds,
-    lists,
-    stories,
-);
+allow_tables_to_appear_in_same_query!(feed_lists, feeds, lists, stories,);
