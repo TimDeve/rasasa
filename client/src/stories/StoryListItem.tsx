@@ -5,8 +5,9 @@ import sanitizeHtml from 'sanitize-html'
 
 import { Feed } from '../feeds/feedsModel'
 import s from './StoryListItem.scss'
-import BoxArrow from 'shared/icons/BoxArrow'
-import Chevron from 'shared/icons/Chevron'
+import BoxArrowIcon from 'shared/icons/BoxArrowIcon'
+import ChevronIcon from 'shared/icons/ChevronIcon'
+
 import useToggle from 'shared/useToggle'
 import { useElementHasExitedTopScreen } from 'shared/intersectionHooks'
 import { FeedsContext } from 'feeds/feedsContext'
@@ -45,20 +46,16 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: 
         </Link>
         <div className={s.actions}>
           {content ? (
-            <Chevron
+            <ChevronIcon
               direction={hasContent ? 'up' : 'down'}
               onClick={toggleContent}
               color={isRead ? 'grey' : 'black'}
             />
           ) : (
-            <Chevron
-              direction='flat'
-              className={s.disabled}
-              color={isRead ? 'grey' : 'black'}
-            />
+            <ChevronIcon direction="flat" className={s.disabled} color={isRead ? 'grey' : 'black'} />
           )}
           <a href={url} target="_blank" rel="noopener noreferrer">
-            <BoxArrow color={isRead ? 'grey' : 'black'} />
+            <BoxArrowIcon color={isRead ? 'grey' : 'black'} />
           </a>
         </div>
       </div>
