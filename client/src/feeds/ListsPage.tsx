@@ -93,7 +93,7 @@ function ListsPage() {
           </li>
           {lists.map(list => (
             <li key={list.id} className={s.list}>
-              <Link to={`/lists/${list.id}`}>
+              <Link to={`/lists/${list.id}/${encodeURI(list.name.replace(/\s/g, "-"))}`}>
                 <h2>{list.name}</h2>
               </Link>
               {inEditMode && (
