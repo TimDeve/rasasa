@@ -17,6 +17,11 @@
     &:visited {
       color: black;
     }
+
+    & > * {
+      vertical-align: top;
+      margin-right: 0.2em;
+    }
   }
 
   .disabled {
