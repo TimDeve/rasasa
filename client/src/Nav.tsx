@@ -14,21 +14,27 @@ function Nav() {
     <nav className={s.nav}>
       <ul>
         <li>
-          <Link to="/lists"><ListIcon/> Lists</Link>
+          <Link to="/lists">
+            <ListIcon /> <span>Lists</span>
+          </Link>
         </li>
         <li>
-          <Link to="/feeds"><FeedIcon/> Feeds</Link>
+          <Link to="/feeds">
+            <FeedIcon /> <span>Feeds</span>
+          </Link>
         </li>
-      </ul>
-      <ul>
         {loggedInState === LoggedInState.LoggedOut && (
-          <li>
-            <Link to="/login"><ConnectionIcon/> Login</Link>
+          <li className={s.rightSideItem}>
+            <Link to="/login">
+              <ConnectionIcon /> <span>Login</span>
+            </Link>
           </li>
         )}
         {loggedInState === LoggedInState.Offline && (
-          <li>
-            <span className={s.disabled}><ConnectionIcon color='grey' /> Offline</span>
+          <li className={s.rightSideItem}>
+            <span className={s.disabled}>
+              <ConnectionIcon color="grey" /> <span>Offline</span>
+            </span>
           </li>
         )}
       </ul>

@@ -1,6 +1,5 @@
 .nav {
   display: flex;
-  justify-content: space-between;
   background-color: white;
 
   @media only screen and (max-width: 800px) {
@@ -8,17 +7,32 @@
     z-index: 1;
     bottom: 0;
     left: 0;
-    width: 100vw;
+    width: 100%;
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   }
 
   ul {
     display: flex;
     list-style: none;
+    width: 100%;
+
+    @media only screen and (max-width: 800px) {
+      padding-left: 5em;
+      padding-right: 5em;
+      justify-content: space-evenly;
+    }
   }
 
-  a,
-  span {
+  .rightSideItem {
+    margin-left: auto;
+
+    @media only screen and (max-width: 800px) {
+      margin: 0;
+    }
+  }
+
+  li > a,
+  li > span {
     display: block;
     padding: 1em;
     text-decoration: none;
@@ -31,6 +45,22 @@
     & > * {
       vertical-align: top;
       margin-right: 0.2em;
+    }
+
+    &:last-child {
+      margin-left: auto;
+    }
+
+    @media only screen and (max-width: 800px) {
+      padding: 0.3em 1em 0.1em 1em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      & > * {
+        margin: 0;
+      }
     }
   }
 
