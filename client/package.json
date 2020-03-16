@@ -8,7 +8,7 @@
     "start:dev:server": "webpack-dev-server",
     "start:dev:ts": "tsc --watch",
     "build": "webpack",
-    "lint": "npm run lint:prettier && npm run lint:ts && npm run lint:tslint",
+    "lint": "npm run lint:prettier && npm run lint:ts",
     "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json,scss,css} --write",
     "lint:ts": "tsc"
   },

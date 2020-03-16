@@ -40,9 +40,7 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
       </Helmet>
       {props.location.pathname.indexOf('/stories/') !== -1 && <StoryPage {...props} />}
       <div className={s.component}>
-        <Title onClick={() => fetchStories(dispatch, { refresh: true })}>
-          {title}
-        </Title>
+        <Title onClick={() => fetchStories(dispatch, { refresh: true })}>{title}</Title>
         <div>
           <Button className={s.button} onClick={() => setStoriesToRead(stories, dispatch)}>
             Mark all as read

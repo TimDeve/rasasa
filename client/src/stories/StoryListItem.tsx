@@ -40,7 +40,10 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: 
   return (
     <li className={s.component} ref={ref}>
       <div className={s.titleContainer}>
-        <Link to={`/stories/${id}/${encodeURI(title.replace(/\s/g, "-"))}`} className={cn(s.link, { [s.linkRead]: isRead })}>
+        <Link
+          to={`/stories/${id}/${encodeURI(title.replace(/\s/g, '-'))}`}
+          className={cn(s.link, { [s.linkRead]: isRead })}
+        >
           <span className={s.feedTitle}>{feeds[feedId] && feeds[feedId].name}</span>
           <span>{title}</span>
         </Link>

@@ -14,15 +14,12 @@ export function getInputValuesFromFormEvent(
     e.preventDefault()
   }
 
-  return Array.from(e.target.elements).reduce(
-    (acc, e: Element) => {
-      if (isHTMLInputElement(e)) {
-        acc[e.name] = e.value
-      }
-      return acc
-    },
-    {} as InputValues
-  )
+  return Array.from(e.target.elements).reduce((acc, e: Element) => {
+    if (isHTMLInputElement(e)) {
+      acc[e.name] = e.value
+    }
+    return acc
+  }, {} as InputValues)
 }
 
 export function resetForm(e: React.ChangeEvent<HTMLFormElement>) {
