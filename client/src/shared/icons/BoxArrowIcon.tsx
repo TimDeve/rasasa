@@ -1,6 +1,6 @@
 import React from 'react'
 
-interface BoxArrowProps extends React.HTMLProps<SVGSVGElement> {
+interface BoxArrowProps extends React.SVGProps<SVGSVGElement> {
   color?: string
 }
 

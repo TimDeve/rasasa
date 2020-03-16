@@ -4,7 +4,7 @@ import s from './ChevronIcon.scss'
 
 type Direction = 'up' | 'down' | 'flat'
 
-interface ChevronProps extends React.HTMLProps<SVGSVGElement> {
+interface ChevronProps extends React.SVGProps<SVGSVGElement> {
   color?: string
   direction?: Direction
 }

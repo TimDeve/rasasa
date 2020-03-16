@@ -1,6 +1,6 @@
 import React from 'react'
 
-interface BookProps extends React.HTMLProps<SVGSVGElement> {
+interface BookProps extends React.SVGProps<SVGSVGElement> {
   color?: string
 }
 

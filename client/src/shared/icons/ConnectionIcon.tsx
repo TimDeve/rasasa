@@ -1,6 +1,6 @@
 import React from 'react'
 
-interface ConnectionIconProps extends React.HTMLProps<SVGSVGElement> {
+interface ConnectionIconProps extends React.SVGProps<SVGSVGElement> {
   color?: string
 }
 

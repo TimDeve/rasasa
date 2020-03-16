@@ -1,6 +1,6 @@
 import React from 'react'
 
-interface FeedIconProps extends React.HTMLProps<SVGSVGElement> {
+interface FeedIconProps extends React.SVGProps<SVGSVGElement> {
   color?: string
 }
 

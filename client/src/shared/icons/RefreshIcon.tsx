@@ -3,7 +3,7 @@ import cn from 'classnames'
 
 import s from './RefreshIcon.scss'
 
-interface RefreshProps extends React.HTMLProps<SVGSVGElement> {
+interface RefreshProps extends React.SVGProps<SVGSVGElement> {
   color?: string
   animated?: boolean
 }
