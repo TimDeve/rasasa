@@ -35,7 +35,7 @@
     "sanitize-html": "^1.20.1"
   },
   "devDependencies": {
-    "jest": "^24.9.0",
+    "jest": "^25.1.0",
     "nodemon": "^1.19.3",
     "prettier": "^1.18.2"
   }
