@@ -1,5 +1,5 @@
 import queryString from 'query-string'
-import uuid from 'uuid/v4'
+import { v4 as uuid } from 'uuid'
 
 import storiesDb from './StoriesDb'
 import feedsDb from 'feeds/FeedsDb'

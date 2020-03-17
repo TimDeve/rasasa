@@ -5,7 +5,7 @@ const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { HotModuleReplacementFilterPlugin } = require('hmr-filter-webpack-plugin')
 const ManifestPlugin = require('webpack-manifest-plugin')
-const uuidv4 = require('uuid/v4')
+const { v4: uuidv4 } = require('uuid')
 
 const isDev = process.env.NODE_ENV !== 'production'
 
@@ -57,9 +57,10 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
-              modules: true,
-              localIdentName: '[name]__[local]___[hash:base64:5]',
-              camelCase: true,
+              modules: {
+                localIdentName: '[name]__[local]___[hash:base64:5]',
+              },
+              localsConvention: 'camelCase',
               sourceMap: true,
             },
           },
