@@ -1,5 +1,6 @@
 use atom_syndication::Feed;
 use chrono::DateTime;
+use reqwest::blocking::get;
 use rss::Channel;
 
 use crate::stories::models::NewStory;
@@ -15,7 +16,7 @@ pub fn fetch_stories(
     url: &String,
     feed_id: i32,
 ) -> Result<Vec<NewStory>, Box<dyn std::error::Error>> {
-    let content = reqwest::get(url)?.text()?;
+    let content = get(url)?.text()?;
 
     let feed = extract_feed(content);
 
