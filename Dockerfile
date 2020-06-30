@@ -1,7 +1,7 @@
 #
 # GOLANG BUILDER
 #
-FROM golang:1.13 as golang-builder
+FROM golang:1.14 as golang-builder
 LABEL builder=true
 
 RUN mkdir -p /root/app
@@ -17,12 +17,8 @@ RUN go build -o rasasa-gateway ./...
 #
 # NODE BUILDER
 #
-FROM node:lts-alpine as node-builder
+FROM node:lts-buster-slim as node-builder
 LABEL builder=true
-
-RUN apk add --no-cache --update \
-      git \
-      bash
 
 RUN mkdir -p /root/app
 WORKDIR /root/app
@@ -37,7 +33,7 @@ RUN NODE_ENV=production ./run client:build
 #
 # RUST BUILDER
 #
-FROM rust:1.40-buster as rust-builder
+FROM rust:1.44-slim-buster as rust-builder
 LABEL builder=true
 
 RUN mkdir -p /root/app
@@ -65,7 +61,10 @@ RUN cargo build --release
 #
 # RUNNER
 #
-FROM node:lts-buster
+FROM node:lts-buster-slim
+RUN apt-get update \
+ && apt-get install -y git libpq5 \
+ && rm -rf /var/lib/apt/lists/*
 RUN npm install -g concurrently
 RUN mkdir /root/app
 WORKDIR /root/app
@@ -78,3 +77,4 @@ COPY --from=rust-builder /root/app/server/target/release/rasasa-server .
 COPY --from=golang-builder /root/app/gateway/rasasa-gateway .
 EXPOSE 8090
 CMD concurrently -n 'Gateway,Server,Read' -c 'yellow,cyan,magenta' --kill-others './rasasa-gateway' './rasasa-server' '(cd read-server && npm start)'
+
