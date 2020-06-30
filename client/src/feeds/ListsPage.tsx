@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react'
 import { Link, RouteComponentProps } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from 'react-helmet'
 
 import Title from 'shared/components/Title'
 import Button from 'shared/components/Button'

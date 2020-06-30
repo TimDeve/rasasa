@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react'
 import { RouteComponentProps } from 'react-router-dom'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from 'react-helmet'
 import cn from 'classnames'
 
 import Title from 'shared/components/Title'

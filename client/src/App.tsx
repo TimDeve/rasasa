@@ -3,7 +3,6 @@ import './hotReloaderConfig'
 import React from 'react'
 import { hot } from 'react-hot-loader/root'
 import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
-import { HelmetProvider } from 'react-helmet-async'
 
 import FeedsPage from 'feeds/FeedsPage'
 import ListsPage from 'feeds/ListsPage'
@@ -13,12 +12,12 @@ import LoginPage from 'login/LoginPage'
 import { FeedsProvider } from 'feeds/feedsContext'
 import { LoggedInProvider } from 'shared/loggedInState/LoggedInContext'
 import ProvidersProvider from 'shared/ProvidersProvider'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from 'react-helmet'
 import s from './App.scss'
 
 function App() {
   return (
-    <ProvidersProvider providers={[HelmetProvider, LoggedInProvider, FeedsProvider]}>
+    <ProvidersProvider providers={[LoggedInProvider, FeedsProvider]}>
       <div className={s.root}>
         <Helmet>
           <title>Rasasa</title>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from 'react-helmet'
 
 import { getInputValuesFromFormEvent, resetForm } from 'shared/helpers'
 import { Feed } from './feedsModel'

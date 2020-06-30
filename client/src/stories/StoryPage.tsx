@@ -3,7 +3,7 @@ import queryString from 'query-string'
 import { Link } from 'react-router-dom'
 import { RouteComponentProps } from 'react-router-dom'
 import ScrollLock, { TouchScrollable } from 'react-scrolllock'
-import { Helmet } from 'react-helmet-async'
+import { Helmet } from 'react-helmet'
 
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
