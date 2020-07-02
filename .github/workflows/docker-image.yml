@@ -10,7 +10,14 @@ jobs:
  
     steps:
     - uses: actions/checkout@v1
-    
+
+    - uses: actions/cache@v1
+      name: Cache Docker
+      with:
+        path: /var/lib/docker
+        key: ${{ runner.os }}-rust-${{ env.GITHUB_SHA }}
+        restore-keys: ${{ runner.os }}-docker-
+
     - name: Record build time
       run: date +%s > time
 
