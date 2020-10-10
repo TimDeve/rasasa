@@ -60,7 +60,6 @@ module.exports = {
               modules: {
                 localIdentName: '[name]__[local]___[hash:base64:5]',
               },
-              localsConvention: 'camelCase',
               sourceMap: true,
             },
           },
@@ -88,7 +87,7 @@ module.exports = {
       return name && name.includes('worker')
     }),
     new webpack.HotModuleReplacementPlugin(),
-    new CopyPlugin([{ from: 'static' }]),
+    new CopyPlugin({ patterns: [{ from: 'static' }] }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
