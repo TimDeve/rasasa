@@ -28,7 +28,7 @@ use std::io;
 
 embed_migrations!("migrations");
 
-#[actix_rt::main]
+#[actix_web::main]
 async fn main() -> io::Result<()> {
     std::env::set_var("RUST_LOG", "info,rasasa_server=info,actix_web=debug");
     env_logger::init();
