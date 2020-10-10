@@ -22,7 +22,7 @@ pub mod stories;
 use actix_web::{middleware, App, HttpServer};
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
-use scheduler::{run_startup_jobs, setup_scheduler};
+use scheduler::setup_scheduler;
 use std::env;
 use std::io;
 
@@ -41,7 +41,6 @@ async fn main() -> io::Result<()> {
     embedded_migrations::run_with_output(&connection, &mut std::io::stdout()).unwrap();
 
     let _thread_handle = setup_scheduler(pool.clone());
-    run_startup_jobs(pool.clone());
 
     HttpServer::new(move || {
         App::new()
