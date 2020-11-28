@@ -22,11 +22,11 @@ jobs:
       run: date +%s > time
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag ghcr.io/timdeve/rasasa/rasasa:$(cat time)
+      run: docker build . -t ghcr.io/timdeve/rasasa/rasasa:$(cat time) -t ghcr.io/timdeve/rasasa/rasasa:latest
 
     - name: Push the image to GPR
       run: |
         echo $GITHUB_PACKAGE_REGISTRY_TOKEN | docker login ghcr.io -u TimDeve --password-stdin
-        docker push ghcr.io/timdeve/rasasa/rasasa:$(cat time)
+        docker push ghcr.io/timdeve/rasasa/rasasa
       env:
         GITHUB_PACKAGE_REGISTRY_TOKEN: ${{ secrets.GITHUB_PACKAGE_REGISTRY_TOKEN }}
