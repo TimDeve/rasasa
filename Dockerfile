@@ -19,6 +19,9 @@ RUN go build -o rasasa-gateway ./...
 #
 FROM node:lts-buster-slim as node-builder
 LABEL builder=true
+RUN apt-get update \
+ && apt-get install -y python build-essential \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /root/app
 WORKDIR /root/app
@@ -28,7 +31,6 @@ ADD ./scripts ./scripts
 ADD ./client ./client
 RUN ./run client:install:ci
 RUN NODE_ENV=production ./run client:build
-
 
 #
 # RUST BUILDER
@@ -75,6 +77,11 @@ WORKDIR /root/app
 COPY --from=node-builder /root/app/client/dist ./public
 COPY --from=rust-builder /root/app/server/target/release/rasasa-server .
 COPY --from=golang-builder /root/app/gateway/rasasa-gateway .
+
+ENV GATEWAY_URL http://:8090
+ENV SERVER_URL http://localhost:8091
+ENV READ_URL http://localhost:8092
+
 EXPOSE 8090
 CMD concurrently -n 'Gateway,Server,Read' -c 'yellow,cyan,magenta' --kill-others './rasasa-gateway' './rasasa-server' '(cd read-server && npm start)'
 

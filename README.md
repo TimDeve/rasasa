@@ -14,13 +14,9 @@ The gateway server is built using Go.
 While the app is functional and I use it every day, this repo is mostly a playground to try out new patterns and tech. Error handling is basically non-existent and there are no tests. Here be dragons 🐉
 
 ## Running
-The easy way to get the app up and running is to use docker, in the repository root run:
-
-```sh
-docker build -t rasasa .
-```
-
-Then you'll need a Postgres and a Redis database, run the following command replacing the example values with the addresses of your databases:
+The easy way to get the app up and running is to use the image hosted on
+Github, you'll need a Postgres and a Redis database, run the following command
+replacing the example values with the addresses of your databases:
 
 ```sh
 docker run -it -p 8090:8090 \
@@ -28,9 +24,23 @@ docker run -it -p 8090:8090 \
 --env "REDIS_URL=redis://host.docker.internal:6379" \
 --env "RASASA_USER=username" \
 --env "RASASA_PASS=alongpassword" \
---env "GATEWAY_URL=http://:8090" \
---env "SERVER_URL=http://localhost:8091" \
---env "READ_URL=http://localhost:8092" \
+ghcr.io/timdeve/rasasa/rasasa:latest
+```
+
+Otherwise you build it locally, in the repository root run:
+
+```sh
+docker build -t rasasa .
+```
+
+Then:
+
+```sh
+docker run -it -p 8090:8090 \
+--env "DATABASE_URL=postgres://tim@host.docker.internal/rasasa" \
+--env "REDIS_URL=redis://host.docker.internal:6379" \
+--env "RASASA_USER=username" \
+--env "RASASA_PASS=alongpassword" \
 rasasa:latest
 ```
 
