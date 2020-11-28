@@ -22,7 +22,7 @@ jobs:
       run: date +%s > time
 
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag docker.pkg.github.com/timdeve/rasasa/rasasa:$(cat time)
+      run: docker build . --file Dockerfile --tag ghcr.io/timdeve/rasasa/rasasa:$(cat time)
 
     - name: Push the image to GPR
       run: |
