@@ -26,7 +26,7 @@ jobs:
 
     - name: Push the image to GPR
       run: |
-        docker login docker.pkg.github.com -u TimDeve -p "${GITHUB_PACKAGE_REGISTRY_TOKEN}"
-        docker push docker.pkg.github.com/timdeve/rasasa/rasasa:$(cat time)
+        echo $GITHUB_PACKAGE_REGISTRY_TOKEN | docker login ghcr.io -u TimDeve --password-stdin
+        docker push ghcr.io/timdeve/rasasa/rasasa:$(cat time)
       env:
         GITHUB_PACKAGE_REGISTRY_TOKEN: ${{ secrets.GITHUB_PACKAGE_REGISTRY_TOKEN }}
