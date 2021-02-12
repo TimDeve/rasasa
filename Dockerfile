@@ -63,7 +63,7 @@ RUN cargo build --release
 #
 # RUNNER
 #
-FROM node:lts-buster-slim
+FROM node:15-buster-slim as runner
 RUN apt-get update \
  && apt-get install -y git libpq5 \
  && rm -rf /var/lib/apt/lists/*
