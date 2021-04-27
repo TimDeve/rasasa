@@ -30,7 +30,7 @@
     "jsdom": "^16.4.0",
     "node-fetch": "^2.6.1",
     "pino-pretty": "^4.3.0",
-    "readability": "git+https://github.com/TimDeve/readability.git#dc34dfd8fa6d5c17801efbc2e115dc368b7117c8",
+    "readability": "git+https://github.com/TimDeve/readability.git#b2f3a43f9f8b1eb41717731cc23a925efc693ab3",
     "redis": "^3.1.1",
     "sanitize-html": "^2.1.0"
   },
