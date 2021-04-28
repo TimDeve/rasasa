@@ -11,12 +11,8 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
-    - uses: actions/cache@v1
-      name: Cache Docker
-      with:
-        path: /var/lib/docker
-        key: ${{ runner.os }}-docker-${{ env.GITHUB_SHA }}
-        restore-keys: ${{ runner.os }}-docker-
+    - uses: satackey/action-docker-layer-caching@v0.0.11
+      continue-on-error: true
 
     - name: Record build time
       run: date +%s > time
