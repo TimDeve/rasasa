@@ -16,7 +16,7 @@ export function LoggedInProvider({ children }: { children?: ReactNode }) {
       const res = await fetch('/api/v0/authenticated')
 
       switch (res.status) {
-        case 200:
+        case 204:
           setLoggedInState(LoggedInState.LoggedIn)
           break
         case 401:
