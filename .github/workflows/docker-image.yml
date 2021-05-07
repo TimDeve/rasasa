@@ -21,6 +21,7 @@ jobs:
       run: docker build . -t ghcr.io/timdeve/rasasa/rasasa:$(cat time) -t ghcr.io/timdeve/rasasa/rasasa:latest
 
     - name: Push the image to GPR
+      if: github.ref == 'refs/heads/master'
       run: |
         echo $GITHUB_PACKAGE_REGISTRY_TOKEN | docker login ghcr.io -u TimDeve --password-stdin
         docker push ghcr.io/timdeve/rasasa/rasasa
