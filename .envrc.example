@@ -1,0 +1,7 @@
+export DATABASE_URL=postgres://admin:admin@localhost:15432/rasasa
+export REDIS_URL=redis://localhost:16379
+export RASASA_USER=user
+export RASASA_PASS=pass
+export GATEWAY_URL=http://:8090
+export SERVER_URL=http://localhost:8091
+export READ_URL=http://localhost:8092
