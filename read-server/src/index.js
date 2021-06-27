@@ -2,8 +2,7 @@ const redis = require('redis')
 const bluebird = require('bluebird')
 const fetch = require('node-fetch')
 const { JSDOM } = require('jsdom')
-const Readability = require('readability')
-const { isProbablyReaderable } = require('readability/Readability-readerable')
+const { Readability, isProbablyReaderable } = require('readability')
 
 const transformHtml = require('./transformHtml')
 

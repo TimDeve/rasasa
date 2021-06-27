@@ -9,7 +9,7 @@
     "start": "NODE_ENV=production node src/index.js",
     "start:dev": "nodemon src/index.js",
     "lint": "npm run lint:prettier",
-    "lint:prettier": "prettier src/**/*.{ts,tsx,js,jsx,json} --write",
+    "lint:prettier": "prettier 'src/**/*.{ts,tsx,js,jsx,json}' --write",
     "test": "jest",
     "test:watch": "jest --watch"
   },
@@ -30,7 +30,7 @@
     "jsdom": "^16.5.3",
     "node-fetch": "^2.6.1",
     "pino-pretty": "^4.7.1",
-    "readability": "git+https://github.com/TimDeve/readability.git#b2f3a43f9f8b1eb41717731cc23a925efc693ab3",
+    "readability": "git+https://github.com/TimDeve/readability.git#28843b6de84447dd6cef04058fda336938e628dc",
     "redis": "^3.1.2",
     "sanitize-html": "^2.3.3"
   },
