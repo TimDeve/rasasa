@@ -38,20 +38,14 @@ export async function fetchStories(
     let stories
 
     if (options.listId) {
-      const list = await feedsDb.feedLists
-        .where('id')
-        .equals(Number(options.listId))
-        .first()
+      const list = await feedsDb.feedLists.where('id').equals(Number(options.listId)).first()
 
       stories = await storiesDb.stories
         .where('feedId')
         .anyOf(list ? list.feedIds : [])
         .toArray()
     } else {
-      stories = await storiesDb.stories
-        .orderBy('id')
-        .reverse()
-        .toArray()
+      stories = await storiesDb.stories.orderBy('id').reverse().toArray()
     }
 
     dispatch(setAllStories(stories))
@@ -61,10 +55,7 @@ export async function fetchStories(
 
 export async function setStoryToRead(dispatch: StoriesDispatch, storyId: number) {
   try {
-    await storiesDb.stories
-      .where('id')
-      .equals(storyId)
-      .modify({ isRead: true })
+    await storiesDb.stories.where('id').equals(storyId).modify({ isRead: true })
   } catch (e) {
     console.error('Failed to cache read status of story', e)
   }
@@ -139,7 +130,7 @@ export async function cacheStoriesAndArticles(stories: Story[]) {
     })
   } else {
     for (const story of stories) {
-      const fetchStory = async function() {
+      const fetchStory = async function () {
         const res = await fetch('/api/v0/read?' + queryString.stringify({ page: story.url }))
 
         const json = await res.json()

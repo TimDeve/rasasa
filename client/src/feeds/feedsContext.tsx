@@ -40,10 +40,7 @@ export function FeedsProvider({ children }: { children?: ReactNode }) {
       }
     } catch (e) {
       console.log('Network failed serving cached lists')
-      const lists = await db.feedLists
-        .orderBy('id')
-        .reverse()
-        .toArray()
+      const lists = await db.feedLists.orderBy('id').reverse().toArray()
 
       setFeedLists(lists.reduce((acc: FeedLists, list: FeedList) => ({ ...acc, [list.id]: list }), {}))
     }
@@ -64,10 +61,7 @@ export function FeedsProvider({ children }: { children?: ReactNode }) {
       }
     } catch (e) {
       console.log('Network failed serving cached feeds')
-      const feeds = await db.feeds
-        .orderBy('id')
-        .reverse()
-        .toArray()
+      const feeds = await db.feeds.orderBy('id').reverse().toArray()
 
       setFeeds(feeds.reduce((acc: Feeds, feed: Feed) => ({ ...acc, [feed.id]: feed }), {}))
     }

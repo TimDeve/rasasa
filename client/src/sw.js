@@ -30,7 +30,7 @@ async function retrieveAndStoreArticles(event) {
 
   if (bgFetch.id.includes('articles-fetch')) {
     event.waitUntil(
-      (async function() {
+      (async function () {
         const articleRequests = await bgFetch.matchAll()
 
         const articleResponses = articleRequests.map(async articleRequest => {

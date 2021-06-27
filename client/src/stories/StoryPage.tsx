@@ -1,15 +1,16 @@
-import React, { useState, useEffect, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode, useLayoutEffect, useRef } from 'react'
 import queryString from 'query-string'
 import { Link } from 'react-router-dom'
 import { RouteComponentProps } from 'react-router-dom'
 import ScrollLock, { TouchScrollable } from 'react-scrolllock'
 import { Helmet } from 'react-helmet'
+import hl from 'highlight.js'
+import 'highlight.js/styles/github-dark.css'
 
 import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
 import { Article, Story } from './storiesModel'
 import db from './StoriesDb'
-
 interface StoryPageProps extends RouteComponentProps<{ storyId: string }> {}
 
 function fetchArticle(page: string): Article | null {
@@ -103,6 +104,12 @@ function StoryPage(props: StoryPageProps) {
   const story = fetchStory(id)
 
   const article = fetchArticle(story ? story.url : '')
+
+  useEffect(() => {
+    window.requestAnimationFrame(function () {
+      hl.highlightAll()
+    })
+  }, [article?.content])
 
   if (!story || !article) {
     return <Wrapper />
