@@ -1,6 +1,7 @@
 const redis = require('redis')
 const bluebird = require('bluebird')
 const fetch = require('node-fetch')
+const createError = require('http-errors');
 const { JSDOM } = require('jsdom')
 const { Readability, isProbablyReaderable } = require('readability')
 
@@ -25,6 +26,15 @@ function cacheResponse(pageUrl, response) {
   redisClient.set(prefixPageCaching(pageUrl), JSON.stringify(response), 'EX', 60 * 60 * 24)
 }
 
+function isValidContentType(contentType) {
+  if (!contentType) {
+    return false
+  }
+
+  return contentType.includes('text/html') ||
+         contentType.includes('text/plain')
+}
+
 fastify.get('/v0/read', async (request, reply) => {
   const { page } = request.query
 
@@ -40,9 +50,19 @@ fastify.get('/v0/read', async (request, reply) => {
   }
 
   const res = await fetch(page)
+  if (!res.ok) {
+    return new createError.BadGateway()
+  }
+
+  const contentType = res.headers.get('content-type');
+  if (!isValidContentType(contentType)) {
+    reply.type('application/json').code(200)
+    const payload = { readable: false, url: page }
+    cacheResponse(page, payload)
+    return payload
+  }
 
   const text = await res.text()
-
   const doc = new JSDOM(text, {
     page,
   })

@@ -27,9 +27,10 @@
   "dependencies": {
     "bluebird": "^3.7.2",
     "fastify": "^3.15.1",
+    "http-errors": "^1.8.0",
     "jsdom": "^16.5.3",
     "node-fetch": "^2.6.1",
-    "pino-pretty": "^4.7.1",
+    "pino-pretty": "^4.8.0",
     "readability": "git+https://github.com/TimDeve/readability.git#28843b6de84447dd6cef04058fda336938e628dc",
     "redis": "^3.1.2",
     "sanitize-html": "^2.3.3"
