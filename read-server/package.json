@@ -29,7 +29,7 @@
     "fastify": "^3.18.0",
     "http-errors": "^1.8.0",
     "jsdom": "^16.6.0",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.1.1",
     "pino-pretty": "^5.1.0",
     "readability": "git+https://github.com/TimDeve/readability.git#28843b6de84447dd6cef04058fda336938e628dc",
     "redis": "^3.1.2",
