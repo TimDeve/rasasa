@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react'
-import { RouteComponentProps } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 import cn from 'classnames'
 
@@ -22,11 +22,13 @@ import { FeedsContext } from 'feeds/feedsContext'
 
 const nonBreakinSpaceChar = '\u00a0'
 
-export default function StoriesPage(props: RouteComponentProps<{ storyId: string; listId: string }>) {
+export default function StoriesPage() {
   const [{ stories, loading }, dispatch] = useStories()
   const { feedLists } = useContext(FeedsContext)
+  const location = useLocation()
+  const params = useParams()
 
-  const listId = props?.match?.params?.listId
+  const listId = params?.listId
   const title = listId ? feedLists?.[parseInt(listId)]?.name ?? nonBreakinSpaceChar : 'All stories'
 
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function StoriesPage(props: RouteComponentProps<{ storyId: string
       <Helmet>
         <title>Rasasa - {title}</title>
       </Helmet>
-      {props.location.pathname.indexOf('/stories/') !== -1 && <StoryPage {...props} />}
+      {location.pathname.indexOf('/stories/') !== -1 && <StoryPage />}
       <div className={s.component}>
         <Title onClick={() => fetchStories(dispatch, { refresh: true })}>{title}</Title>
         <div>

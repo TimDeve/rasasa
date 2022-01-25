@@ -2,7 +2,7 @@ import './hotReloaderConfig'
 
 import React from 'react'
 import { hot } from 'react-hot-loader/root'
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom'
 
 import FeedsPage from 'feeds/FeedsPage'
 import ListsPage from 'feeds/ListsPage'
@@ -25,14 +25,15 @@ function App() {
         <Router>
           <>
             <Nav />
-            <Switch>
-              <Route exact path="/login" component={LoginPage} />
-              <Route exact path="/" component={StoriesPage} />
-              <Route path="(/stories/:storyId|/lists/:listId)" component={StoriesPage} />
-              <Route exact path="/feeds" component={FeedsPage} />
-              <Route exact path="/lists" component={ListsPage} />
-              <Redirect to="/" />
-            </Switch>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/" element={<StoriesPage />} />
+              <Route path="/lists/:listId/*" element={<StoriesPage />} />
+              <Route path="/stories/:storyId/*" element={<StoriesPage />} />
+              <Route path="/feeds" element={<FeedsPage />} />
+              <Route path="/lists" element={<ListsPage />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
           </>
         </Router>
       </div>

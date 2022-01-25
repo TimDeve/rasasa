@@ -1,7 +1,6 @@
 import React, { useState, useEffect, ReactNode, useLayoutEffect, useRef } from 'react'
 import queryString from 'query-string'
-import { Link } from 'react-router-dom'
-import { RouteComponentProps } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import ScrollLock, { TouchScrollable } from 'react-scrolllock'
 import { Helmet } from 'react-helmet'
 import hl from 'highlight.js'
@@ -11,7 +10,6 @@ import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
 import { Article, Story } from './storiesModel'
 import db from './StoriesDb'
-interface StoryPageProps extends RouteComponentProps<{ storyId: string }> {}
 
 function fetchArticle(page: string): Article | null {
   const [article, setArticle] = useState<Article | null>(null)
@@ -98,8 +96,9 @@ function Wrapper({ title, children }: { title?: string; children?: ReactNode }) 
   )
 }
 
-function StoryPage(props: StoryPageProps) {
-  const id = props.match.params.storyId || ''
+function StoryPage() {
+  const params = useParams()
+  const id = params.storyId || ''
 
   const story = fetchStory(id)
 
