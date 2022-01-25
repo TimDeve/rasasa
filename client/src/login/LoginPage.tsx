@@ -32,7 +32,7 @@ function LoginPage() {
           <br />
           <TextInput type="password" name="password" placeholder="Password" />
           <br />
-          <Button>Add</Button>
+          <Button>Login</Button>
         </form>
       </div>
     </div>
