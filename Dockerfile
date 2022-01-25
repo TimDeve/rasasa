@@ -35,7 +35,7 @@ RUN NODE_ENV=production ./run client:build
 #
 # RUST BUILDER
 #
-FROM rust:1.44-slim-buster as rust-builder
+FROM rust:1.57-slim-buster as rust-builder
 LABEL builder=true
 
 RUN mkdir -p /root/app
