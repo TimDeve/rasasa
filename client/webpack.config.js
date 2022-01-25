@@ -4,7 +4,7 @@ const CopyPlugin = require('copy-webpack-plugin')
 const webpack = require('webpack')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { HotModuleReplacementFilterPlugin } = require('hmr-filter-webpack-plugin')
-const ManifestPlugin = require('webpack-manifest-plugin')
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const { v4: uuidv4 } = require('uuid')
 
 const isDev = process.env.NODE_ENV !== 'production'
@@ -90,13 +90,12 @@ module.exports = {
       const { name } = compilation.compiler
       return name && name.includes('worker')
     }),
-    new webpack.HotModuleReplacementPlugin(),
     new CopyPlugin({ patterns: [{ from: 'static' }] }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
       chunkFilename: '[id].css',
     }),
-    new ManifestPlugin({
+    new WebpackManifestPlugin({
       fileName: 'assets-manifest.js',
       serialize(obj) {
         return `
