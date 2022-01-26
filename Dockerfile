@@ -74,6 +74,7 @@ ADD ./read-server ./read-server
 WORKDIR ./read-server
 RUN npm ci
 WORKDIR /root/app
+ADD ./Procfile
 COPY --from=node-builder /root/app/client/dist ./public
 COPY --from=rust-builder /root/app/server/target/release/rasasa-server .
 COPY --from=golang-builder /root/app/gateway/rasasa-gateway .
