@@ -42,7 +42,7 @@ export default function StoriesPage() {
       </Helmet>
       {location.pathname.indexOf('/stories/') !== -1 && <StoryPage />}
       <div className={s.component}>
-        <Title onClick={() => fetchStories(dispatch, { refresh: true })}>{title}</Title>
+        <Title onClick={() => fetchStories(dispatch, { refresh: true, listId })}>{title}</Title>
         <div>
           <Button className={s.button} onClick={() => setStoriesToRead(stories, dispatch)}>
             Mark all as read
