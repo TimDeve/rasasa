@@ -14,6 +14,11 @@ async function login(loginData: object) {
     },
     body: JSON.stringify(loginData),
   })
+
+  if (res.ok) {
+    // Very hacky/lazy way of ensuring all feeds/lists are loaded properly
+    location.pathname = "/" // Reloads the page...
+  }
 }
 
 function LoginPage() {
