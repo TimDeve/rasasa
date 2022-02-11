@@ -12,6 +12,10 @@
     "lint:prettier": "prettier 'src/**/*.{ts,tsx,js,jsx,json,scss,css}' --write",
     "lint:ts": "tsc"
   },
+  "engines": {
+    "node": ">=16",
+    "pnpm": ">=3"
+  },
   "babel": {
     "presets": [
       "@babel/react",

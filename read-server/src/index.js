@@ -1,7 +1,7 @@
 const redis = require('redis')
 const bluebird = require('bluebird')
 const fetch = require('node-fetch')
-const createError = require('http-errors');
+const createError = require('http-errors')
 const { JSDOM } = require('jsdom')
 const { Readability, isProbablyReaderable } = require('readability')
 
@@ -31,8 +31,7 @@ function isValidContentType(contentType) {
     return false
   }
 
-  return contentType.includes('text/html') ||
-         contentType.includes('text/plain')
+  return contentType.includes('text/html') || contentType.includes('text/plain')
 }
 
 fastify.get('/v0/read', async (request, reply) => {
@@ -54,7 +53,7 @@ fastify.get('/v0/read', async (request, reply) => {
     return new createError.BadGateway()
   }
 
-  const contentType = res.headers.get('content-type');
+  const contentType = res.headers.get('content-type')
   if (!isValidContentType(contentType)) {
     reply.type('application/json').code(200)
     const payload = { readable: false, url: page }

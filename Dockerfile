@@ -26,11 +26,13 @@ RUN apt-get update \
 RUN mkdir -p /root/app
 WORKDIR /root/app
 
-ADD run .
-ADD ./scripts ./scripts
+RUN npm install --global pnpm
+
 ADD ./client ./client
-RUN ./run client:install:ci
-RUN NODE_ENV=production ./run client:build
+WORKDIR /root/app/client
+RUN pnpm install --frozen-lockfile
+RUN pnpm run lint
+RUN NODE_ENV=production pnpm run build
 
 #
 # RUST BUILDER
@@ -53,9 +55,6 @@ RUN apt-get update && \
       xutils-dev \
       ca-certificates
 
-ADD run .
-ADD ./scripts ./scripts
-
 ADD ./server ./server
 WORKDIR ./server
 RUN cargo build --release
@@ -67,12 +66,13 @@ FROM node:16-buster-slim as runner
 RUN apt-get update \
  && apt-get install -y git libpq5 \
  && rm -rf /var/lib/apt/lists/*
-RUN npm install -g concurrently
+RUN npm install --global pnpm
+RUN pnpm install --global concurrently
 RUN mkdir /root/app
 WORKDIR /root/app
 ADD ./read-server ./read-server
 WORKDIR ./read-server
-RUN npm ci
+RUN pnpm install --frozen-lockfile
 WORKDIR /root/app
 # ADD ./Procfile .
 COPY --from=node-builder /root/app/client/dist ./public
@@ -84,5 +84,5 @@ ENV SERVER_URL http://localhost:8091
 ENV READ_URL http://localhost:8092
 
 EXPOSE 8090
-CMD concurrently -n 'Gateway,Server,Read' -c 'yellow,cyan,magenta' --kill-others './rasasa-gateway' './rasasa-server' '(cd read-server && npm start)'
+CMD concurrently -n 'Gateway,Server,Read' -c 'yellow,cyan,magenta' --kill-others './rasasa-gateway' './rasasa-server' '(cd read-server && pnpm start)'
 
