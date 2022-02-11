@@ -56,8 +56,13 @@ RUN apt-get update && \
       xutils-dev \
       ca-certificates
 
-ADD ./server ./server
+RUN cargo new --bin server --name rasasa-server
 WORKDIR ./server
+ADD ./server/Cargo.lock ./server/Cargo.toml ./
+RUN cargo build --release
+
+ADD ./server .
+RUN rm ./target/release/deps/rasasa_server*
 RUN cargo build --release
 
 #

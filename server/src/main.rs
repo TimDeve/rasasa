@@ -19,9 +19,10 @@ mod scheduler;
 pub mod schema;
 pub mod stories;
 
-use actix_web::{middleware, App, HttpServer};
+use actix_web::{App, HttpServer, middleware};
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
+use reqwest::Url;
 use scheduler::setup_scheduler;
 use std::env;
 use std::io;
@@ -32,6 +33,12 @@ embed_migrations!("migrations");
 async fn main() -> io::Result<()> {
     std::env::set_var("RUST_LOG", "info,rasasa_server=info,actix_web=debug");
     env_logger::init();
+
+    let server_addr = {
+        let env = env::var("SERVER_URL").expect("SERVER_URL env_var must be set");
+        let url = Url::parse(&env).expect("Couldn't not parse SERVER_URL");
+        url.socket_addrs(|| None).expect("Could not get address out of SERVER_URL")
+    };
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env_var must be set");
     let manager = ConnectionManager::<PgConnection>::new(database_url);
@@ -50,7 +57,7 @@ async fn main() -> io::Result<()> {
             .configure(feeds::handlers::config)
             .configure(lists::handlers::config)
     })
-    .bind("127.0.0.1:8091")?
+    .bind(&*server_addr)?
     .run()
     .await
 }

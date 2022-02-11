@@ -1,20 +1,47 @@
 version: "3.8"
 
 services:
-  app:
+  gateway:
     build: .
     ports: ["8099:8090"]
     profiles: ["local"]
+    command: "./rasasa-gateway"
     environment:
      - RASASA_USER=user
      - RASASA_PASS=pass
-     - DATABASE_URL=postgres://admin:admin@db:5432/rasasa
      - REDIS_URL=redis://redis:6379
+     - SERVER_URL=http://server:8091
+     - READ_URL=http://read-server:8092
     links:
-      - db
+      - server
+      - read-server
       - redis
     depends_on:
+      - server
+      - read-server
+      - redis
+  server:
+    build: .
+    profiles: ["local"]
+    command: "./rasasa-server"
+    environment:
+     - SERVER_URL=http://0.0.0.0:8091
+     - DATABASE_URL=postgres://admin:admin@db:5432/rasasa
+    links:
       - db
+    depends_on:
+      - db
+  read-server:
+    build: .
+    profiles: ["local"]
+    command: "pnpm start"
+    working_dir: "/root/app/read-server"
+    environment:
+     - READ_URL=http://0.0.0.0:8092
+     - REDIS_URL=redis://redis:6379
+    links:
+      - redis
+    depends_on:
       - redis
   db:
     image: postgres
