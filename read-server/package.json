@@ -5,10 +5,10 @@
   "main": "src/index.js",
   "author": "Timothee Deve",
   "scripts": {
-    "precommit": "npm run lint",
-    "start": "NODE_ENV=production node src/index.js",
+    "precommit": "pnpm run lint",
+    "start": "NODE_ENV=production pnpm node src/index.js",
     "start:dev": "nodemon src/index.js",
-    "lint": "npm run lint:prettier",
+    "lint": "pnpm run lint:prettier",
     "lint:prettier": "prettier 'src/**/*.{ts,tsx,js,jsx,json}' --write",
     "test": "jest",
     "test:watch": "jest --watch"

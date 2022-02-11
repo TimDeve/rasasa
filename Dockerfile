@@ -23,14 +23,15 @@ RUN apt-get update \
  && apt-get install -y python build-essential \
  && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir -p /root/app
-WORKDIR /root/app
-
 RUN npm install --global pnpm
 
-ADD ./client ./client
+RUN mkdir -p /root/app/client
 WORKDIR /root/app/client
+
+ADD client/.npmrc client/package.json client/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
+
+ADD client .
 RUN pnpm run lint
 RUN NODE_ENV=production pnpm run build
 
@@ -68,12 +69,16 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 RUN npm install --global pnpm
 RUN pnpm install --global concurrently
-RUN mkdir /root/app
+
+RUN mkdir -p /root/app/read-server
+WORKDIR /root/app/read-server
+
+ADD read-server/.npmrc read-server/package.json read-server/pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --prod
+
+ADD ./read-server .
 WORKDIR /root/app
-ADD ./read-server ./read-server
-WORKDIR ./read-server
-RUN pnpm install --frozen-lockfile
-WORKDIR /root/app
+
 # ADD ./Procfile .
 COPY --from=node-builder /root/app/client/dist ./public
 COPY --from=rust-builder /root/app/server/target/release/rasasa-server .
