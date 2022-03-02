@@ -41,7 +41,7 @@ fn get_lists(pool: web::Data<DbPool>) -> Result<Vec<ListWithFeedIds>, diesel::re
 }
 
 async fn get_lists_handler(pool: web::Data<DbPool>) -> Result<HttpResponse, Error> {
-    let res = web::block(move || get_lists(pool)).await;
+    let res = web::block(move || get_lists(pool)).await?;
 
     match res {
         Ok(lists) => Ok(HttpResponse::Ok().json(ListsResponse { lists })),

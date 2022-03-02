@@ -88,7 +88,7 @@ async fn get_stories_handler(
     query: web::Query<GetStoriesQueryString>,
     pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    let res = web::block(move || get_stories(query, pool)).await;
+    let res = web::block(move || get_stories(query, pool)).await?;
 
     match res {
         Ok(stories) => Ok(HttpResponse::Ok().json(StoriesResponse { stories })),
@@ -108,7 +108,7 @@ async fn get_story_handler(
     story_id: web::Path<i32>,
     pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    let res = web::block(move || get_story(story_id.into_inner(), pool)).await;
+    let res = web::block(move || get_story(story_id.into_inner(), pool)).await?;
 
     match res {
         Ok(story) => Ok(HttpResponse::Ok().json(story)),
@@ -136,7 +136,7 @@ async fn patch_stories_handler(
     web::Json(body): web::Json<PatchStoriesBody>,
     pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    let res = web::block(move || patch_stories(body, pool)).await;
+    let res = web::block(move || patch_stories(body, pool)).await?;
 
     match res {
         Ok(stories) => Ok(HttpResponse::Ok().json(StoriesResponse { stories })),
@@ -166,7 +166,7 @@ async fn patch_story_handler(
     web::Json(body): web::Json<PatchStoryBody>,
     pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    let res = web::block(move || patch_story(story_id.into_inner(), body.is_read, pool)).await;
+    let res = web::block(move || patch_story(story_id.into_inner(), body.is_read, pool)).await?;
 
     match res {
         Ok(story) => Ok(HttpResponse::Ok().json(story)),

@@ -19,7 +19,8 @@ mod scheduler;
 pub mod schema;
 pub mod stories;
 
-use actix_web::{App, HttpServer, middleware};
+use actix_web::web::Data;
+use actix_web::{middleware, App, HttpServer};
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::PgConnection;
 use reqwest::Url;
@@ -37,7 +38,8 @@ async fn main() -> io::Result<()> {
     let server_addr = {
         let env = env::var("SERVER_URL").expect("SERVER_URL env_var must be set");
         let url = Url::parse(&env).expect("Couldn't not parse SERVER_URL");
-        url.socket_addrs(|| None).expect("Could not get address out of SERVER_URL")
+        url.socket_addrs(|| None)
+            .expect("Could not get address out of SERVER_URL")
     };
 
     let database_url = env::var("DATABASE_URL").expect("DATABASE_URL env_var must be set");
@@ -51,7 +53,7 @@ async fn main() -> io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
-            .data(pool.clone())
+            .app_data(Data::new(pool.clone()))
             .wrap(middleware::Logger::default())
             .configure(stories::handlers::config)
             .configure(feeds::handlers::config)

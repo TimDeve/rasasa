@@ -20,7 +20,7 @@ fn get_feeds(pool: web::Data<DbPool>) -> Result<Vec<Feed>, diesel::result::Error
 }
 
 async fn get_feeds_handler(pool: web::Data<DbPool>) -> Result<HttpResponse, Error> {
-    let res = web::block(move || get_feeds(pool)).await;
+    let res = web::block(move || get_feeds(pool)).await?;
 
     match res {
         Ok(feeds) => Ok(HttpResponse::Ok().json(FeedsResponse { feeds })),
@@ -43,8 +43,8 @@ fn create_feed(body: NewFeed, pool: web::Data<DbPool>) -> Result<(), diesel::res
 async fn create_feed_handler(
     web::Json(body): web::Json<NewFeed>,
     pool: web::Data<DbPool>,
-) -> Result<HttpResponse,Error> {
-    let res = web::block(move || create_feed(body, pool)).await;
+) -> Result<HttpResponse, Error> {
+    let res = web::block(move || create_feed(body, pool)).await?;
 
     match res {
         Ok(_) => Ok(HttpResponse::Created().body("")),
@@ -66,7 +66,7 @@ async fn delete_feed_handler(
     list_id: web::Path<i32>,
     pool: web::Data<DbPool>,
 ) -> Result<HttpResponse, Error> {
-    let res = web::block(move || delete_feed(list_id.into_inner(), pool)).await;
+    let res = web::block(move || delete_feed(list_id.into_inner(), pool)).await?;
 
     match res {
         Ok(_) => Ok(HttpResponse::NoContent().body("")),
