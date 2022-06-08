@@ -23,7 +23,10 @@ RUN apt-get update \
  && apt-get install -y python build-essential \
  && rm -rf /var/lib/apt/lists/*
 
-RUN npm install --global pnpm
+RUN npm install --location=global pnpm
+ENV PNPM_HOME="/usr/local/share/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN pnpm setup
 
 RUN mkdir -p /root/app/client
 WORKDIR /root/app/client
@@ -72,7 +75,12 @@ FROM node:16-bullseye-slim as runner
 RUN apt-get update \
  && apt-get install -y git libpq5 \
  && rm -rf /var/lib/apt/lists/*
-RUN npm install --global pnpm
+
+RUN npm install --location=global pnpm
+ENV PNPM_HOME="/usr/local/share/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN pnpm setup
+
 RUN pnpm install --global concurrently
 
 RUN mkdir -p /root/app/read-server
