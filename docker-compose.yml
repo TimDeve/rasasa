@@ -35,7 +35,7 @@ services:
     build: .
     profiles: ["local"]
     command: "pnpm start"
-    working_dir: "/root/app/read-server"
+    working_dir: "/home/runner/app/read-server"
     environment:
      - READ_URL=http://0.0.0.0:8092
      - REDIS_URL=redis://redis:6379

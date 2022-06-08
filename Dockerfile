@@ -72,25 +72,30 @@ RUN cargo build --release
 # RUNNER
 #
 FROM node:16-bullseye-slim as runner
+
 RUN apt-get update \
  && apt-get install -y git libpq5 \
  && rm -rf /var/lib/apt/lists/*
 
 RUN npm install --location=global pnpm
-ENV PNPM_HOME="/usr/local/share/pnpm"
+
+RUN groupadd -r runner && useradd -m -r -g runner runner
+USER runner
+
+ENV PNPM_HOME="/home/runner/.local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN pnpm setup
 
 RUN pnpm install --global concurrently
 
-RUN mkdir -p /root/app/read-server
-WORKDIR /root/app/read-server
+RUN mkdir -p /home/runner/app/read-server
+WORKDIR /home/runner/app/read-server
 
 ADD read-server/.npmrc read-server/package.json read-server/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod
 
 ADD ./read-server .
-WORKDIR /root/app
+WORKDIR /home/runner/app
 
 # ADD ./Procfile .
 COPY --from=node-builder /root/app/client/dist ./public
