@@ -26,7 +26,7 @@ RUN apt-get update \
 RUN npm install --location=global pnpm
 ENV PNPM_HOME="/usr/local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN pnpm setup
+RUN bash -c "SHELL=/bin/bash pnpm setup" # Setups pnpm with bash because it really wants to be in add random stuff to .bashrc
 
 RUN mkdir -p /root/app/client
 WORKDIR /root/app/client
@@ -84,7 +84,7 @@ USER runner
 
 ENV PNPM_HOME="/home/runner/.local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN pnpm setup
+RUN bash -c "SHELL=/bin/bash pnpm setup" # Setups pnpm with bash because it really wants to be in add random stuff to .bashrc
 
 RUN pnpm install --global concurrently
 
