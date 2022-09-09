@@ -8,7 +8,7 @@ use diesel::r2d2::{ConnectionManager, Pool};
 
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
-use crate::helpers::fetch_stories;
+use crate::helpers::fetch_this_week_stories;
 use crate::lists::models::*;
 use crate::stories::models::*;
 
@@ -51,7 +51,7 @@ fn get_stories(
 
         let stories_list: Vec<NewStory> = feeds_list
             .iter()
-            .flat_map(|feed| fetch_stories(&feed.url, feed.id).unwrap())
+            .flat_map(|feed| fetch_this_week_stories(&feed.url, feed.id).unwrap())
             .collect();
 
         insert_into(stories)

@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
-use crate::helpers::fetch_stories;
+use crate::helpers::fetch_this_week_stories;
 use crate::stories::models::*;
 
 type PgPool = Pool<ConnectionManager<PgConnection>>;
@@ -14,18 +14,20 @@ type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 pub fn setup_scheduler(pool: PgPool) -> clokwerk::ScheduleHandle {
     use clokwerk::{Scheduler, TimeUnits};
 
+    run_startup_jobs(pool.clone());
+
     let mut scheduler = Scheduler::new();
 
-    // {
-    //     let pool = Box::new(pool.clone());
-    //     scheduler
-    //         .every(1.day())
-    //         .at("3:00 am")
-    //         .run(move || match pool.get() {
-    //             Ok(db_conn) => delete_old_stories(db_conn),
-    //             Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
-    //         });
-    // }
+    {
+        let pool = Box::new(pool.clone());
+        scheduler
+            .every(1.day())
+            .at("3:00 am")
+            .run(move || match pool.get() {
+                Ok(db_conn) => delete_old_stories(db_conn),
+                Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
+            });
+    }
 
     {
         let pool = Box::new(pool.clone());
@@ -38,24 +40,24 @@ pub fn setup_scheduler(pool: PgPool) -> clokwerk::ScheduleHandle {
     scheduler.watch_thread(Duration::from_millis(1000))
 }
 
-// pub fn run_startup_jobs(pool: PgPool) {
-//     match pool.get() {
-//         Ok(db_conn) => delete_old_stories(db_conn),
-//         Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
-//     }
-// }
+fn run_startup_jobs(pool: PgPool) {
+    match pool.get() {
+        Ok(db_conn) => delete_old_stories(db_conn),
+        Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
+    }
+}
 
-// pub fn delete_old_stories(conn: PgPooledConnection) {
-//     use crate::schema::stories::dsl::*;
-//     use diesel::dsl::{now, IntervalDsl};
-//
-//     let result = diesel::delete(stories.filter(created_at.lt(now - 7_i32.days()))).execute(&conn);
-//
-//     match result {
-//         Ok(n) => info!("Number of old stories deleted: {}", n),
-//         Err(e) => error!("Failed to delete old stories.\n{:?}", e),
-//     }
-// }
+pub fn delete_old_stories(conn: PgPooledConnection) {
+    use crate::schema::stories::dsl::*;
+    use diesel::dsl::{now, IntervalDsl};
+
+    let result = diesel::delete(stories.filter(created_at.lt(now - 14_i32.days()))).execute(&conn);
+
+    match result {
+        Ok(n) => info!("Number of old stories deleted: {}", n),
+        Err(e) => error!("Failed to delete old stories.\n{:?}", e),
+    }
+}
 
 pub fn fetch_new_stories(conn: PgPooledConnection) {
     use crate::schema::feeds::dsl::*;
@@ -68,7 +70,7 @@ pub fn fetch_new_stories(conn: PgPooledConnection) {
         Ok(loaded_feeds) => {
             let stories_list: Vec<NewStory> = loaded_feeds
                 .iter()
-                .flat_map(|feed| fetch_stories(&feed.url, feed.id).unwrap_or(vec![]))
+                .flat_map(|feed| fetch_this_week_stories(&feed.url, feed.id).unwrap_or(vec![]))
                 .collect();
 
             let db_result = insert_into(stories)

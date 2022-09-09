@@ -1,5 +1,5 @@
 use atom_syndication::Feed;
-use chrono::DateTime;
+use chrono::{DateTime, Duration, Utc};
 use reqwest::blocking::get;
 use rss::Channel;
 
@@ -12,10 +12,7 @@ pub enum FeedType {
     None,
 }
 
-pub fn fetch_stories(
-    url: &String,
-    feed_id: i32,
-) -> Result<Vec<NewStory>, Box<dyn std::error::Error>> {
+fn fetch_stories(url: &str, feed_id: i32) -> Result<Vec<NewStory>, Box<dyn std::error::Error>> {
     let content = get(url)?.text()?;
 
     let feed = extract_feed(content);
@@ -25,6 +22,20 @@ pub fn fetch_stories(
         FeedType::Atom(f) => Ok(marshal_atom_feed_into_stories(f, feed_id)),
         FeedType::None => Ok(vec![]),
     };
+}
+
+pub fn fetch_this_week_stories(
+    url: &str,
+    feed_id: i32,
+) -> Result<Vec<NewStory>, Box<dyn std::error::Error>> {
+    let seven_days_ago: DateTime<chrono::Utc> = Utc::now() - Duration::days(7);
+
+    fetch_stories(url, feed_id).map(|stories| {
+        stories
+            .into_iter()
+            .filter(|s| s.published_date >= seven_days_ago)
+            .collect()
+    })
 }
 
 pub fn extract_feed(s: String) -> FeedType {
