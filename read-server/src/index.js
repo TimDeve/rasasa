@@ -35,22 +35,43 @@ function isValidContentType(contentType) {
 }
 
 fastify.get('/v0/read', async (request, reply) => {
-  const { page } = request.query
+  const { page, skipCache } = request.query
 
   if (!page) {
     reply.code(400)
     return '"page" query parameter is missing'
   }
 
-  const cachedPage = await redisClient.getAsync(prefixPageCaching(page))
-  if (cachedPage) {
-    reply.type('application/json').code(200)
-    return JSON.parse(cachedPage)
+  if (!skipCache) {
+    const cachedPage = await redisClient.getAsync(prefixPageCaching(page))
+    if (cachedPage) {
+      reply.type('application/json').code(200)
+      return JSON.parse(cachedPage)
+    }
   }
 
-  const res = await fetch(page)
+  const res = await fetch(page, {
+    headers: {
+      // Pretend to be a browser
+      Accept: 'text/html,application/xhtml+xml',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:105.0) Gecko/20100101 Firefox/105.0',
+    },
+  })
   if (!res.ok) {
-    return new createError.BadGateway()
+    let body = null
+    try {
+      body = await res.text()
+    } catch (_) {}
+
+    request.log
+      .child({
+        status: res.status,
+        statusText: res.statusText,
+        headers: res.headers,
+        body: body,
+      })
+      .error('Remote fetch has failed')
+    return new createError.BadGateway(`Remote response status was: ${res.status}`)
   }
 
   const contentType = res.headers.get('content-type')
