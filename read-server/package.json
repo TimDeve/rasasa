@@ -28,7 +28,7 @@
     "bluebird": "^3.7.2",
     "fastify": "^3.18.0",
     "http-errors": "^1.8.0",
-    "jsdom": "^16.6.0",
+    "linkedom": "~0.14.16",
     "node-fetch": "^2.6.1",
     "pino-pretty": "^5.1.0",
     "readability": "git+https://github.com/TimDeve/readability.git#28843b6de84447dd6cef04058fda336938e628dc",

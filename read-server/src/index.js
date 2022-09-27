@@ -2,7 +2,7 @@ const redis = require('redis')
 const bluebird = require('bluebird')
 const fetch = require('node-fetch')
 const createError = require('http-errors')
-const { JSDOM } = require('jsdom')
+const { parseHTML } = require('linkedom')
 const { Readability, isProbablyReaderable } = require('readability')
 
 const transformHtml = require('./transformHtml')
@@ -62,9 +62,7 @@ fastify.get('/v0/read', async (request, reply) => {
   }
 
   const text = await res.text()
-  const doc = new JSDOM(text, {
-    page,
-  })
+  const doc = parseHTML(text)
 
   const readable = isProbablyReaderable(doc.window.document)
   if (!readable) {
