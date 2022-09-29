@@ -10,6 +10,7 @@ import s from './StoryPage.scss'
 import Title from 'shared/components/Title'
 import { Article, Story } from './storiesModel'
 import db from './StoriesDb'
+import TakeFocusDiv from 'shared/TakeFocusDiv'
 
 function fetchArticle(page: string): Article | null {
   const [article, setArticle] = useState<Article | null>(null)
@@ -84,12 +85,12 @@ function Wrapper({ title, children }: { title?: string; children?: ReactNode }) 
       <ScrollLock />
       <TouchScrollable>
         <div className={s.component}>
-          <div className={s.wrapper}>
+          <TakeFocusDiv className={s.wrapper}>
             <div className={s.nav}>
               <Link to="/">Back to stories</Link>
             </div>
             {children}
-          </div>
+          </TakeFocusDiv>
         </div>
       </TouchScrollable>
     </>
