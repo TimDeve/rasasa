@@ -27,6 +27,11 @@ function EmptyIcon() {
   return <span style={{ width: '24px' }} />
 }
 
+function favicon(urlString: string) {
+  const url = new URL(urlString)
+  return `https://icons.duckduckgo.com/ip2/${url.hostname}.ico`
+}
+
 function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: StoryListItemProps) {
   const { feeds } = useContext(FeedsContext)
   const [hasContent, toggleContent] = useToggle(false)
@@ -44,6 +49,10 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: 
           to={`/stories/${id}/${encodeURI(title.replace(/\s/g, '-'))}`}
           className={cn(s.link, { [s.linkRead]: isRead })}
         >
+          <img
+            src={favicon(url)}
+            className={s.favicon}
+          />
           <span className={s.feedTitle}>{feeds[feedId] && feeds[feedId].name}</span>
           <span>{title}</span>
         </Link>
