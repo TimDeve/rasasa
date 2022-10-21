@@ -1,14 +1,16 @@
-use atom_syndication::Feed;
+use crate::diesel::prelude::*;
+use atom_syndication::Feed as AtomFeed;
 use chrono::{DateTime, Duration, Utc};
 use reqwest::blocking::get;
 use rss::Channel;
 
 use crate::stories::models::NewStory;
+use crate::PgPooledConnection;
 
 #[derive(Debug)]
 pub enum FeedType {
     Rss(Channel),
-    Atom(Feed),
+    Atom(AtomFeed),
     None,
 }
 
@@ -39,18 +41,16 @@ pub fn fetch_this_week_stories(
 }
 
 pub fn extract_feed(s: String) -> FeedType {
-    let try_rss = Channel::read_from(s.as_bytes());
-    let try_atom = Feed::read_from(s.as_bytes());
+    if let Ok(feed) = Channel::read_from(s.as_bytes()) {
+        return FeedType::Rss(feed);
+    } else if let Ok(feed) = AtomFeed::read_from(s.as_bytes()) {
+        return FeedType::Atom(feed);
+    }
 
-    return match (try_rss, try_atom) {
-        (Ok(feed), Ok(_)) => FeedType::Rss(feed),
-        (Ok(feed), Err(_)) => FeedType::Rss(feed),
-        (Err(_), Ok(feed)) => FeedType::Atom(feed),
-        (Err(_), Err(_)) => FeedType::None,
-    };
+    return FeedType::None;
 }
 
-fn marshal_atom_feed_into_stories(feed: Feed, feed_id: i32) -> Vec<NewStory> {
+fn marshal_atom_feed_into_stories(feed: AtomFeed, feed_id: i32) -> Vec<NewStory> {
     feed.entries()
         .iter()
         .map(|entry| {
@@ -88,4 +88,51 @@ fn marshal_rss_feed_into_stories(feed: Channel, feed_id: i32) -> Vec<NewStory> {
             published_date: DateTime::parse_from_rfc2822(entry.pub_date().unwrap()).unwrap(),
         })
         .collect()
+}
+
+pub fn delete_old_stories(conn: PgPooledConnection) {
+    use crate::schema::stories::dsl::*;
+    use diesel::dsl::{now, IntervalDsl};
+
+    let result = diesel::delete(stories.filter(created_at.lt(now - 14_i32.days()))).execute(&conn);
+
+    match result {
+        Ok(n) => info!("Number of old stories deleted: {}", n),
+        Err(e) => error!("Failed to delete old stories.\n{:?}", e),
+    }
+}
+
+pub fn fetch_new_stories(conn: PgPooledConnection) {
+    use diesel::insert_into;
+    use diesel::pg::upsert::*;
+
+    use crate::feeds::models::Feed;
+    use crate::schema::feeds::dsl::feeds;
+    use crate::schema::stories::dsl::*;
+
+    let results = feeds.load::<Feed>(&conn);
+
+    match results {
+        Err(e) => error!("Error loading feeds.\n{:?}", e),
+        Ok(loaded_feeds) => {
+            let stories_list: Vec<NewStory> = loaded_feeds
+                .iter()
+                .flat_map(|feed| fetch_this_week_stories(&feed.url, feed.id).unwrap_or(vec![]))
+                .collect();
+
+            let update_published_date = published_date.eq(excluded(published_date));
+
+            let db_result = insert_into(stories)
+                .values(stories_list)
+                .on_conflict(on_constraint("stories_title_url_uniq"))
+                .do_update()
+                .set(update_published_date)
+                .execute(&conn);
+
+            match db_result {
+                Ok(_) => info!("Fetched new stories"),
+                Err(e) => error!("Failed to insert new stories in DB.\n{:?}", e),
+            }
+        }
+    }
 }

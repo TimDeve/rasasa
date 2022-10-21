@@ -8,9 +8,9 @@ use diesel::r2d2::{ConnectionManager, Pool};
 
 use crate::diesel::prelude::*;
 use crate::feeds::models::*;
-use crate::helpers::fetch_this_week_stories;
 use crate::lists::models::*;
 use crate::stories::models::*;
+use crate::stories::services::fetch_this_week_stories;
 
 type DbPool = Pool<ConnectionManager<PgConnection>>;
 

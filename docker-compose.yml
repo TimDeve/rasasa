@@ -48,8 +48,8 @@ services:
     ports: ["15432:5432"]
     environment:
       - POSTGRES_DB=rasasa
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
   redis:
     image: redis
     ports: ["16379:6379"]

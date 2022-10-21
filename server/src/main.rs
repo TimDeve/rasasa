@@ -13,7 +13,6 @@ extern crate openssl;
 extern crate rss;
 
 pub mod feeds;
-pub mod helpers;
 pub mod lists;
 mod scheduler;
 pub mod schema;
@@ -21,12 +20,15 @@ pub mod stories;
 
 use actix_web::web::Data;
 use actix_web::{middleware, App, HttpServer};
-use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use diesel::PgConnection;
 use reqwest::Url;
 use scheduler::setup_scheduler;
 use std::env;
 use std::io;
+
+type PgPool = Pool<ConnectionManager<PgConnection>>;
+type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
 embed_migrations!("migrations");
 

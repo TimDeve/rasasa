@@ -1,4 +1,6 @@
-table! {
+// @generated automatically by Diesel CLI.
+
+diesel::table! {
     feed_lists (id) {
         id -> Int4,
         feed_id -> Int4,
@@ -6,7 +8,7 @@ table! {
     }
 }
 
-table! {
+diesel::table! {
     feeds (id) {
         id -> Int4,
         name -> Text,
@@ -14,14 +16,14 @@ table! {
     }
 }
 
-table! {
+diesel::table! {
     lists (id) {
         id -> Int4,
         name -> Text,
     }
 }
 
-table! {
+diesel::table! {
     stories (id) {
         id -> Int4,
         feed_id -> Int4,
@@ -34,8 +36,13 @@ table! {
     }
 }
 
-joinable!(feed_lists -> feeds (feed_id));
-joinable!(feed_lists -> lists (list_id));
-joinable!(stories -> feeds (feed_id));
+diesel::joinable!(feed_lists -> feeds (feed_id));
+diesel::joinable!(feed_lists -> lists (list_id));
+diesel::joinable!(stories -> feeds (feed_id));
 
-allow_tables_to_appear_in_same_query!(feed_lists, feeds, lists, stories,);
+diesel::allow_tables_to_appear_in_same_query!(
+    feed_lists,
+    feeds,
+    lists,
+    stories,
+);
