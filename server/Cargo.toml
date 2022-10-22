@@ -2,10 +2,11 @@
 name = "rasasa-server"
 version = "0.1.0"
 authors = ["Tim Dévé <timdeve@users.noreply.github.com>"]
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 actix-web         = "4"
+anyhow            = "1"
 atom_syndication  = "0.9"
 chrono            = { version = "0.4", features = ["serde"] }
 clokwerk          = "0.3"

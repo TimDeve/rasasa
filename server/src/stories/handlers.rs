@@ -3,14 +3,13 @@ extern crate diesel;
 extern crate rss;
 
 use actix_web::{web, Error, HttpResponse};
-use diesel::insert_into;
+use anyhow::Result;
 use diesel::r2d2::{ConnectionManager, Pool};
 
 use crate::diesel::prelude::*;
-use crate::feeds::models::*;
 use crate::lists::models::*;
 use crate::stories::models::*;
-use crate::stories::services::fetch_this_week_stories;
+use crate::stories::services::fetch_new_stories;
 
 type DbPool = Pool<ConnectionManager<PgConnection>>;
 
@@ -39,25 +38,14 @@ struct PatchStoriesBody(Vec<StoryUpdate>);
 fn get_stories(
     query: web::Query<GetStoriesQueryString>,
     pool: web::Data<DbPool>,
-) -> Result<Vec<Story>, diesel::result::Error> {
-    use crate::schema::feeds::dsl::*;
+) -> Result<Vec<Story>> {
     use crate::schema::lists::dsl::*;
     use crate::schema::stories::dsl::*;
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &pool.get()?;
 
     if query.refresh.unwrap_or(false) {
-        let feeds_list = feeds.load::<Feed>(conn).expect("Error loading feeds");
-
-        let stories_list: Vec<NewStory> = feeds_list
-            .iter()
-            .flat_map(|feed| fetch_this_week_stories(&feed.url, feed.id).unwrap())
-            .collect();
-
-        insert_into(stories)
-            .values(stories_list)
-            .on_conflict_do_nothing()
-            .execute(conn)?;
+        fetch_new_stories(conn)?
     }
 
     let mut boxed_stories = stories.into_boxed();

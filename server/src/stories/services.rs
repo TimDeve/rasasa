@@ -1,9 +1,10 @@
-use crate::diesel::prelude::*;
+use anyhow::{Context, Result};
 use atom_syndication::Feed as AtomFeed;
 use chrono::{DateTime, Duration, Utc};
 use reqwest::blocking::get;
 use rss::Channel;
 
+use crate::diesel::prelude::*;
 use crate::stories::models::NewStory;
 use crate::PgPooledConnection;
 
@@ -90,11 +91,11 @@ fn marshal_rss_feed_into_stories(feed: Channel, feed_id: i32) -> Vec<NewStory> {
         .collect()
 }
 
-pub fn delete_old_stories(conn: PgPooledConnection) {
+pub fn delete_old_stories(conn: &PgPooledConnection) {
     use crate::schema::stories::dsl::*;
     use diesel::dsl::{now, IntervalDsl};
 
-    let result = diesel::delete(stories.filter(created_at.lt(now - 14_i32.days()))).execute(&conn);
+    let result = diesel::delete(stories.filter(created_at.lt(now - 14_i32.days()))).execute(conn);
 
     match result {
         Ok(n) => info!("Number of old stories deleted: {}", n),
@@ -102,7 +103,7 @@ pub fn delete_old_stories(conn: PgPooledConnection) {
     }
 }
 
-pub fn fetch_new_stories(conn: PgPooledConnection) {
+pub fn fetch_new_stories(conn: &PgPooledConnection) -> Result<()> {
     use diesel::insert_into;
     use diesel::pg::upsert::*;
 
@@ -110,29 +111,19 @@ pub fn fetch_new_stories(conn: PgPooledConnection) {
     use crate::schema::feeds::dsl::feeds;
     use crate::schema::stories::dsl::*;
 
-    let results = feeds.load::<Feed>(&conn);
+    let loaded_feeds = feeds.load::<Feed>(conn).context("Error loading feeds")?;
 
-    match results {
-        Err(e) => error!("Error loading feeds.\n{:?}", e),
-        Ok(loaded_feeds) => {
-            let stories_list: Vec<NewStory> = loaded_feeds
-                .iter()
-                .flat_map(|feed| fetch_this_week_stories(&feed.url, feed.id).unwrap_or(vec![]))
-                .collect();
+    let stories_list: Vec<NewStory> = loaded_feeds
+        .iter()
+        .flat_map(|feed| fetch_this_week_stories(&feed.url, feed.id).unwrap_or(vec![]))
+        .collect();
 
-            let update_published_date = published_date.eq(excluded(published_date));
+    insert_into(stories)
+        .values(stories_list)
+        .on_conflict(on_constraint("stories_title_url_uniq"))
+        .do_nothing()
+        .execute(conn)
+        .context("Failed to insert new stories in DB.")?;
 
-            let db_result = insert_into(stories)
-                .values(stories_list)
-                .on_conflict(on_constraint("stories_title_url_uniq"))
-                .do_update()
-                .set(update_published_date)
-                .execute(&conn);
-
-            match db_result {
-                Ok(_) => info!("Fetched new stories"),
-                Err(e) => error!("Failed to insert new stories in DB.\n{:?}", e),
-            }
-        }
-    }
+    Ok(())
 }

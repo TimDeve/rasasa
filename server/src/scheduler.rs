@@ -16,7 +16,7 @@ pub fn setup_scheduler(pool: PgPool) -> clokwerk::ScheduleHandle {
             .every(1.day())
             .at("3:00 am")
             .run(move || match pool.get() {
-                Ok(db_conn) => delete_old_stories(db_conn),
+                Ok(db_conn) => delete_old_stories(&db_conn),
                 Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
             });
     }
@@ -24,7 +24,9 @@ pub fn setup_scheduler(pool: PgPool) -> clokwerk::ScheduleHandle {
     {
         let pool = Box::new(pool.clone());
         scheduler.every(3.minute()).run(move || match pool.get() {
-            Ok(db_conn) => fetch_new_stories(db_conn),
+            Ok(db_conn) => fetch_new_stories(&db_conn)
+                .map(|_| info!("Fetched new stories"))
+                .expect("Could not fetch new stories"),
             Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
         });
     }
@@ -34,7 +36,7 @@ pub fn setup_scheduler(pool: PgPool) -> clokwerk::ScheduleHandle {
 
 fn run_startup_jobs(pool: PgPool) {
     match pool.get() {
-        Ok(db_conn) => delete_old_stories(db_conn),
+        Ok(db_conn) => delete_old_stories(&db_conn),
         Err(e) => error!("Failed to acquire db connection.\n{:?}", e),
     }
 }
