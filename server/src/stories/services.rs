@@ -105,7 +105,6 @@ pub fn delete_old_stories(conn: &PgPooledConnection) {
 
 pub fn fetch_new_stories(conn: &PgPooledConnection) -> Result<()> {
     use diesel::insert_into;
-    use diesel::pg::upsert::*;
 
     use crate::feeds::models::Feed;
     use crate::schema::feeds::dsl::feeds;
@@ -120,8 +119,7 @@ pub fn fetch_new_stories(conn: &PgPooledConnection) -> Result<()> {
 
     insert_into(stories)
         .values(stories_list)
-        .on_conflict(on_constraint("stories_title_url_uniq"))
-        .do_nothing()
+        .on_conflict_do_nothing()
         .execute(conn)
         .context("Failed to insert new stories in DB.")?;
 
