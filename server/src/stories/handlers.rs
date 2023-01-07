@@ -139,7 +139,7 @@ fn patch_story(
 ) -> Result<Story, diesel::result::Error> {
     let story = StoryUpdate {
         id: story_id,
-        is_read: is_read,
+        is_read,
     };
 
     let conn: &PgConnection = &pool.get().unwrap();
