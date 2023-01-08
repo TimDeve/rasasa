@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/TimDeve/rasasa/rss/api"
+	"github.com/TimDeve/rasasa/rss/lists"
 	"github.com/TimDeve/rasasa/rss/messages"
 	"github.com/TimDeve/rasasa/rss/shared"
 	"github.com/TimDeve/rasasa/rss/stories"
@@ -25,6 +27,7 @@ type model struct {
 	currentPage shared.Page
 	storiesPage stories.Model
 	storyPage   story.Model
+	listsPage   lists.Model
 
 	win tea.WindowSizeMsg
 
@@ -36,8 +39,9 @@ func main() {
 	if _, err := tea.NewProgram(model{
 		storiesPage: stories.InitModel(),
 		storyPage:   story.InitModel(),
+		listsPage:   lists.InitModel(),
 	},
-		tea.WithAltScreen(),
+		//tea.WithAltScreen(),
 		tea.WithMouseCellMotion(),
 	).Run(); err != nil {
 		fmt.Printf("Uh oh, there was an error: %v\n", err)
@@ -50,29 +54,37 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
 
 	switch msg := msg.(type) {
 	case tea.WindowSizeMsg:
 		m.win = msg
 
 	case messages.ErrMsg:
-		m.failure = msg
-		return m, tea.Quit
+		m.failure = msg.Err
+		return m, tea.Batch(tea.ExitAltScreen, tea.Quit)
 
 	case messages.OpenStoryPage:
 		m.currentPage = shared.StoryPage
-
 		m.storyPage = story.Open(m.storyPage, m.win)
-
-		return m, messages.Cmd(messages.LoadStory{Story: msg.Story})
+		cmds = append(cmds, messages.Cmd(messages.LoadStory{Story: msg.Story}))
 
 	case messages.OpenStoriesPage:
 		m.currentPage = shared.StoriesPage
-		return m, nil
+		m.storiesPage = stories.Open(m.storiesPage, m.win, msg.List)
+
+	case messages.BackToStoriesPage:
+		m.currentPage = shared.StoriesPage
+
+	case messages.OpenListsPage:
+		m.currentPage = shared.ListsPage
+		m.listsPage = lists.Open(m.listsPage, m.win)
 
 	case tea.KeyMsg:
-		if msg.Type == tea.KeyCtrlC {
+		if msg.Type == tea.KeyCtrlC || msg.Type == tea.KeyRunes && msg.Runes[0] == 'q' {
 			m.exiting = true
 			return m, tea.Quit
 		}
@@ -81,14 +93,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.currentPage {
 	case shared.StoriesPage:
 		m.storiesPage, cmd = stories.Update(m.storiesPage, msg)
-		return m, cmd
+		cmds = append(cmds, cmd)
 
 	case shared.StoryPage:
 		m.storyPage, cmd = story.Update(m.storyPage, msg)
-		return m, cmd
+		cmds = append(cmds, cmd)
+
+	case shared.ListsPage:
+		m.listsPage, cmd = lists.Update(m.listsPage, msg)
+		cmds = append(cmds, cmd)
+
+	default:
+		m.failure = errors.New("Page not handled in Update")
+		return m, tea.Quit
 	}
 
-	return m, nil
+	return m, tea.Batch(cmds...)
 }
 
 func center(m model, source string) string {
@@ -103,7 +123,7 @@ func center(m model, source string) string {
 
 func (m model) View() string {
 	if m.failure != nil {
-		return fmt.Sprintf("\nUnexpected errror: %v\n\n", m.failure)
+		return fmt.Sprintf("Unexpected errror:\n%v\n", m.failure)
 	}
 
 	if m.exiting {
@@ -117,17 +137,20 @@ func (m model) View() string {
 	case shared.StoryPage:
 		return center(m, story.View(m.storyPage))
 
+	case shared.ListsPage:
+		return center(m, lists.View(m.listsPage))
+
 	default:
-		log.Fatal("Page not handled")
+		log.Fatal("Page not handled in View")
 	}
 
-	return "\n"
+	return ""
 }
 
 func login() tea.Msg {
 	err := api.Login()
 	if err != nil {
-		return messages.ErrMsg(err)
+		return messages.ErrMsg{Err: err}
 	}
 
 	return messages.LoginSuccessful{}

@@ -13,7 +13,10 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
+const topMargin = 1
+
 var (
+	pageStyle         = lipgloss.NewStyle().MarginTop(topMargin)
 	titleStyle        = lipgloss.NewStyle().MarginLeft(2).Reverse(true).Padding(0, 2)
 	itemStyle         = lipgloss.NewStyle().PaddingLeft(4)
 	selectedItemStyle = lipgloss.NewStyle().PaddingLeft(4).Foreground(lipgloss.Color("3"))
@@ -22,14 +25,19 @@ var (
 
 	extraKeybindings = []key.Binding{
 		key.NewBinding(
-			key.WithKeys("\n"),
+			key.WithKeys("ENTER"),
 			key.WithHelp("ENTER", "open story"),
+		),
+		key.NewBinding(
+			key.WithKeys("f"),
+			key.WithHelp("f", "open lists"),
 		),
 	}
 )
 
 type Model struct {
 	stories list.Model
+	list    *api.List
 	loading bool
 }
 
@@ -63,35 +71,63 @@ func (d storyItemDelegate) Render(w io.Writer, m list.Model, index int, listItem
 	fmt.Fprint(w, fn(str))
 }
 
+func listHeight(viewportHeight int) int {
+	return viewportHeight - topMargin
+}
+
 func makeList() list.Model {
-	l := list.New(nil, storyItemDelegate{}, shared.MaxWidth, 0)
+	l := list.New(nil, storyItemDelegate{}, shared.MaxWidth, 10)
 	l.Title = "Rasasa"
 	l.SetShowStatusBar(false)
 	l.SetFilteringEnabled(false)
 	l.Styles.Title = titleStyle
 	l.Styles.PaginationStyle = paginationStyle
 	l.Styles.HelpStyle = helpStyle
+	l.AdditionalFullHelpKeys = func() []key.Binding { return extraKeybindings }
+	l.AdditionalShortHelpKeys = func() []key.Binding { return extraKeybindings }
 	return l
+}
+
+func Open(m Model, win tea.WindowSizeMsg, f *api.List) Model {
+	m.stories.SetHeight(listHeight(win.Height))
+	m.stories.SetWidth(win.Width)
+	if f != nil {
+		m.stories.Title = fmt.Sprintf("Rasasa - %s", f.Name)
+	} else {
+		m.stories.Title = "Rasasa"
+	}
+	m.list = f
+
+	return m
 }
 
 func Update(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
-		m.stories.SetHeight(msg.Height - 2)
+		m.stories.SetHeight(listHeight(msg.Height))
 		m.stories.SetWidth(shared.Min(msg.Width, shared.MaxWidth))
 
 	case tea.KeyMsg:
-		if msg.Type == tea.KeyEnter {
+		switch msg.Type {
+		case tea.KeyEnter:
 			item := m.stories.SelectedItem().(api.Story)
 			return m, messages.Cmd(messages.OpenStoryPage{Story: item})
+		case tea.KeyRunes:
+			switch string(msg.Runes) {
+			case "f":
+				return m, messages.Cmd(messages.OpenListsPage{})
+			}
 		}
 
 	case messages.LoginSuccessful:
-		return m, fetchStories
+		return m, fetchStories(nil)
 
-	case messages.StoryFetched:
-		m.stories.SetItems(storiesToListItem(msg))
+	case messages.OpenStoriesPage:
+		return m, fetchStories(msg.List)
+
+	case messages.StoriesFetched:
+		m.stories.SetItems(shared.ToListItem(msg))
 		return m, nil
 	}
 
@@ -100,24 +136,18 @@ func Update(m Model, msg tea.Msg) (Model, tea.Cmd) {
 	return m, cmd
 }
 
-func fetchStories() tea.Msg {
-	sx, err := api.FetchStories()
+func fetchStories(f *api.List) tea.Cmd {
+	return func() tea.Msg {
+		sx, err := api.FetchStories(f)
 
-	if err != nil {
-		return messages.ErrMsg(err)
+		if err != nil {
+			return messages.ErrMsg{Err: err}
+		}
+
+		return messages.StoriesFetched(sx)
 	}
-
-	return messages.StoryFetched(sx)
 }
 
 func View(m Model) string {
-	return "\n" + m.stories.View()
-}
-
-func storiesToListItem(sx []api.Story) []list.Item {
-	titles := make([]list.Item, 0, len(sx))
-	for _, s := range sx {
-		titles = append(titles, s)
-	}
-	return titles
+	return pageStyle.Render(m.stories.View())
 }

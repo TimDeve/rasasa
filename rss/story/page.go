@@ -69,8 +69,9 @@ func Update(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		m.viewport.SetContent(loadedView(m))
 
 	case tea.KeyMsg:
-		if msg.Type == tea.KeyBackspace {
-			cmds = append(cmds, messages.Cmd(messages.OpenStoriesPage{}))
+		switch msg.Type {
+		case tea.KeyBackspace:
+			cmds = append(cmds, messages.Cmd(messages.BackToStoriesPage{}))
 		}
 
 	case messages.LoadStory:
@@ -83,6 +84,10 @@ func Update(m Model, msg tea.Msg) (Model, tea.Cmd) {
 		m.loading = false
 		m.article = msg.Article
 		m.viewport.SetContent(loadedView(m))
+
+	case messages.ArticleFetchFailed:
+		m.loading = false
+		m.viewport.SetContent(errorView(m, msg.Err))
 	}
 
 	m.viewport, cmd = m.viewport.Update(msg)
@@ -96,7 +101,7 @@ func fetchArticle(url string) tea.Cmd {
 		a, err := api.FetchArticle(url)
 
 		if err != nil {
-			return messages.ErrMsg(err)
+			return messages.ArticleFetchFailed{Err: err}
 		}
 
 		return messages.ArticleFetched{Article: a}
@@ -131,6 +136,10 @@ func render(m Model, body string) string {
 
 func loadingView(m Model) string {
 	return render(m, "Loading...")
+}
+
+func errorView(m Model, e error) string {
+	return render(m, e.Error())
 }
 
 func loadedView(m Model) string {

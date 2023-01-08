@@ -3,11 +3,13 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
+	"strconv"
 )
 
 type Story struct {
 	Id      int32  `json:"id"`
-	FeedId  int32  `json:"feedId"`
+	ListId  int32  `json:"listId"`
 	Title   string `json:"title"`
 	Url     string `json:"url"`
 	IsRead  bool   `json:"isRead"`
@@ -15,10 +17,14 @@ type Story struct {
 	//published_date time.Time `json:"publishedDate"`
 }
 
-func (s Story) FilterValue() string { return fmt.Sprintf("%d", s.Id) }
+func (s Story) FilterValue() string { return s.Title }
 
-func FetchStories() ([]Story, error) {
-	res, err := client.Get(V0("stories"))
+func FetchStories(f *List) ([]Story, error) {
+	query := ""
+	if f != nil {
+		query = "?listId=" + url.QueryEscape(strconv.Itoa(int(f.Id)))
+	}
+	res, err := client.Get(V0("stories" + query))
 	if err != nil {
 		return nil, fmt.Errorf("Could not fetch stories: %w", err)
 	}
