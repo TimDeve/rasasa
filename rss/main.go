@@ -93,10 +93,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func center(m model, source string) string {
 	if m.win.Width > shared.MaxWidth {
-		padded := lipgloss.NewStyle().MarginLeft((m.win.Width-shared.MaxWidth)/2 + 1).MarginRight((m.win.Width-shared.MaxWidth)/2 + 1)
-		return padded.Render(source)
+		toMaxWidth := lipgloss.NewStyle().MaxWidth(shared.MaxWidth).PaddingRight(shared.MaxWidth)
+		centered := lipgloss.NewStyle().Width(m.win.Width).Align(lipgloss.Center)
+		return centered.Render(toMaxWidth.Render(source))
 	} else {
-
 		return source
 	}
 }
