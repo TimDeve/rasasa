@@ -1,10 +1,16 @@
-import { Feed } from '../feeds/feedsModel'
+interface ArticleNotReadable {
+  readable: false
+}
 
-export interface Article {
-  readable: boolean
-  title?: string
-  byline?: string
-  content?: string
+interface ArticleReadable {
+  readable: true
+  title: string
+  byline: string
+  content: string
+}
+
+export type Article = ArticleReadable | ArticleNotReadable & {
+  url: string
 }
 
 export interface Story {

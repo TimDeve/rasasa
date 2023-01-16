@@ -6,7 +6,6 @@ import feedsDb from 'feeds/FeedsDb'
 import { Story } from './storiesModel'
 import {
   StoriesDispatch,
-  useStories,
   markStoryAsRead,
   markAllStoriesAsRead,
   setAllStories,
@@ -35,19 +34,20 @@ export async function fetchStories(
     }
   } catch (e) {
     console.log('Network failed serving cached stories')
-    let stories
 
+    const articleUrls: Set<string> = new Set()
+    await storiesDb.articles.toCollection().eachUniqueKey(url => articleUrls.add(url as string))
+
+    let query
     if (options.listId) {
       const list = await feedsDb.feedLists.where('id').equals(Number(options.listId)).first()
 
-      stories = await storiesDb.stories
-        .where('feedId')
-        .anyOf(list ? list.feedIds : [])
-        .toArray()
+      query = storiesDb.stories.where('feedId').anyOf(list ? list.feedIds : [])
     } else {
-      stories = await storiesDb.stories.orderBy('id').reverse().toArray()
+      query = storiesDb.stories.orderBy('id').reverse()
     }
 
+    let stories = await query.and(story => articleUrls.has(story.url)).toArray()
     dispatch(setAllStories(stories))
     dispatch(setStoriesLoading(false))
   }
@@ -62,7 +62,7 @@ export async function setStoryToRead(dispatch: StoriesDispatch, storyId: number)
 
   dispatch(markStoryAsRead(storyId))
 
-  const res = await fetch(`/api/v0/stories/${storyId}`, {
+  await fetch(`/api/v0/stories/${storyId}`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export async function setStoriesToRead(stories: Story[], dispatch: StoriesDispat
 
   dispatch(markAllStoriesAsRead())
 
-  const res = await fetch(`/api/v0/stories`, {
+  await fetch(`/api/v0/stories`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ export async function clearStories(stories: Story[], dispatch: StoriesDispatch) 
 
   dispatch(clearStoriesAction())
 
-  const res = await fetch(`/api/v0/stories`, {
+   await fetch(`/api/v0/stories`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',

@@ -109,7 +109,7 @@ function StoryPage() {
     window.requestAnimationFrame(function () {
       hl.highlightAll()
     })
-  }, [article?.content])
+  }, [article?.readable && article.content])
 
   if (!story || !article) {
     return <Wrapper />
