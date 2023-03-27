@@ -41,7 +41,7 @@ RUN NODE_ENV=production pnpm run build
 #
 # RUST BUILDER
 #
-FROM rust:1.64-slim-bullseye as rust-builder
+FROM rust:1.67-slim-bullseye as rust-builder
 LABEL builder=true
 
 RUN mkdir -p /root/app

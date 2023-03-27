@@ -106,7 +106,7 @@ export async function clearStories(stories: Story[], dispatch: StoriesDispatch) 
 
   dispatch(clearStoriesAction())
 
-   await fetch(`/api/v0/stories`, {
+  await fetch(`/api/v0/stories`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ export async function cacheStoriesAndArticles(stories: Story[]) {
     })
   } else {
     for (const story of stories) {
-      const fetchStory = async function () {
+      const fetchStory = async function() {
         const res = await fetch('/api/v0/read?' + queryString.stringify({ page: story.url }))
 
         const json = await res.json()
