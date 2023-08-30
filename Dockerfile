@@ -23,7 +23,7 @@ RUN apt-get update \
  && apt-get install -y python build-essential \
  && rm -rf /var/lib/apt/lists/*
 
-RUN npm install --location=global pnpm
+RUN npm install --location=global pnpm@8
 ENV PNPM_HOME="/usr/local/share/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN bash -c "SHELL=/bin/bash pnpm setup" # Setups pnpm with bash because it really wants to be in add random stuff to .bashrc
@@ -77,7 +77,7 @@ RUN apt-get update \
  && apt-get install -y git libpq5 \
  && rm -rf /var/lib/apt/lists/*
 
-RUN npm install --location=global pnpm
+RUN npm install --location=global pnpm@8
 
 RUN groupadd -r runner && useradd -m -r -g runner runner
 USER runner
