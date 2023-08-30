@@ -9,9 +9,11 @@ interface ArticleReadable {
   content: string
 }
 
-export type Article = ArticleReadable | ArticleNotReadable & {
-  url: string
-}
+export type Article =
+  | ArticleReadable
+  | (ArticleNotReadable & {
+      url: string
+    })
 
 export interface Story {
   id: number

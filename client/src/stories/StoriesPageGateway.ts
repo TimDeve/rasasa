@@ -15,7 +15,7 @@ import {
 
 export async function fetchStories(
   dispatch: StoriesDispatch,
-  options: { refresh?: boolean; listId?: string } = {}
+  options: { refresh?: boolean; listId?: string; read?: boolean } = {}
 ) {
   try {
     dispatch(setStoriesLoading(true))
@@ -47,7 +47,10 @@ export async function fetchStories(
       query = storiesDb.stories.orderBy('id').reverse()
     }
 
-    let stories = await query.and(story => articleUrls.has(story.url)).toArray()
+    let stories = await query
+      .filter(s => s.isRead == options.read)
+      .and(story => articleUrls.has(story.url))
+      .toArray()
     dispatch(setAllStories(stories))
     dispatch(setStoriesLoading(false))
   }
@@ -130,7 +133,7 @@ export async function cacheStoriesAndArticles(stories: Story[]) {
     })
   } else {
     for (const story of stories) {
-      const fetchStory = async function() {
+      const fetchStory = async function () {
         const res = await fetch('/api/v0/read?' + queryString.stringify({ page: story.url }))
 
         const json = await res.json()
