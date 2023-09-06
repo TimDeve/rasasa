@@ -48,7 +48,7 @@ export async function fetchStories(
     }
 
     let stories = await query
-      .filter(s => s.isRead == options.read)
+      .filter(s => options.read || !s.isRead)
       .and(story => articleUrls.has(story.url))
       .toArray()
     dispatch(setAllStories(stories))
