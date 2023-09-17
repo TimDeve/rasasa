@@ -1,6 +1,6 @@
 import React, { useState, useEffect, ReactNode, useLayoutEffect, useRef } from 'react'
 import queryString from 'query-string'
-import { Link, useParams } from 'react-router-dom'
+import { Link, Path, useLocation, useParams } from 'react-router-dom'
 import ScrollLock, { TouchScrollable } from 'react-scrolllock'
 import { Helmet } from 'react-helmet'
 import hl from 'highlight.js'
@@ -74,7 +74,30 @@ function fetchStory(id: string): Story | null {
   return story
 }
 
+function getPath(u: unknown): Path {
+  const path: Path = { pathname: '/', search: '', hash: '' }
+
+  const pathname = (u as { [key: string]: unknown } | null)?.pathname
+  if (typeof pathname == 'string') {
+    path.pathname = pathname
+  }
+
+  const search = (u as { [key: string]: unknown } | null)?.search
+  if (typeof search == 'string') {
+    path.search = search
+  }
+
+  const hash = (u as { [key: string]: unknown } | null)?.hash
+  if (typeof hash == 'string') {
+    path.hash = hash
+  }
+
+  return path
+}
+
 function Wrapper({ title, children }: { title?: string; children?: ReactNode }) {
+  const location = useLocation()
+
   return (
     <>
       {title && (
@@ -87,7 +110,7 @@ function Wrapper({ title, children }: { title?: string; children?: ReactNode }) 
         <div className={s.component}>
           <TakeFocusDiv className={s.wrapper}>
             <div className={s.nav}>
-              <Link to="/">Back to stories</Link>
+              <Link to={getPath(location.state)}>Back to stories</Link>
             </div>
             {children}
           </TakeFocusDiv>

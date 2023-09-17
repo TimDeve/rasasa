@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react'
+import React, { useEffect, useContext, useState } from 'react'
 import { useLocation, useParams, useSearchParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet'
 
@@ -16,8 +16,25 @@ import {
 } from './StoriesPageGateway'
 import { useStories } from './StoriesPageState'
 import { FeedsContext } from 'feeds/feedsContext'
+import { StoriesDispatch } from './StoriesPageState'
 
 const nonBreakinSpaceChar = '\u00a0'
+
+// Ugh this is ugly...
+function useFetchStories(dispatch: StoriesDispatch, showReadStories: boolean, isStoryPage: boolean) {
+  const [showRead, setShowRead] = useState(showReadStories)
+  const params = useParams()
+
+  const listId = params?.listId
+
+  useEffect(() => {
+    if (!isStoryPage) { setShowRead(showReadStories) }
+  }, [showReadStories, isStoryPage])
+
+  useEffect(() => {
+    fetchStories(dispatch, { listId, read: showReadStories })
+  }, [showRead])
+}
 
 export default function StoriesPage() {
   const [{ stories, loading }, dispatch] = useStories()
@@ -29,18 +46,18 @@ export default function StoriesPage() {
   const listId = params?.listId
   const title = listId ? feedLists?.[parseInt(listId)]?.name ?? nonBreakinSpaceChar : 'All stories'
 
-  const showReadStories = searchParams.has('read')
+  let showReadStories: boolean = searchParams.has('read')
 
-  useEffect(() => {
-    fetchStories(dispatch, { listId, read: showReadStories })
-  }, [showReadStories])
+  const isStoryPage = location.pathname.indexOf('/stories/') !== -1
+
+  useFetchStories(dispatch, showReadStories, isStoryPage)
 
   return (
     <>
       <Helmet>
         <title>Rasasa - {title}</title>
       </Helmet>
-      {location.pathname.indexOf('/stories/') !== -1 && <StoryPage />}
+      {isStoryPage && <StoryPage />}
       <div className={s.component}>
         <Title onClick={() => fetchStories(dispatch, { refresh: true, listId })}>{title}</Title>
         <div>

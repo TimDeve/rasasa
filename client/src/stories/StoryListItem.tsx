@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, useCallback, useContext } from 'react'
+import React, { useContext } from 'react'
 import cn from 'classnames'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import sanitizeHtml from 'sanitize-html'
 
 import { Feed } from '../feeds/feedsModel'
@@ -28,6 +28,7 @@ function EmptyIcon() {
 }
 
 function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: StoryListItemProps) {
+  const location = useLocation()
   const { feeds } = useContext(FeedsContext)
   const [hasContent, toggleContent] = useToggle(false)
 
@@ -42,6 +43,7 @@ function StoryListItem({ id, url, title, isRead, content, markAsRead, feedId }: 
       <div className={s.titleContainer}>
         <Link
           to={`/stories/${id}/${encodeURI(title.replace(/\s/g, '-'))}`}
+          state={location}
           className={cn(s.link, { [s.linkRead]: isRead })}
         >
           <span className={s.feedTitle}>{feeds[feedId] && feeds[feedId].name}</span>
