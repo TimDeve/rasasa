@@ -37,10 +37,38 @@ function transformHtml(html, pageUrl) {
     }
   }
 
+  function transformLinks(tagName, attribs) {
+    const href = attribs.href || ''
+    if (!href || href.match(/https?/g)) {
+      return {
+        tagName,
+        attribs,
+      }
+    }
+
+    const newUrl = new URL(pageUrl)
+
+    if (href.charAt(0) === '/') {
+      newUrl.pathname = href
+    } else {
+      newUrl.pathname = `${newUrl.pathname}/${href}`
+    }
+
+    return {
+      tagName,
+      attribs: {
+        ...attribs,
+        href: newUrl.toString(),
+      },
+    }
+  }
+
+
   const sanitizeHtmlOptions = {
     ...sanitizeHtmlDefaultOptions,
     transformTags: {
       img: transformImages,
+      a: transformLinks,
     },
   }
 
