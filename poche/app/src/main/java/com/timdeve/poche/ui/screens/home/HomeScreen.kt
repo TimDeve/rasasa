@@ -1,4 +1,4 @@
-package com.timdeve.poche.ui.screens
+package com.timdeve.poche.ui.screens.home
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
@@ -133,7 +133,7 @@ fun HomeScreen(
                 refreshing = storiesUiState is StoriesUiState.Loading,
                 state = pullRefreshState,
                 modifier = modifier.align(Alignment.TopCenter),
-                backgroundColor = colorScheme.surfaceColorAtElevation(2.dp)
+                backgroundColor = colorScheme.surfaceVariant
             )
         }
     }

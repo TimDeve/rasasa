@@ -2,32 +2,30 @@ package com.timdeve.poche.network
 
 import com.timdeve.poche.BuildConfig
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.timdeve.poche.model.Story
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.http.GET
+import retrofit2.http.Body
+import retrofit2.http.POST
 
 @Serializable
-data class GetStoriesResponse(
-    val stories: List<Story>
-)
+data class LoginRequest(val username: String, val password: String)
 
-interface StoryApiService {
-    @GET("api/v0/stories")
-    suspend fun getStories(): GetStoriesResponse
+interface LoginApiService {
+    @POST("api/v0/login")
+    suspend fun login(@Body body: LoginRequest)
 }
 
-class StoriesApi(client: OkHttpClient) {
+class LoginApi(client: OkHttpClient) {
     private val retrofit = Retrofit.Builder()
         .addConverterFactory(Json.asConverterFactory("application/json".toMediaType()))
         .client(client)
         .baseUrl(BuildConfig.BASE_URL)
         .build()
 
-    val retrofitService: StoryApiService by lazy {
-        retrofit.create(StoryApiService::class.java)
+    val retrofitService: LoginApiService by lazy {
+        retrofit.create(LoginApiService::class.java)
     }
 }
