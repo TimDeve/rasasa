@@ -16,12 +16,14 @@ import java.io.IOException
 
 sealed interface StoriesUiState {
     data class Success(val stories: List<Story>) : StoriesUiState
-    object Error : StoriesUiState
-    object Loading : StoriesUiState
+    data object Error : StoriesUiState
+    data class Loading(val stories: List<Story>) : StoriesUiState
 }
 class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
-    var storiesUiState: StoriesUiState by mutableStateOf(StoriesUiState.Loading)
+    var storiesUiState: StoriesUiState by mutableStateOf(StoriesUiState.Loading(emptyList()))
         private set
+
+    private var stories: List<Story> by mutableStateOf(emptyList())
 
     init {
         getStories()
@@ -29,16 +31,15 @@ class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
 
     fun getStories() {
         viewModelScope.launch {
-            storiesUiState = StoriesUiState.Loading
+            storiesUiState = StoriesUiState.Loading(stories)
             storiesUiState = try {
-                val storiesRes = storyApi.retrofitService.getStories()
-                StoriesUiState.Success(storiesRes.stories)
+                stories = storyApi.retrofitService.getStories().stories
+                StoriesUiState.Success(stories)
             } catch (e: IOException) {
                 StoriesUiState.Error
             } catch (e: HttpException) {
                 StoriesUiState.Error
             }
-
         }
     }
 }

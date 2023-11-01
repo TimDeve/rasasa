@@ -1,10 +1,8 @@
 package com.timdeve.poche
 
-import android.app.Fragment
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.MainThread
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -13,9 +11,7 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelLazy
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.franmontiel.persistentcookiejar.ClearableCookieJar
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
@@ -52,13 +48,16 @@ class MainActivity : ComponentActivity() {
                     val storiesViewModel by lazy {
                         injectViewModel { StoriesViewModel(storyApi) }
                     }
-                    HomeScreen(storiesUiState = storiesViewModel.storiesUiState)
+                    HomeScreen(
+                        storiesUiState = storiesViewModel.storiesUiState,
+                        getStories = storiesViewModel::getStories
+                    )
                 }
             }
         }
     }
 
-    private inline fun <reified T: ViewModel> injectViewModel(crossinline lambda: () -> T): T {
+    private inline fun <reified T : ViewModel> injectViewModel(crossinline lambda: () -> T): T {
         return ViewModelProvider(this, createWithFactory { lambda() })[T::class.java]
     }
 }
