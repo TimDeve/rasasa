@@ -2,27 +2,33 @@ package com.timdeve.poche.ui.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
@@ -31,12 +37,17 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.timdeve.poche.R
 import com.timdeve.poche.model.Story
@@ -51,13 +62,21 @@ fun HomeScreen(
 ) {
     val appBarState = rememberTopAppBarState()
     val scrollBehavior = enterAlwaysScrollBehavior(appBarState)
+    val bottomBarHeight = LocalDensity.current.run {
+        (64.dp.toPx()  + (appBarState.heightOffset)).toDp()
+    }
+
+//    val pullRefreshState = rememberPullRefreshState(
+//        refreshing = state.isLoading,
+//        onRefresh = viewModel::loadOrders
+//    )
 
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = colorScheme.primaryContainer,
+                    titleContentColor = colorScheme.primary,
                 ),
                 title = {
                     Text("All stories")
@@ -68,6 +87,21 @@ fun HomeScreen(
         floatingActionButton = {
             FloatingActionButton(onClick = { }) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
+            }
+        },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = colorScheme.primaryContainer,
+                contentColor = colorScheme.primary,
+                modifier = Modifier
+                    .height(bottomBarHeight)
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = "Bottom app bar",
+                )
             }
         },
         modifier = Modifier
@@ -96,6 +130,7 @@ fun HomeScreen(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "Light Mode")
 @Preview(
@@ -116,6 +151,25 @@ fun PreviewHomeScreen() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(name = "Light Mode")
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Composable
+fun PreviewHomeScreenLoading() {
+    PocheTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = colorScheme.surfaceColorAtElevation(2.dp),
+        ) {
+            HomeScreen(storiesUiState = StoriesUiState.Loading)
+        }
+    }
+}
+
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Column(
@@ -123,10 +177,18 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        CircularProgressIndicator(
-            color = colorScheme.surfaceVariant,
-            trackColor = colorScheme.secondary,
-        )
+//        Surface(
+//            modifier = Modifier
+//                .padding(4.dp)
+//                .clip(CircleShape)
+//                .border(4.dp, colorScheme.surfaceVariant, CircleShape)
+//                .shadow(2.dp)
+//        ) {
+            CircularProgressIndicator(
+                color = colorScheme.surfaceVariant,
+                trackColor = colorScheme.secondary,
+            )
+//        }
     }
 }
 

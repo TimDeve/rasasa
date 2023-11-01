@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.timdeve.poche.model.Story
 import com.timdeve.poche.network.StoriesApi
+import com.timdeve.poche.network.StoryApiService
 import kotlinx.coroutines.launch
 import java.io.IOException
 
@@ -18,7 +19,7 @@ sealed interface StoriesUiState {
     object Error : StoriesUiState
     object Loading : StoriesUiState
 }
-class StoriesViewModel : ViewModel() {
+class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
     var storiesUiState: StoriesUiState by mutableStateOf(StoriesUiState.Loading)
         private set
 
@@ -30,12 +31,11 @@ class StoriesViewModel : ViewModel() {
         viewModelScope.launch {
             storiesUiState = StoriesUiState.Loading
             storiesUiState = try {
-                val storiesRes = StoriesApi.retrofitService.getStories()
+                val storiesRes = storyApi.retrofitService.getStories()
                 StoriesUiState.Success(storiesRes.stories)
             } catch (e: IOException) {
                 StoriesUiState.Error
             } catch (e: HttpException) {
-                println(e)
                 StoriesUiState.Error
             }
 
