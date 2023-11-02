@@ -15,3 +15,19 @@ data class FeedList(
     val name: String,
     val feedIds: List<Int>,
 )
+
+// genFeeds generates fake data for previews
+fun genFeeds(): Pair<Map<Int, Feed>, List<FeedList>> {
+    return Pair(
+        listOf(
+            0 to Feed(0, "Hacker News", "http://example.com"),
+            1 to Feed(1, "News Org", "http://example.com"),
+            2 to Feed(2, "Tech Knowledge", "http://example.com"),
+            3 to Feed(3, "Stuff N' Things", "http://example.com"),
+        ).toMap(),
+        listOf(
+            FeedList(0, "My List", listOf(0, 3)),
+            FeedList(1, "Another one", listOf(0, 3)),
+        )
+    )
+}

@@ -1,20 +1,16 @@
 package com.timdeve.poche
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.compose.rememberNavController
 import com.franmontiel.persistentcookiejar.ClearableCookieJar
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import com.timdeve.poche.network.ArticleApi
 import com.timdeve.poche.network.FeedsApi
 import com.timdeve.poche.network.LoginApi
 import com.timdeve.poche.network.StoriesApi
@@ -29,7 +25,6 @@ import okhttp3.OkHttpClient.Builder
 import okhttp3.Response
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +37,7 @@ class MainActivity : ComponentActivity() {
         val httpClient: OkHttpClient = Builder()
             .addInterceptor { chain ->
                     val response: Response = chain.proceed(chain.request())
-                    if (response.code == 401) {
+                    if (response.code == 401 && authStatus.value is AuthStatus.LoggedIn) {
                         authStatus.update { AuthStatus.LoggedOff }
                         response
                     } else response
@@ -59,8 +54,10 @@ class MainActivity : ComponentActivity() {
         val storyApi = StoriesApi(httpClient)
         val storiesViewModel by lazy { injectViewModel { StoriesViewModel(storyApi) } }
 
+        val articleApi = ArticleApi(httpClient)
+
         setContent {
-            PocheApp(storiesViewModel, authViewModel, feedsViewModel)
+            PocheApp(storiesViewModel, authViewModel, feedsViewModel, articleApi)
         }
     }
 

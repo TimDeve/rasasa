@@ -27,7 +27,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
@@ -46,12 +45,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.timdeve.poche.BaseWrapper
+import com.timdeve.poche.PocheNavigate
 import com.timdeve.poche.R
 import com.timdeve.poche.model.Feed
 import com.timdeve.poche.model.Story
+import com.timdeve.poche.model.genFeeds
 import com.timdeve.poche.model.genRandomStories
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
-import com.timdeve.poche.ui.theme.PocheTheme
 import com.timdeve.poche.ui.theme.Typography
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -62,6 +65,7 @@ fun HomeScreen(
     getStories: () -> Unit,
     feedsUiState: FeedsUiState,
     getFeedsAndFeedLists: () -> Unit,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     val appBarState = rememberTopAppBarState()
@@ -93,7 +97,9 @@ fun HomeScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { }) {
+            FloatingActionButton(onClick = {
+                navController.navigate(PocheNavigate.article("http://example.com"))
+            }) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More")
             }
         },
@@ -126,25 +132,25 @@ fun HomeScreen(
             when {
                 storiesUiState is StoriesUiState.Loading &&
                         feedsUiState is FeedsUiState.Loading -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
+                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
                         .fillMaxWidth()
                 )
 
                 storiesUiState is StoriesUiState.Success &&
                         feedsUiState is FeedsUiState.Success -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
+                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
                         .fillMaxWidth()
                 )
 
                 storiesUiState is StoriesUiState.Loading &&
                         feedsUiState is FeedsUiState.Success -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
+                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
                         .fillMaxWidth()
                 )
 
                 storiesUiState is StoriesUiState.Success &&
                         feedsUiState is FeedsUiState.Loading -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
+                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
                         .fillMaxWidth()
                 )
 
@@ -175,18 +181,15 @@ fun HomeScreen(
 @Composable
 fun PreviewHomeScreen() {
     val stories = genRandomStories()
-    PocheTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = colorScheme.surfaceColorAtElevation(2.dp),
-        ) {
-            HomeScreen(
-                storiesUiState = StoriesUiState.Success(stories),
-                getStories = {},
-                feedsUiState = FeedsUiState.Success(emptyMap(), emptyList()),
-                getFeedsAndFeedLists = {},
-            )
-        }
+    val (feeds, feedLists) = genFeeds()
+    BaseWrapper {
+        HomeScreen(
+            storiesUiState = StoriesUiState.Success(stories),
+            getStories = {},
+            feedsUiState = FeedsUiState.Success(feeds, feedLists),
+            getFeedsAndFeedLists = {},
+            navController = rememberNavController(),
+        )
     }
 }
 
@@ -199,18 +202,14 @@ fun PreviewHomeScreen() {
 )
 @Composable
 fun PreviewHomeScreenLoading() {
-    PocheTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = colorScheme.surfaceColorAtElevation(2.dp),
-        ) {
-            HomeScreen(
-                storiesUiState = StoriesUiState.Loading(emptyList()),
-                getStories = {},
-                feedsUiState = FeedsUiState.Loading(emptyMap(), emptyList()),
-                getFeedsAndFeedLists = {}
-            )
-        }
+    BaseWrapper {
+        HomeScreen(
+            storiesUiState = StoriesUiState.Loading(emptyList()),
+            getStories = {},
+            feedsUiState = FeedsUiState.Loading(emptyMap(), emptyList()),
+            getFeedsAndFeedLists = {},
+            navController = rememberNavController(),
+        )
     }
 }
 
@@ -233,7 +232,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun StoryItem(story: Story, feeds: Map<Int, Feed>) {
+fun StoryItem(story: Story, feeds: Map<Int, Feed>, onClick: (Int) -> Unit = {}) {
     Row(
         modifier = Modifier
             .padding(PaddingValues(16.dp, 12.dp))
@@ -242,31 +241,40 @@ fun StoryItem(story: Story, feeds: Map<Int, Feed>) {
         val uriHandler = LocalUriHandler.current
         Column {
             ClickableText(
-                text = buildAnnotatedString {
-                    append(feeds[story.feedId]?.name ?: "Feed Name Not Found")
-                },
+                text = buildAnnotatedString { append(story.title) },
                 style = Typography.labelLarge.copy(
-                    color = colorScheme.onSurfaceVariant,
+                    color = colorScheme.onSurface,
                 ),
-                onClick = { uriHandler.openUri(story.url) },
+                onClick = onClick,
                 modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp)
             )
             ClickableText(
-                text = buildAnnotatedString { append(story.title) },
+                text = buildAnnotatedString {
+                    append(feeds[story.feedId]?.name ?: "Feed id '${story.feedId}' Not Found")
+                },
                 style = Typography.bodyMedium.copy(
-                    color = colorScheme.onBackground,
+                    color = colorScheme.onSurfaceVariant,
                 ),
-                onClick = { uriHandler.openUri(story.url) },
+                onClick = onClick,
             )
         }
     }
 }
 
 @Composable
-fun ResultScreen(stories: List<Story>, feeds: Map<Int, Feed>, modifier: Modifier = Modifier) {
+fun ResultScreen(
+    stories: List<Story>,
+    feeds: Map<Int, Feed>,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     LazyColumn {
         items(stories) { story ->
-            StoryItem(story, feeds)
+            StoryItem(
+                story,
+                feeds,
+                onClick = { navController.navigate(PocheNavigate.article(story.url)) }
+            )
             Divider(
                 color = colorScheme.surfaceVariant,
                 modifier = Modifier

@@ -1,4 +1,4 @@
-package com.timdeve.poche.ui.screens.story
+package com.timdeve.poche.ui.screens.article
 
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material3.ExperimentalMaterial3Api
