@@ -2,7 +2,6 @@ package com.timdeve.poche.ui.screens.home
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +16,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -38,11 +35,16 @@ import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -77,6 +79,8 @@ fun HomeScreen(
         (((64.dp.toPx() + (appBarState.heightOffset)) / 100) * 46.dp.toPx()).toDp()
     }
 
+    var showReadStories by remember { mutableStateOf(false) }
+
     val refreshing =
         storiesUiState is StoriesUiState.Loading || feedsUiState is FeedsUiState.Loading
 
@@ -101,9 +105,13 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                navController.navigate(PocheNavigate.article("http://example.com"))
+                showReadStories = !showReadStories
             }) {
-                Icon(Icons.Filled.Favorite, contentDescription = "More")
+                Icon(
+                    painterResource(
+                        if (showReadStories) R.drawable.visibility_off_fill else R.drawable.visibility_fill
+                    ), contentDescription = "More"
+                )
             }
         },
         bottomBar = { BottomBar(bottomBarHeight) },
