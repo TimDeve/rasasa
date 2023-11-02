@@ -11,6 +11,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
 import com.timdeve.poche.ui.screens.home.HomeRoute
 import com.timdeve.poche.ui.screens.home.StoriesViewModel
 import com.timdeve.poche.ui.screens.login.AuthStatus
@@ -23,12 +24,13 @@ import com.timdeve.poche.ui.screens.login.LoginRoute
 fun PocheNavGraph(
     storiesViewModel: StoriesViewModel,
     authViewModel: AuthViewModel,
+    feedsViewModel: FeedsViewModel,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(startDestination = PocheDestinations.HOME_ROUTE, navController = navController) {
         composable(PocheDestinations.HOME_ROUTE) {
             AuthWall(authViewModel, navController) {
-                HomeRoute(storiesViewModel = storiesViewModel)
+                HomeRoute(storiesViewModel, feedsViewModel)
             }
         }
         composable(PocheDestinations.LOGIN_ROUTE) {

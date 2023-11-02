@@ -15,8 +15,10 @@ import com.franmontiel.persistentcookiejar.ClearableCookieJar
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import com.timdeve.poche.network.FeedsApi
 import com.timdeve.poche.network.LoginApi
 import com.timdeve.poche.network.StoriesApi
+import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
 import com.timdeve.poche.ui.screens.home.StoriesViewModel
 import com.timdeve.poche.ui.screens.login.AuthStatus
 import com.timdeve.poche.ui.screens.login.AuthViewModel
@@ -48,14 +50,17 @@ class MainActivity : ComponentActivity() {
             .cookieJar(cookieJar)
             .build()
 
-        val storyApi = StoriesApi(httpClient)
         val loginApi = LoginApi(httpClient)
-
         val authViewModel by lazy { injectViewModel { AuthViewModel(loginApi, authStatus) } }
+
+        val feedsApi = FeedsApi(httpClient)
+        val feedsViewModel by lazy { injectViewModel { FeedsViewModel(feedsApi) } }
+
+        val storyApi = StoriesApi(httpClient)
         val storiesViewModel by lazy { injectViewModel { StoriesViewModel(storyApi) } }
 
         setContent {
-            PocheApp(storiesViewModel, authViewModel)
+            PocheApp(storiesViewModel, authViewModel, feedsViewModel)
         }
     }
 

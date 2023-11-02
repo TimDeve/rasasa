@@ -47,8 +47,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.timdeve.poche.R
+import com.timdeve.poche.model.Feed
 import com.timdeve.poche.model.Story
 import com.timdeve.poche.model.genRandomStories
+import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.theme.PocheTheme
 import com.timdeve.poche.ui.theme.Typography
 
@@ -58,6 +60,8 @@ import com.timdeve.poche.ui.theme.Typography
 fun HomeScreen(
     storiesUiState: StoriesUiState,
     getStories: () -> Unit,
+    feedsUiState: FeedsUiState,
+    getFeedsAndFeedLists: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val appBarState = rememberTopAppBarState()
@@ -66,9 +70,15 @@ fun HomeScreen(
         (64.dp.toPx() + (appBarState.heightOffset)).toDp()
     }
 
+    val refreshing =
+        storiesUiState is StoriesUiState.Loading || feedsUiState is FeedsUiState.Loading
+
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = storiesUiState is StoriesUiState.Loading,
-        onRefresh = getStories
+        refreshing = refreshing,
+        onRefresh = {
+            getFeedsAndFeedLists()
+            getStories()
+        },
     )
 
     Scaffold(
@@ -113,24 +123,39 @@ fun HomeScreen(
                 .background(color = colorScheme.surfaceColorAtElevation(1.dp))
                 .pullRefresh(pullRefreshState)
         ) {
-            when (storiesUiState) {
-                is StoriesUiState.Loading -> ResultScreen(
-                    storiesUiState.stories, modifier = modifier
+            when {
+                storiesUiState is StoriesUiState.Loading &&
+                        feedsUiState is FeedsUiState.Loading -> ResultScreen(
+                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
                         .fillMaxWidth()
                 )
 
-                is StoriesUiState.Success -> ResultScreen(
-                    storiesUiState.stories, modifier = modifier
+                storiesUiState is StoriesUiState.Success &&
+                        feedsUiState is FeedsUiState.Success -> ResultScreen(
+                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
                         .fillMaxWidth()
                 )
 
-                is StoriesUiState.Error -> ErrorScreen(
+                storiesUiState is StoriesUiState.Loading &&
+                        feedsUiState is FeedsUiState.Success -> ResultScreen(
+                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
+                        .fillMaxWidth()
+                )
+
+                storiesUiState is StoriesUiState.Success &&
+                        feedsUiState is FeedsUiState.Loading -> ResultScreen(
+                    storiesUiState.stories, feedsUiState.feeds, modifier = modifier
+                        .fillMaxWidth()
+                )
+
+                storiesUiState is StoriesUiState.Error
+                        || feedsUiState is FeedsUiState.Error -> ErrorScreen(
                     modifier = modifier
                         .fillMaxSize()
                 )
             }
             PullRefreshIndicator(
-                refreshing = storiesUiState is StoriesUiState.Loading,
+                refreshing = refreshing,
                 state = pullRefreshState,
                 modifier = modifier.align(Alignment.TopCenter),
                 backgroundColor = colorScheme.surfaceVariant
@@ -157,7 +182,9 @@ fun PreviewHomeScreen() {
         ) {
             HomeScreen(
                 storiesUiState = StoriesUiState.Success(stories),
-                getStories = {}
+                getStories = {},
+                feedsUiState = FeedsUiState.Success(emptyMap(), emptyList()),
+                getFeedsAndFeedLists = {},
             )
         }
     }
@@ -177,7 +204,12 @@ fun PreviewHomeScreenLoading() {
             modifier = Modifier.fillMaxSize(),
             color = colorScheme.surfaceColorAtElevation(2.dp),
         ) {
-            HomeScreen(storiesUiState = StoriesUiState.Loading(emptyList()), getStories = {})
+            HomeScreen(
+                storiesUiState = StoriesUiState.Loading(emptyList()),
+                getStories = {},
+                feedsUiState = FeedsUiState.Loading(emptyMap(), emptyList()),
+                getFeedsAndFeedLists = {}
+            )
         }
     }
 }
@@ -201,7 +233,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun StoryItem(story: Story) {
+fun StoryItem(story: Story, feeds: Map<Int, Feed>) {
     Row(
         modifier = Modifier
             .padding(PaddingValues(16.dp, 12.dp))
@@ -211,15 +243,13 @@ fun StoryItem(story: Story) {
         Column {
             ClickableText(
                 text = buildAnnotatedString {
-                    append("Feed Name (")
-                    append(story.feedId.toString())
-                    append(")")
+                    append(feeds[story.feedId]?.name ?: "Feed Name Not Found")
                 },
                 style = Typography.labelLarge.copy(
-                    color = colorScheme.onBackground,
+                    color = colorScheme.onSurfaceVariant,
                 ),
                 onClick = { uriHandler.openUri(story.url) },
-                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 2.dp)
+                modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp)
             )
             ClickableText(
                 text = buildAnnotatedString { append(story.title) },
@@ -233,10 +263,10 @@ fun StoryItem(story: Story) {
 }
 
 @Composable
-fun ResultScreen(stories: List<Story>, modifier: Modifier = Modifier) {
+fun ResultScreen(stories: List<Story>, feeds: Map<Int, Feed>, modifier: Modifier = Modifier) {
     LazyColumn {
         items(stories) { story ->
-            StoryItem(story)
+            StoryItem(story, feeds)
             Divider(
                 color = colorScheme.surfaceVariant,
                 modifier = Modifier

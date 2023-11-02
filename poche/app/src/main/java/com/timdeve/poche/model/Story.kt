@@ -25,7 +25,7 @@ fun genRandomStories(): List<Story> {
     return IntRange(0, 200).map {
         Story(
             id = it,
-            feedId = it % 3 * it,
+            feedId = it % 4 * it % 4,
             title = storyTitles[it % storyTitles.size],
             url = "http://example.com",
             isRead = false,

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 @ExperimentalMaterialApi
 @ExperimentalMaterial3Api
 @Composable
-fun ListsScreen(
+fun FeedListsScreen(
     modifier: Modifier = Modifier
 ) {
     Text(text = "Lists screen")
