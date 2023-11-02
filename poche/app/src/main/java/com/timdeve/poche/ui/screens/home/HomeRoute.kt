@@ -13,6 +13,7 @@ fun HomeRoute(
     navController: NavHostController,
 ) {
     HomeScreen(
+        screenTitle = "All Stories",
         storiesUiState = storiesViewModel.storiesUiState,
         getStories = storiesViewModel::getStories,
         feedsUiState = feedsViewModel.feedsUiState,

@@ -21,7 +21,8 @@ private val storyTitles = listOf(
     "The actual teachings of the great explorer of the truth, the master-builder of human happiness"
 )
 
-fun genRandomStories(): List<Story> {
+// genStories generates fake data for previews
+fun genStories(): List<Story> {
     return IntRange(0, 200).map {
         Story(
             id = it,
