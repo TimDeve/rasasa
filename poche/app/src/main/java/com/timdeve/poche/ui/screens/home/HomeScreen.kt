@@ -1,7 +1,10 @@
 package com.timdeve.poche.ui.screens.home
 
+import android.content.Intent
 import android.content.res.Configuration
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -50,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -187,7 +192,7 @@ fun HomeScreen(
             PullRefreshIndicator(
                 refreshing = refreshing,
                 state = pullRefreshState,
-                modifier = modifier.align(Alignment.TopCenter),
+                modifier = modifier.align(Alignment.TopCenter).offset(y = (-64).dp),
                 backgroundColor = colorScheme.surfaceVariant
             )
         }
@@ -315,15 +320,36 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun linkSharer(url: String): () -> Unit {
+    val sendIntent: Intent = Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, url)
+        type = "text/plain"
+    }
+    val shareIntent = Intent.createChooser(sendIntent, null)
+    val context = LocalContext.current
+    return {
+        context.startActivity(shareIntent)
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
 fun StoryItem(
     story: Story,
     feeds: Map<Int, Feed>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
+    val shareLink = linkSharer(story.url)
+
     Surface(
-        onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = shareLink,
+            ),
         color = Color.Transparent,
     ) {
         Box(Modifier.padding(PaddingValues(16.dp, 12.dp))) {
