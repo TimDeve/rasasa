@@ -17,14 +17,14 @@ import java.io.IOException
 
 
 sealed interface FeedsUiState {
-    data class Success(val feeds: Map<Int, Feed>, val feedLists: List<FeedList>) : FeedsUiState
-    data class Loading(val feeds: Map<Int, Feed>, val feedLists: List<FeedList>) : FeedsUiState
+    data class Success(val feeds: Map<Int, Feed>, val feedLists: Map<Int,FeedList>) : FeedsUiState
+    data class Loading(val feeds: Map<Int, Feed>, val feedLists: Map<Int,FeedList>) : FeedsUiState
     data object Error : FeedsUiState
 }
 
 class FeedsViewModel(private val feedsApi: FeedsApiService) : ViewModel() {
     private var feeds: Map<Int, Feed> by mutableStateOf(emptyMap())
-    private var feedLists: List<FeedList> by mutableStateOf(emptyList())
+    private var feedLists: Map<Int,FeedList> by mutableStateOf(emptyMap())
 
     var feedsUiState: FeedsUiState by mutableStateOf(FeedsUiState.Loading(feeds, feedLists))
         private set
@@ -41,7 +41,7 @@ class FeedsViewModel(private val feedsApi: FeedsApiService) : ViewModel() {
                     val feedsDeferred = async { feedsApi.getFeeds() }
                     val feedListsDeferred = async { feedsApi.getFeedLists() }
                     feeds = feedsDeferred.await().feeds.associateBy { it.id }
-                    feedLists = feedListsDeferred.await().lists
+                    feedLists = feedListsDeferred.await().lists.associateBy { it.id }
                     FeedsUiState.Success(feeds, feedLists)
                 } catch (e: IOException) {
                     Log.e("Poche", e.toString())

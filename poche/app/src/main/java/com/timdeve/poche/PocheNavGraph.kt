@@ -14,12 +14,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.timdeve.poche.network.ArticleApiService
 import com.timdeve.poche.ui.screens.article.ArticleRoute
+import com.timdeve.poche.ui.screens.feedlists.FeedListsRoute
 import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
-import com.timdeve.poche.ui.screens.home.HomeRoute
-import com.timdeve.poche.ui.screens.home.StoriesViewModel
 import com.timdeve.poche.ui.screens.login.AuthStatus
 import com.timdeve.poche.ui.screens.login.AuthViewModel
 import com.timdeve.poche.ui.screens.login.LoginRoute
+import com.timdeve.poche.ui.screens.stories.StoriesRoute
+import com.timdeve.poche.ui.screens.stories.StoriesViewModel
 import java.net.URLDecoder
 
 
@@ -35,12 +36,16 @@ fun PocheNavGraph(
     NavHost(startDestination = PocheDestinations.HOME_ROUTE, navController = navController) {
         composable(PocheDestinations.HOME_ROUTE) {
             AuthWall(authViewModel, navController) {
-                HomeRoute(storiesViewModel, feedsViewModel, navController)
+                StoriesRoute(storiesViewModel, feedsViewModel, navController)
+            }
+        }
+        composable(PocheDestinations.LISTS_ROUTE) {
+            AuthWall(authViewModel, navController) {
+               FeedListsRoute(feedsViewModel, navController)
             }
         }
         composable(
-//            "article/{pageUrl}"
-            route = "article/{pageUrl}",
+            route = "${PocheDestinations.ARTICLE_ROUTE}/{pageUrl}",
             arguments = listOf(
                 navArgument("pageUrl") { type = NavType.StringType }
             )
@@ -52,6 +57,17 @@ fun PocheNavGraph(
                     URLDecoder.decode(encodedUrl, "UTF-8"),
                     navController
                 )
+            }
+        }
+        composable(
+            route = "${PocheDestinations.STORIES_ROUTE}/{listId}",
+            arguments = listOf(
+                navArgument("listId") { type = NavType.IntType }
+            )
+        ) {
+            AuthWall(authViewModel, navController) {
+                val listId = it.arguments?.getInt("listId")
+                StoriesRoute(storiesViewModel, feedsViewModel, navController, listId)
             }
         }
         composable(PocheDestinations.LOGIN_ROUTE) {

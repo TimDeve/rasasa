@@ -24,7 +24,10 @@ data class UpdateStoryRequest(val isRead: Boolean)
 
 interface StoryApiService {
     @GET("api/v0/stories")
-    suspend fun getStories(@Query("read") read: Boolean = false): GetStoriesResponse
+    suspend fun getStories(
+        @Query("read") read: Boolean = false,
+        @Query("listId") list: Int? = null,
+    ): GetStoriesResponse
 
     @PATCH("api/v0/stories/{id}")
     suspend fun updateStory(@Path("id") id: Int, @Body patch: UpdateStoryRequest)

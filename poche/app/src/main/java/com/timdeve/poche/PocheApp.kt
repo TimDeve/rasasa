@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.timdeve.poche.network.ArticleApi
 import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
-import com.timdeve.poche.ui.screens.home.StoriesViewModel
+import com.timdeve.poche.ui.screens.stories.StoriesViewModel
 import com.timdeve.poche.ui.screens.login.AuthViewModel
 import com.timdeve.poche.ui.theme.PocheTheme
 

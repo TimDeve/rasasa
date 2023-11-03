@@ -3,7 +3,6 @@ package com.timdeve.poche
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.franmontiel.persistentcookiejar.ClearableCookieJar
@@ -15,7 +14,7 @@ import com.timdeve.poche.network.FeedsApi
 import com.timdeve.poche.network.LoginApi
 import com.timdeve.poche.network.StoriesApi
 import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
-import com.timdeve.poche.ui.screens.home.StoriesViewModel
+import com.timdeve.poche.ui.screens.stories.StoriesViewModel
 import com.timdeve.poche.ui.screens.login.AuthStatus
 import com.timdeve.poche.ui.screens.login.AuthViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

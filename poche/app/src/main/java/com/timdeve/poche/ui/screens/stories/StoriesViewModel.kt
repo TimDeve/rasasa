@@ -1,4 +1,4 @@
-package com.timdeve.poche.ui.screens.home
+package com.timdeve.poche.ui.screens.stories
 
 import android.util.Log
 import androidx.compose.runtime.getValue
@@ -28,13 +28,18 @@ class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
     var showReadStories: Boolean by mutableStateOf(false)
         private set
 
-    init {
-        getStories()
-    }
+    var currentListId: Int? by mutableStateOf(-1)
 
     fun toggleReadStories() {
         showReadStories = !showReadStories
         getStories()
+    }
+
+    fun setListId(listId: Int?) {
+        if (currentListId != listId) {
+            currentListId = listId
+            getStories()
+        }
     }
 
     fun markStoryAsRead(index: Int) {
@@ -59,7 +64,8 @@ class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
         viewModelScope.launch {
             storiesUiState = StoriesUiState.Loading(stories)
             storiesUiState = try {
-                stories = storyApi.retrofitService.getStories(showReadStories).stories
+                stories =
+                    storyApi.retrofitService.getStories(showReadStories, currentListId).stories
                 StoriesUiState.Success(stories)
             } catch (e: IOException) {
                 Log.e("Poche", e.toString())

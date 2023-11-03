@@ -1,19 +1,38 @@
-package com.timdeve.poche.ui.screens.home
+package com.timdeve.poche.ui.screens.stories
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
+import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeRoute(
+fun StoriesRoute(
     storiesViewModel: StoriesViewModel,
     feedsViewModel: FeedsViewModel,
     navController: NavHostController,
+    listId: Int? = null,
 ) {
-    HomeScreen(
-        screenTitle = "All Stories",
+    LaunchedEffect(Unit) {
+        storiesViewModel.setListId(listId)
+    }
+
+    val screenTitle = if (listId == null) {
+        "All Stories"
+    } else {
+        when (val uiState = feedsViewModel.feedsUiState) {
+            is FeedsUiState.Success -> {
+                uiState.feedLists.getOrDefault(listId, null)?.name ?: ""
+            }
+
+            else -> ""
+        }
+    }
+
+    StoriesScreen(
+        screenTitle = screenTitle,
         storiesUiState = storiesViewModel.storiesUiState,
         getStories = storiesViewModel::getStories,
         markStoryAsRead = storiesViewModel::markStoryAsRead,

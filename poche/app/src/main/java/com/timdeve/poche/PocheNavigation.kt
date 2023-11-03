@@ -6,12 +6,18 @@ object PocheDestinations {
     const val HOME_ROUTE = "home"
     const val LOGIN_ROUTE = "login"
     const val ARTICLE_ROUTE = "article"
+    const val LISTS_ROUTE = "feed-lists"
+    const val STORIES_ROUTE = "stories"
 }
 
 object PocheNavigate {
     fun article(url: String): String {
         val encodedUrl = URLEncoder.encode(url, "UTF-8")
         return "${PocheDestinations.ARTICLE_ROUTE}/$encodedUrl"
+    }
+
+    fun stories(listId: Int): String {
+        return "${PocheDestinations.STORIES_ROUTE}/$listId"
     }
 }
 

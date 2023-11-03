@@ -1,4 +1,4 @@
-package com.timdeve.poche.ui.screens.home
+package com.timdeve.poche.ui.screens.stories
 
 import android.content.Intent
 import android.content.res.Configuration
@@ -18,21 +18,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,8 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -59,7 +51,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -71,6 +62,7 @@ import com.timdeve.poche.model.Story
 import com.timdeve.poche.model.genFeeds
 import com.timdeve.poche.model.genStories
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
+import com.timdeve.poche.ui.shared.BottomBar
 import com.timdeve.poche.ui.theme.Typography
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -78,7 +70,7 @@ import kotlinx.coroutines.flow.filter
 @OptIn(ExperimentalMaterialApi::class)
 @ExperimentalMaterial3Api
 @Composable
-fun HomeScreen(
+fun StoriesScreen(
     screenTitle: String,
     storiesUiState: StoriesUiState,
     getStories: () -> Unit,
@@ -130,7 +122,7 @@ fun HomeScreen(
                 )
             }
         },
-        bottomBar = { BottomBar(bottomBarHeight) },
+        bottomBar = { BottomBar(bottomBarHeight, navController) },
         modifier = Modifier
             .nestedScroll(scrollBehavior.nestedScrollConnection)
             .background(color = Color.Transparent),
@@ -192,67 +184,14 @@ fun HomeScreen(
             PullRefreshIndicator(
                 refreshing = refreshing,
                 state = pullRefreshState,
-                modifier = modifier.align(Alignment.TopCenter).offset(y = (-64).dp),
+                modifier = modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-64).dp),
                 backgroundColor = colorScheme.surfaceVariant
             )
         }
     }
 }
-
-@Preview
-@Composable
-fun BottomBarFull() {
-    BottomBar(bottomBarHeight = 80.dp)
-}
-
-@Preview
-@Composable
-fun BottomBarHalf() {
-    BottomBar(bottomBarHeight = 40.dp)
-}
-
-@Composable
-fun BottomBar(bottomBarHeight: Dp) {
-    val shape = RoundedCornerShape(50, 50)
-    BottomAppBar(
-//        containerColor = colorScheme.primaryContainer,
-        containerColor = colorScheme.surfaceColorAtElevation(48.dp),
-        contentColor = colorScheme.primary,
-        modifier = Modifier
-            .height(bottomBarHeight)
-            .padding(start = 6.dp, end = 6.dp)
-            .shadow(4.dp, shape)
-            .clip(shape)
-    ) {
-        NavigationBarItem(
-            icon = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.Home,
-                        contentDescription = "Home",
-                    )
-                    Text("Home")
-                }
-            },
-            selected = false,
-            onClick = {}
-        )
-        NavigationBarItem(
-            icon = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.List,
-                        contentDescription = "Lists",
-                    )
-                    Text("Lists")
-                }
-            },
-            selected = false,
-            onClick = {}
-        )
-    }
-}
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(name = "Light Mode")
@@ -262,11 +201,11 @@ fun BottomBar(bottomBarHeight: Dp) {
     name = "Dark Mode"
 )
 @Composable
-fun PreviewHomeScreen() {
+fun PreviewStoriesScreen() {
     val stories = genStories()
     val (feeds, feedLists) = genFeeds()
     BaseWrapper {
-        HomeScreen(
+        StoriesScreen(
             screenTitle = "All stories",
             storiesUiState = StoriesUiState.Success(stories),
             getStories = {},
@@ -288,9 +227,9 @@ fun PreviewHomeScreen() {
 //    name = "Dark Mode"
 //)
 //@Composable
-//fun PreviewHomeScreenLoading() {
+//fun PreviewStoriesScreenLoading() {
 //    BaseWrapper {
-//        HomeScreen(
+//        StoriesScreen(
 //            screenTitle = "All stories",
 //            storiesUiState = StoriesUiState.Loading(emptyList()),
 //            getStories = {},
