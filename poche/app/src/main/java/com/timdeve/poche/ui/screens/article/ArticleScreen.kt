@@ -1,6 +1,7 @@
 package com.timdeve.poche.ui.screens.article
 
 import android.content.res.Configuration
+import android.text.Html
 import android.text.method.LinkMovementMethod
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,19 +21,22 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.text.HtmlCompat
 import com.google.android.material.textview.MaterialTextView
 import com.timdeve.poche.BaseWrapper
 import com.timdeve.poche.model.Article
+import com.timdeve.poche.model.genArticle
 import com.timdeve.poche.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,14 +44,15 @@ import com.timdeve.poche.ui.theme.Typography
 fun ArticleScreen(
     articleUiState: ArticleUiState,
     navigateUp: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
+    val appBarState = rememberTopAppBarState()
+    val scrollBehavior = enterAlwaysScrollBehavior(appBarState)
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
-                    containerColor = colorScheme.primaryContainer,
-                    titleContentColor = colorScheme.primary,
+                    containerColor = Color.Transparent,
+                    titleContentColor = colorScheme.onSurface,
                 ),
                 title = {
                     Surface(
@@ -70,11 +75,13 @@ fun ArticleScreen(
                             )
                         }
                     }
-                }
-//                scrollBehavior = scrollBehavior
+                },
+                scrollBehavior = scrollBehavior,
             )
         },
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
     ) {
         when (articleUiState) {
@@ -99,33 +106,7 @@ fun ArticleScreen(
 fun ArticleScreenSuccessPreview() {
     BaseWrapper {
         ArticleScreen(
-            articleUiState = ArticleUiState.Success(
-                Article(
-                    readable = true,
-                    title = "A most fantastic day",
-                    byline = "By me, a writer",
-                    content = """
-                        <h2>H2 Type title</h2>
-                        <p>
-                            A paragraph <i>Wow</i> This is just some great html.
-                        </p>
-                        <p>
-                            Another paragraph with a 
-                            <a href="http://example.com">Link</a> in the middle of it.
-                            This one is longer and run for more than one line. 
-                            Maybe even three lines.
-                        </p>
-                        <h3>H3 Type title</h3>
-                        <p>Small paragraph with <em>emphasised</em> text</p>
-                        <h4>H4 Type title</h4>
-                        <p>Small paragraph with <strong>strong</strong> text</p>
-                        <h5>H5 Type title</h5>
-                        <pre><code>
-                        console.log("Hello World")
-                        </code></pre>
-                    """.trimIndent()
-                )
-            ),
+            ArticleUiState.Success(genArticle()),
             {}
         )
     }
@@ -162,7 +143,7 @@ fun Success(article: Article, modifier: Modifier = Modifier) {
 
 @Composable
 fun Content(content: String, modifier: Modifier = Modifier) {
-    val spannedText = HtmlCompat.fromHtml(content, 0)
+    val spannedText = Html.fromHtml(content, 0)
     val textColor = colorScheme.onSurface
     val linkColor = colorScheme.tertiary
     AndroidView(

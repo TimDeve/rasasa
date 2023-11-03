@@ -8,7 +8,7 @@ data class Story(
     val feedId: Int,
     val title: String,
     val url: String,
-    val isRead: Boolean,
+    var isRead: Boolean,
     val publishedDate: String,
     val content: String,
 )
@@ -29,7 +29,7 @@ fun genStories(): List<Story> {
             feedId = (it * it + 1) % 5,
             title = storyTitles[it % storyTitles.size],
             url = "http://example.com",
-            isRead = false,
+            isRead = it < 3,
             publishedDate = "",
             content = "",
         )

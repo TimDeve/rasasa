@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -34,13 +36,18 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
@@ -60,6 +67,8 @@ import com.timdeve.poche.model.genFeeds
 import com.timdeve.poche.model.genStories
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.theme.Typography
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 @OptIn(ExperimentalMaterialApi::class)
 @ExperimentalMaterial3Api
@@ -68,6 +77,9 @@ fun HomeScreen(
     screenTitle: String,
     storiesUiState: StoriesUiState,
     getStories: () -> Unit,
+    markStoryAsRead: (index: Int) -> Unit,
+    showReadStories: Boolean,
+    toggleReadStories: () -> Unit,
     feedsUiState: FeedsUiState,
     getFeedsAndFeedLists: () -> Unit,
     navController: NavHostController,
@@ -78,8 +90,6 @@ fun HomeScreen(
     val bottomBarHeight = LocalDensity.current.run {
         (((64.dp.toPx() + (appBarState.heightOffset)) / 100) * 46.dp.toPx()).toDp()
     }
-
-    var showReadStories by remember { mutableStateOf(false) }
 
     val refreshing =
         storiesUiState is StoriesUiState.Loading || feedsUiState is FeedsUiState.Loading
@@ -96,21 +106,22 @@ fun HomeScreen(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
-                    containerColor = colorScheme.primaryContainer,
-                    titleContentColor = colorScheme.primary,
+                    containerColor = Color.Transparent,
+                    titleContentColor = colorScheme.onSurface,
                 ),
                 title = { Text(screenTitle) },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                showReadStories = !showReadStories
-            }) {
+            FloatingActionButton(
+                onClick = toggleReadStories,
+                containerColor = colorScheme.surfaceColorAtElevation(48.dp),
+            ) {
                 Icon(
                     painterResource(
                         if (showReadStories) R.drawable.visibility_off_fill else R.drawable.visibility_fill
-                    ), contentDescription = "More"
+                    ), contentDescription = "Toggle read stories"
                 )
             }
         },
@@ -129,25 +140,41 @@ fun HomeScreen(
             when {
                 storiesUiState is StoriesUiState.Loading &&
                         feedsUiState is FeedsUiState.Loading -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
+                    storiesUiState.stories,
+                    feedsUiState.feeds,
+                    markStoryAsRead,
+                    navController,
+                    modifier = modifier
                         .fillMaxWidth()
                 )
 
                 storiesUiState is StoriesUiState.Success &&
                         feedsUiState is FeedsUiState.Success -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
+                    storiesUiState.stories,
+                    feedsUiState.feeds,
+                    markStoryAsRead,
+                    navController,
+                    modifier = modifier
                         .fillMaxWidth()
                 )
 
                 storiesUiState is StoriesUiState.Loading &&
                         feedsUiState is FeedsUiState.Success -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
+                    storiesUiState.stories,
+                    feedsUiState.feeds,
+                    markStoryAsRead,
+                    navController,
+                    modifier = modifier
                         .fillMaxWidth()
                 )
 
                 storiesUiState is StoriesUiState.Success &&
                         feedsUiState is FeedsUiState.Loading -> ResultScreen(
-                    storiesUiState.stories, feedsUiState.feeds, navController, modifier = modifier
+                    storiesUiState.stories,
+                    feedsUiState.feeds,
+                    markStoryAsRead,
+                    navController,
+                    modifier = modifier
                         .fillMaxWidth()
                 )
 
@@ -181,11 +208,16 @@ fun BottomBarHalf() {
 
 @Composable
 fun BottomBar(bottomBarHeight: Dp) {
+    val shape = RoundedCornerShape(50, 50)
     BottomAppBar(
-        containerColor = colorScheme.primaryContainer,
+//        containerColor = colorScheme.primaryContainer,
+        containerColor = colorScheme.surfaceColorAtElevation(48.dp),
         contentColor = colorScheme.primary,
         modifier = Modifier
             .height(bottomBarHeight)
+            .padding(start = 6.dp, end = 6.dp)
+            .shadow(4.dp, shape)
+            .clip(shape)
     ) {
         NavigationBarItem(
             icon = {
@@ -233,6 +265,9 @@ fun PreviewHomeScreen() {
             screenTitle = "All stories",
             storiesUiState = StoriesUiState.Success(stories),
             getStories = {},
+            markStoryAsRead = {},
+            showReadStories = false,
+            toggleReadStories = {},
             feedsUiState = FeedsUiState.Success(feeds, feedLists),
             getFeedsAndFeedLists = {},
             navController = rememberNavController(),
@@ -240,26 +275,26 @@ fun PreviewHomeScreen() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview(name = "Light Mode")
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
-)
-@Composable
-fun PreviewHomeScreenLoading() {
-    BaseWrapper {
-        HomeScreen(
-            screenTitle = "All stories",
-            storiesUiState = StoriesUiState.Loading(emptyList()),
-            getStories = {},
-            feedsUiState = FeedsUiState.Loading(emptyMap(), emptyList()),
-            getFeedsAndFeedLists = {},
-            navController = rememberNavController(),
-        )
-    }
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Preview(name = "Light Mode")
+//@Preview(
+//    uiMode = Configuration.UI_MODE_NIGHT_YES,
+//    showBackground = true,
+//    name = "Dark Mode"
+//)
+//@Composable
+//fun PreviewHomeScreenLoading() {
+//    BaseWrapper {
+//        HomeScreen(
+//            screenTitle = "All stories",
+//            storiesUiState = StoriesUiState.Loading(emptyList()),
+//            getStories = {},
+//            feedsUiState = FeedsUiState.Loading(emptyMap(), emptyList()),
+//            getFeedsAndFeedLists = {},
+//            navController = rememberNavController(),
+//        )
+//    }
+//}
 
 @Composable
 fun ErrorScreen(modifier: Modifier = Modifier) {
@@ -280,10 +315,15 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun StoryItem(story: Story, feeds: Map<Int, Feed>, onClick: () -> Unit = {}) {
+fun StoryItem(
+    story: Story,
+    feeds: Map<Int, Feed>,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
     Surface(
         onClick,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         color = Color.Transparent,
     ) {
         Box(Modifier.padding(PaddingValues(16.dp, 12.dp))) {
@@ -291,7 +331,7 @@ fun StoryItem(story: Story, feeds: Map<Int, Feed>, onClick: () -> Unit = {}) {
                 Text(
                     text = story.title,
                     style = Typography.labelLarge.copy(
-                        color = colorScheme.onSurface,
+                        color = if (story.isRead) colorScheme.tertiary else colorScheme.onSurface,
                     ),
                     modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp)
                 )
@@ -310,15 +350,31 @@ fun StoryItem(story: Story, feeds: Map<Int, Feed>, onClick: () -> Unit = {}) {
 fun ResultScreen(
     stories: List<Story>,
     feeds: Map<Int, Feed>,
+    markStoryAsRead: (index: Int) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn {
-        items(stories) { story ->
+    val listState = rememberLazyListState()
+    var highestIndex by remember { mutableIntStateOf(Int.MIN_VALUE) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .distinctUntilChanged()
+            .filter { it > highestIndex }
+            .collect {
+                // Offset by one so the one outside of the screen is targeted
+                val targetIndex = it - 1
+                if (targetIndex >= 0) {
+                    highestIndex = targetIndex
+                    markStoryAsRead(targetIndex)
+                }
+            }
+    }
+    LazyColumn(state = listState, modifier = modifier) {
+        itemsIndexed(stories) { i, story ->
             StoryItem(
                 story,
                 feeds,
-                onClick = { navController.navigate(PocheNavigate.article(story.url)) }
+                onClick = { navController.navigate(PocheNavigate.article(story.url)) },
             )
             Divider(
                 color = colorScheme.surfaceVariant,
