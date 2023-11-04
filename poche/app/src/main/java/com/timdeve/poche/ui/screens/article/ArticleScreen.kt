@@ -1,8 +1,8 @@
 package com.timdeve.poche.ui.screens.article
 
 import android.content.res.Configuration
-import android.text.Html
 import android.text.method.LinkMovementMethod
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -25,21 +28,28 @@ import androidx.compose.material3.TopAppBarDefaults.enterAlwaysScrollBehavior
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.text.HtmlCompat
 import com.google.android.material.textview.MaterialTextView
 import com.timdeve.poche.BaseWrapper
 import com.timdeve.poche.model.Article
 import com.timdeve.poche.model.genArticle
 import com.timdeve.poche.ui.theme.Typography
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ArticleScreen(
     articleUiState: ArticleUiState,
@@ -47,6 +57,11 @@ fun ArticleScreen(
 ) {
     val appBarState = rememberTopAppBarState()
     val scrollBehavior = enterAlwaysScrollBehavior(appBarState)
+    val refreshing = articleUiState is ArticleUiState.Loading
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = refreshing,
+        onRefresh = {},
+    )
     Scaffold(
         topBar = {
             TopAppBar(
@@ -84,14 +99,24 @@ fun ArticleScreen(
             .nestedScroll(scrollBehavior.nestedScrollConnection),
         containerColor = Color.Transparent,
     ) {
-        when (articleUiState) {
-            is ArticleUiState.Loading -> Text(text = "Loading")
-            is ArticleUiState.Success -> Success(
-                articleUiState.article,
-                Modifier.padding(it)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            when (articleUiState) {
+                is ArticleUiState.Loading -> Unit
+                is ArticleUiState.Success -> Success(articleUiState.article)
+                is ArticleUiState.Error -> Failure()
+            }
+            PullRefreshIndicator(
+                refreshing = refreshing,
+                state = pullRefreshState,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-64).dp),
+                backgroundColor = colorScheme.surfaceVariant
             )
-
-            is ArticleUiState.Error -> Text(text = "Error")
         }
     }
 }
@@ -109,6 +134,33 @@ fun ArticleScreenSuccessPreview() {
             ArticleUiState.Success(genArticle()),
             {}
         )
+    }
+}
+
+@Composable
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
+@Preview(showSystemUi = true)
+fun ArticleScreenLoadingPreview() {
+    BaseWrapper {
+        ArticleScreen(
+            ArticleUiState.Loading,
+            {}
+        )
+    }
+}
+
+@Composable
+fun Failure(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        Text("An error happened", color = colorScheme.onSurface)
     }
 }
 
@@ -136,18 +188,19 @@ fun Success(article: Article, modifier: Modifier = Modifier) {
             }
             Content(article.content)
         } else {
-            Text("Article is not readable")
+            Text("Article is not readable", color = colorScheme.onSurface)
         }
     }
 }
 
 @Composable
 fun Content(content: String, modifier: Modifier = Modifier) {
-    val spannedText = Html.fromHtml(content, 0)
     val textColor = colorScheme.onSurface
     val linkColor = colorScheme.tertiary
+    var size by remember { mutableStateOf(IntSize.Zero) }
+
     AndroidView(
-        modifier = modifier,
+        modifier = modifier.onGloballyPositioned { size = it.size },
         factory = {
             MaterialTextView(it).apply {
                 movementMethod = LinkMovementMethod.getInstance()
@@ -156,7 +209,12 @@ fun Content(content: String, modifier: Modifier = Modifier) {
             }
         },
         update = {
-            it.text = spannedText
+            it.text = HtmlCompat.fromHtml(
+                content,
+                HtmlCompat.FROM_HTML_MODE_LEGACY,
+                CoilImageGetter(it, maxSize = size),
+                null
+            )
         }
     )
 }

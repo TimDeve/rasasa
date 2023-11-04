@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
@@ -281,6 +281,9 @@ fun StoryItem(
     onClick: () -> Unit = {}
 ) {
     val shareLink = linkSharer(story.url)
+    val readColor = if (story.isRead) {
+        colorScheme.onSurface.copy(alpha = 0.7F)
+    } else colorScheme.onSurface
 
     Surface(
         modifier = modifier
@@ -296,7 +299,7 @@ fun StoryItem(
                 Text(
                     text = story.title,
                     style = Typography.labelLarge.copy(
-                        color = if (story.isRead) colorScheme.tertiary else colorScheme.onSurface,
+                        color = readColor,
                     ),
                     modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp)
                 )
@@ -335,7 +338,7 @@ fun ResultScreen(
             }
     }
     LazyColumn(state = listState, modifier = modifier) {
-        itemsIndexed(stories) { i, story ->
+        items(stories) { story ->
             StoryItem(
                 story,
                 feeds,

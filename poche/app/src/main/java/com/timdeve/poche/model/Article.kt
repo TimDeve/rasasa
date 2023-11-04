@@ -14,7 +14,7 @@ data class Article(
 private const val fakeArticleContent = """
 <h2>H2 Type title</h2>
 <p>
-    A paragraph <i>Wow</i> This is just some great html.
+    A paragraph <i>wow</i> this is just some great html.
 </p>
 <p>
     Another paragraph with a 
