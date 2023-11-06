@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.timdeve.poche.network.ArticleApi
+import com.timdeve.poche.repository.ArticlesRepository
 import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
 import com.timdeve.poche.ui.screens.login.AuthViewModel
 import com.timdeve.poche.ui.screens.stories.StoriesViewModel
@@ -19,11 +19,17 @@ fun PocheApp(
     storiesViewModel: StoriesViewModel,
     authViewModel: AuthViewModel,
     feedsViewModel: FeedsViewModel,
-    articleApi: ArticleApi,
+    articlesRepository: ArticlesRepository,
 ) {
     val navController = rememberNavController()
     BaseWrapper {
-        PocheNavGraph(storiesViewModel, authViewModel, feedsViewModel, articleApi, navController)
+        PocheNavGraph(
+            storiesViewModel,
+            authViewModel,
+            feedsViewModel,
+            articlesRepository,
+            navController
+        )
     }
 }
 

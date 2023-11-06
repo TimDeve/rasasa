@@ -28,14 +28,14 @@ class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
     var showReadStories: Boolean by mutableStateOf(false)
         private set
 
-    var currentListId: Int? by mutableStateOf(-1)
+    var currentListId: Long? by mutableStateOf(-1)
 
     fun toggleReadStories() {
         showReadStories = !showReadStories
         getStories()
     }
 
-    fun setListId(listId: Int?) {
+    fun setListId(listId: Long?) {
         if (currentListId != listId) {
             currentListId = listId
             getStories()

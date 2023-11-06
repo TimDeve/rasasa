@@ -26,11 +26,11 @@ interface StoryApiService {
     @GET("api/v0/stories")
     suspend fun getStories(
         @Query("read") read: Boolean = false,
-        @Query("listId") list: Int? = null,
+        @Query("listId") list: Long? = null,
     ): GetStoriesResponse
 
     @PATCH("api/v0/stories/{id}")
-    suspend fun updateStory(@Path("id") id: Int, @Body patch: UpdateStoryRequest)
+    suspend fun updateStory(@Path("id") id: Long, @Body patch: UpdateStoryRequest)
 }
 
 class StoriesApi(client: OkHttpClient) {

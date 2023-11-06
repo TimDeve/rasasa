@@ -16,7 +16,7 @@ object PocheNavigate {
         return "${PocheDestinations.ARTICLE_ROUTE}/$encodedUrl"
     }
 
-    fun stories(listId: Int): String {
+    fun stories(listId: Long): String {
         return "${PocheDestinations.STORIES_ROUTE}/$listId"
     }
 }

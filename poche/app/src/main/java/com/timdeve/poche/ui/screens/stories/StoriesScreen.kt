@@ -60,6 +60,8 @@ import com.timdeve.poche.model.Feed
 import com.timdeve.poche.model.Story
 import com.timdeve.poche.model.genFeeds
 import com.timdeve.poche.model.genStories
+import com.timdeve.poche.persistence.FeedList
+import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.shared.BottomBar
 import com.timdeve.poche.ui.theme.Typography
@@ -202,6 +204,7 @@ fun StoriesScreen(
 fun PreviewStoriesScreen() {
     val stories = genStories()
     val (feeds, feedLists) = genFeeds()
+
     BaseWrapper {
         StoriesScreen(
             screenTitle = "All stories",
@@ -210,7 +213,9 @@ fun PreviewStoriesScreen() {
             markStoryAsRead = {},
             showReadStories = false,
             toggleReadStories = {},
-            feedsUiState = FeedsUiState.Success(feeds, feedLists),
+            feedsUiState = FeedsUiState.Success(
+                feeds,
+                feedLists.mapValues { FeedList.fromModel(it.value) }),
             getFeedsAndFeedLists = {},
             navController = rememberNavController(),
         )
@@ -274,7 +279,7 @@ fun linkSharer(url: String): () -> Unit {
 @Composable
 fun StoryItem(
     story: Story,
-    feeds: Map<Int, Feed>,
+    feeds: Map<Long, Feed>,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
@@ -315,7 +320,7 @@ fun StoryItem(
 @Composable
 fun ResultScreen(
     stories: List<Story>,
-    feeds: Map<Int, Feed>,
+    feeds: Map<Long, Feed>,
     markStoryAsRead: (index: Int) -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier

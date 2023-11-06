@@ -44,8 +44,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import com.google.android.material.textview.MaterialTextView
 import com.timdeve.poche.BaseWrapper
-import com.timdeve.poche.model.Article
 import com.timdeve.poche.model.genArticle
+import com.timdeve.poche.persistence.Article
+import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -130,7 +131,7 @@ fun ArticleScreen(
 fun ArticleScreenSuccessPreview() {
     BaseWrapper {
         ArticleScreen(
-            ArticleUiState.Success(genArticle()),
+            ArticleUiState.Success(Article.fromModel(genArticle())),
             {}
         )
     }

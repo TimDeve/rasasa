@@ -11,7 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.timdeve.poche.network.ArticleApiService
+import com.timdeve.poche.repository.ArticlesRepository
 import com.timdeve.poche.ui.screens.article.ArticleRoute
 import com.timdeve.poche.ui.screens.feedlists.FeedListsRoute
 import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
@@ -29,7 +29,7 @@ fun PocheNavGraph(
     storiesViewModel: StoriesViewModel,
     authViewModel: AuthViewModel,
     feedsViewModel: FeedsViewModel,
-    articleApiService: ArticleApiService,
+    articlesRepository: ArticlesRepository,
     navController: NavHostController = rememberNavController()
 ) {
     NavHost(startDestination = PocheDestinations.HOME_ROUTE, navController = navController) {
@@ -52,7 +52,7 @@ fun PocheNavGraph(
             AuthWall(authViewModel, navController) {
                 val encodedUrl = it.arguments?.getString("pageUrl")
                 ArticleRoute(
-                    articleApiService,
+                    articlesRepository,
                     URLDecoder.decode(encodedUrl, "UTF-8"),
                     navController
                 )
@@ -61,11 +61,11 @@ fun PocheNavGraph(
         composable(
             route = "${PocheDestinations.STORIES_ROUTE}/{listId}",
             arguments = listOf(
-                navArgument("listId") { type = NavType.IntType }
+                navArgument("listId") { type = NavType.LongType }
             )
         ) {
             AuthWall(authViewModel, navController) {
-                val listId = it.arguments?.getInt("listId")
+                val listId = it.arguments?.getLong("listId")
                 StoriesRoute(storiesViewModel, feedsViewModel, navController, listId)
             }
         }

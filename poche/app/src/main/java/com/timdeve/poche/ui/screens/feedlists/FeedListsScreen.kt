@@ -32,8 +32,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.timdeve.poche.BaseWrapper
 import com.timdeve.poche.PocheNavigate
-import com.timdeve.poche.model.FeedList
 import com.timdeve.poche.model.genFeeds
+import com.timdeve.poche.persistence.FeedList
+import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.shared.BottomBar
 
@@ -95,7 +96,7 @@ fun FeedListsScreen(
 
 @Composable
 fun Success(
-    feedLists: Map<Int, FeedList>,
+    feedLists: Map<Long, FeedList>,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -133,7 +134,10 @@ fun PreviewStoriesScreen() {
 
     BaseWrapper {
         FeedListsScreen(
-            feedsUiState = FeedsUiState.Success(feeds, feedLists),
+            feedsUiState = FeedsUiState.Success(
+                feeds,
+                feedLists.mapValues { FeedList.fromModel(it.value) },
+            ),
             navController = rememberNavController(),
         )
     }

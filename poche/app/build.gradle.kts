@@ -103,6 +103,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
     implementation("com.github.franmontiel:PersistentCookieJar:v1.0.1")
 
+    // Datetime
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
+
     // Persistence
     val roomVersion = "2.6.0"
     implementation("androidx.room:room-runtime:$roomVersion")

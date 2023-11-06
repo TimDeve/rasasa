@@ -1,15 +1,16 @@
 package com.timdeve.poche.model
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Story(
-    val id: Int,
-    val feedId: Int,
+    val id: Long,
+    val feedId: Long,
     val title: String,
     val url: String,
     var isRead: Boolean,
-    val publishedDate: String,
+    val publishedDate: Instant,
     val content: String,
 )
 
@@ -23,14 +24,14 @@ private val storyTitles = listOf(
 
 // genStories generates fake data for previews
 fun genStories(): List<Story> {
-    return IntRange(0, 200).map {
+    return LongRange(0, 200).map {
         Story(
             id = it,
             feedId = (it * it + 1) % 5,
-            title = storyTitles[it % storyTitles.size],
+            title = storyTitles[(it % storyTitles.size).toInt()],
             url = "http://example.com",
             isRead = it < 3,
-            publishedDate = "",
+            publishedDate = Instant.DISTANT_PAST,
             content = "",
         )
     }

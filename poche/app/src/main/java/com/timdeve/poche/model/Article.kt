@@ -4,11 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Article(
+    val url: String,
     val readable: Boolean,
     val title: String = "",
     val byline: String? = "",
     val content: String = "",
-    val url: String = "",
 )
 
 private const val fakeArticleContent = """
@@ -47,9 +47,10 @@ console.log("Hello World")
 
 fun genArticle(): Article {
     return Article(
+        url = "http://example.com",
         readable = true,
         title = "A most fantastic day",
         byline = "By me, a writer",
-        content = fakeArticleContent
+        content = fakeArticleContent,
     )
 }
