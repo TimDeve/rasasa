@@ -7,7 +7,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Instant
 
 @Entity(tableName = "stories")
@@ -53,12 +52,44 @@ fun Story.toModel(): com.timdeve.poche.model.Story {
 
 @Dao
 interface StoriesDao {
-    @Query("select * from stories order by published_date limit 500")
-    fun getStories(): Flow<List<Story>>
+    @Query(
+        """
+        select * 
+        from stories 
+        where is_read == coalesce(:read, 0)
+           or is_read == 0
+        order by published_date desc
+        limit 500
+    """
+    )
+    suspend fun getStories(read: Boolean): List<Story>
 
-//    @Query("select * from stories where list_id = :listId order by published_date limit 500")
-//    fun getStoriesByListId(listId: Int): Flow<List<Story>>
+    @Query(
+        """
+        select *
+        from stories as s
+        where exists(
+            select * 
+            from feed_list_feed_cross_refs as refs 
+            where refs.feed_id == s.feed_id 
+              and refs.feed_list_id == :listId
+        )
+        and (
+            is_read == coalesce(:read, 0)
+         or is_read == 0
+        )
+        order by published_date desc
+        limit 500
+    """
+    )
+    suspend fun getStoriesByListId(listId: Long, read: Boolean): List<Story>
+
+    @Query("update stories set is_read = 1 where id == :id")
+    suspend fun markStoryAsRead(id: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStories(stories: List<Story>)
+
+    @Query("delete from stories where published_date < :date")
+    suspend fun deleteStoriesOlderThan(date: Instant)
 }

@@ -6,11 +6,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.timdeve.poche.model.Feed
-import com.timdeve.poche.network.FeedsApiService
+import com.timdeve.poche.persistence.Feed
 import com.timdeve.poche.persistence.FeedList
 import com.timdeve.poche.repository.FeedsRepository
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
 import retrofit2.HttpException
@@ -28,7 +28,6 @@ sealed interface FeedsUiState {
 }
 
 class FeedsViewModel(
-    private val feedsApi: FeedsApiService,
     private val feedsRepository: FeedsRepository
 ) : ViewModel() {
     private var feeds: Map<Long, Feed> by mutableStateOf(emptyMap())
@@ -46,17 +45,18 @@ class FeedsViewModel(
             supervisorScope {
                 feedsUiState = FeedsUiState.Loading(feeds, feedLists)
                 try {
-                    val feedsDeferred = async { feedsApi.getFeeds() }
-//                    val feedListsDeferred = async { feedsApi.getFeedLists() }
+                    val feedsDeferred = async { feedsRepository.fetchFeeds() }
                     val feedListsDeferred = async { feedsRepository.fetchFeedLists() }
-                    feeds = feedsDeferred.await().feeds.associateBy { it.id }
-//                    feedLists = feedListsDeferred.await().lists.associateBy { it.id }
+                    feedsDeferred.await()
                     feedListsDeferred.await()
-                    feedsRepository.getFeedLists().collect {
-                        Log.d("Wow", it.toString())
-                        feedLists = it.associateBy { it.id }
+                    combine(
+                        feedsRepository.getFeeds(),
+                        feedsRepository.getFeedLists()
+                    ) { repoFeeds, repoLists ->
+                        feeds = repoFeeds.associateBy { it.id }
+                        feedLists = repoLists.associateBy { it.id }
                         feedsUiState = FeedsUiState.Success(feeds, feedLists)
-                    }
+                    }.collect {}
                 } catch (e: IOException) {
                     Log.e("Poche", e.toString())
                     feedsUiState = FeedsUiState.Error

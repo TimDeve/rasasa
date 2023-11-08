@@ -6,9 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.timdeve.poche.model.Story
-import com.timdeve.poche.network.StoriesApi
-import com.timdeve.poche.network.UpdateStoryRequest
+import com.timdeve.poche.persistence.Story
+import com.timdeve.poche.repository.StoriesRepository
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -19,7 +18,9 @@ sealed interface StoriesUiState {
     data class Loading(val stories: List<Story>) : StoriesUiState
 }
 
-class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
+class StoriesViewModel(
+    private val storiesRepository: StoriesRepository
+) : ViewModel() {
     var storiesUiState: StoriesUiState by mutableStateOf(StoriesUiState.Loading(emptyList()))
         private set
 
@@ -35,6 +36,12 @@ class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
         getStories()
     }
 
+    init {
+        viewModelScope.launch {
+            storiesRepository.deleteOldStories()
+        }
+    }
+
     fun setListId(listId: Long?) {
         if (currentListId != listId) {
             currentListId = listId
@@ -47,11 +54,13 @@ class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
             stories.getOrNull(index)?.let { story ->
                 try {
                     if (!story.isRead) {
-                        storyApi.retrofitService.updateStory(story.id, UpdateStoryRequest(true))
+                        storiesRepository.markStoriesAsRead(story.id)
                         story.isRead = true
+//                        storyApi.retrofitService.updateStory(story.id, UpdateStoryRequest(true))
+//                        story.isRead = true
                     }
                 } catch (e: Exception) {
-                    Log.e("Poche", e.toString())
+                    Log.e("Poche Not there", e.toString())
                 }
                 Unit
             } ?: run {
@@ -61,18 +70,17 @@ class StoriesViewModel(private val storyApi: StoriesApi) : ViewModel() {
     }
 
     fun getStories() {
+        storiesUiState = StoriesUiState.Loading(stories)
         viewModelScope.launch {
-            storiesUiState = StoriesUiState.Loading(stories)
-            storiesUiState = try {
-                stories =
-                    storyApi.retrofitService.getStories(showReadStories, currentListId).stories
-                StoriesUiState.Success(stories)
+            try {
+                stories = storiesRepository.getStories(currentListId, showReadStories)
+                storiesUiState = StoriesUiState.Success(stories)
             } catch (e: IOException) {
-                Log.e("Poche", e.toString())
-                StoriesUiState.Error
+                Log.e("Poche Here", e.toString())
+                storiesUiState = StoriesUiState.Error
             } catch (e: HttpException) {
-                Log.e("Poche", e.toString())
-                StoriesUiState.Error
+                Log.e("Poche There", e.toString())
+                storiesUiState = StoriesUiState.Error
             }
         }
     }

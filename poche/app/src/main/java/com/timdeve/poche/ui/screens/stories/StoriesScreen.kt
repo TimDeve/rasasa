@@ -56,11 +56,11 @@ import androidx.navigation.compose.rememberNavController
 import com.timdeve.poche.BaseWrapper
 import com.timdeve.poche.PocheNavigate
 import com.timdeve.poche.R
-import com.timdeve.poche.model.Feed
-import com.timdeve.poche.model.Story
 import com.timdeve.poche.model.genFeeds
 import com.timdeve.poche.model.genStories
+import com.timdeve.poche.persistence.Feed
 import com.timdeve.poche.persistence.FeedList
+import com.timdeve.poche.persistence.Story
 import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.shared.BottomBar
@@ -208,13 +208,13 @@ fun PreviewStoriesScreen() {
     BaseWrapper {
         StoriesScreen(
             screenTitle = "All stories",
-            storiesUiState = StoriesUiState.Success(stories),
+            storiesUiState = StoriesUiState.Success(stories.map { Story.fromModel(it) }),
             getStories = {},
             markStoryAsRead = {},
             showReadStories = false,
             toggleReadStories = {},
             feedsUiState = FeedsUiState.Success(
-                feeds,
+                feeds.mapValues { Feed.fromModel(it.value) },
                 feedLists.mapValues { FeedList.fromModel(it.value) }),
             getFeedsAndFeedLists = {},
             navController = rememberNavController(),

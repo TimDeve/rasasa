@@ -50,7 +50,17 @@ data class Feed(
     val id: Long,
     val name: String,
     val url: String,
-)
+) {
+    companion object
+}
+
+fun Feed.Companion.fromModel(feed: com.timdeve.poche.model.Feed): Feed {
+    return Feed(
+        feed.id,
+        feed.name,
+        feed.url,
+    )
+}
 
 @Entity(
     tableName = "feed_list_feed_cross_refs",
@@ -85,11 +95,11 @@ fun FeedList.toModel(): com.timdeve.poche.model.FeedList {
 @Dao
 abstract class FeedListsDao {
     @Transaction
-    @Query("select * from feed_lists order by id")
+    @Query("select * from feed_lists")
     abstract fun getFeedLists(): Flow<List<FeedList>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun _insertFeedLists(stories: List<FeedList>)
+    abstract suspend fun _insertFeedLists(lists: List<FeedList>)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun _insertFeedListFeedCrossRefs(crossRefs: List<FeedListFeedCrossRef>)
@@ -104,4 +114,11 @@ abstract class FeedListsDao {
         _insertFeedLists(lists)
         _insertFeedListFeedCrossRefs(crossRefs)
     }
+
+    @Transaction
+    @Query("select * from feeds order by name")
+    abstract fun getFeeds(): Flow<List<Feed>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertFeeds(feeds: List<Feed>)
 }

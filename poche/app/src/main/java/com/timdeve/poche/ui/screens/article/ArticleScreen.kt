@@ -106,7 +106,14 @@ fun ArticleScreen(
         ) {
             when (articleUiState) {
                 is ArticleUiState.Loading -> Unit
-                is ArticleUiState.Success -> Success(articleUiState.article)
+                is ArticleUiState.Success -> {
+                    if (articleUiState.article != null) {
+                        Success(articleUiState.article)
+                    } else {
+                        NoArticle()
+                    }
+                }
+
                 is ArticleUiState.Error -> Failure()
             }
             PullRefreshIndicator(
@@ -150,6 +157,17 @@ fun ArticleScreenLoadingPreview() {
             ArticleUiState.Loading,
             {}
         )
+    }
+}
+
+@Composable
+fun NoArticle(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        Text("No article available", color = colorScheme.onSurface)
     }
 }
 

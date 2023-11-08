@@ -33,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import com.timdeve.poche.BaseWrapper
 import com.timdeve.poche.PocheNavigate
 import com.timdeve.poche.model.genFeeds
+import com.timdeve.poche.persistence.Feed
 import com.timdeve.poche.persistence.FeedList
 import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
@@ -100,7 +101,7 @@ fun Success(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val feedListsList = feedLists.entries.sortedBy { it.key }.map { it.value }
+    val feedListsList = feedLists.entries.sortedBy { it.value.name }.map { it.value }
     LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
         items(feedListsList) { list ->
             Surface(
@@ -135,7 +136,7 @@ fun PreviewStoriesScreen() {
     BaseWrapper {
         FeedListsScreen(
             feedsUiState = FeedsUiState.Success(
-                feeds,
+                feeds.mapValues { Feed.fromModel(it.value) },
                 feedLists.mapValues { FeedList.fromModel(it.value) },
             ),
             navController = rememberNavController(),

@@ -17,6 +17,7 @@ import com.timdeve.poche.network.StoriesApi
 import com.timdeve.poche.persistence.PocheDatabase
 import com.timdeve.poche.repository.ArticlesRepository
 import com.timdeve.poche.repository.FeedsRepository
+import com.timdeve.poche.repository.StoriesRepository
 import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
 import com.timdeve.poche.ui.screens.login.AuthStatus
 import com.timdeve.poche.ui.screens.login.AuthViewModel
@@ -61,10 +62,11 @@ class MainActivity : ComponentActivity() {
 
         val feedsApi = FeedsApi(httpClient)
         val feedsRepository = FeedsRepository(db.feedListsDao(), feedsApi)
-        val feedsViewModel by lazy { injectViewModel { FeedsViewModel(feedsApi, feedsRepository) } }
+        val feedsViewModel by lazy { injectViewModel { FeedsViewModel(feedsRepository) } }
 
         val storyApi = StoriesApi(httpClient)
-        val storiesViewModel by lazy { injectViewModel { StoriesViewModel(storyApi) } }
+        val storiesRepository = StoriesRepository(db.storiesDao(), storyApi)
+        val storiesViewModel by lazy { injectViewModel { StoriesViewModel(storiesRepository) } }
 
         val articleApi = ArticleApi(httpClient)
         val articlesRepository = ArticlesRepository(db.articlesDao(), articleApi)

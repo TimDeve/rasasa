@@ -43,7 +43,7 @@ fun Article.toModel(): com.timdeve.poche.model.Article {
 @Dao
 interface ArticlesDao {
     @Query("select * from articles where url=:url")
-    fun getArticle(url: String): Flow<Article>
+    fun getArticle(url: String): Flow<Article?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArticle(article: Article)

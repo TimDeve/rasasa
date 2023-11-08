@@ -12,11 +12,10 @@ import com.timdeve.poche.repository.ArticlesRepository
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
-import java.net.SocketTimeoutException
 
 
 sealed interface ArticleUiState {
-    data class Success(val article: Article) : ArticleUiState
+    data class Success(val article: Article?) : ArticleUiState
     data object Loading : ArticleUiState
     data object Error : ArticleUiState
 }
@@ -52,15 +51,8 @@ class ArticleViewModel(
                     articleUiState = ArticleUiState.Success(it)
                 }
             } catch (e: IOException) {
-                if (e is SocketTimeoutException) {
-                    Log.e("Poche", "Socket timeout fallback to cache")
-                    articlesRepo.getArticle(articleUrl).collect {
-                        articleUiState = ArticleUiState.Success(it)
-                    }
-                } else {
-                    Log.e("Poche", e.toString())
-                    articleUiState = ArticleUiState.Error
-                }
+                Log.e("Poche", e.toString())
+                articleUiState = ArticleUiState.Error
             } catch (e: HttpException) {
                 Log.e("Poche", e.toString())
                 articleUiState = ArticleUiState.Error
