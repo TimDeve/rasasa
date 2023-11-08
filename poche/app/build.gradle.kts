@@ -106,6 +106,9 @@ dependencies {
     // Datetime
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
 
+    // Workers
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
+
     // Persistence
     val roomVersion = "2.6.0"
     implementation("androidx.room:room-runtime:$roomVersion")

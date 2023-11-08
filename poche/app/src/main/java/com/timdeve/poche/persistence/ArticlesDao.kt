@@ -6,7 +6,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
-import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "articles")
 data class Article(
@@ -43,7 +42,7 @@ fun Article.toModel(): com.timdeve.poche.model.Article {
 @Dao
 interface ArticlesDao {
     @Query("select * from articles where url=:url")
-    fun getArticle(url: String): Flow<Article?>
+    suspend fun getArticle(url: String): Article?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArticle(article: Article)

@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.room.Room
 import com.franmontiel.persistentcookiejar.ClearableCookieJar
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
@@ -32,6 +31,7 @@ import kotlin.time.toJavaDuration
 
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,10 +52,7 @@ class MainActivity : ComponentActivity() {
             .cookieJar(cookieJar)
             .build()
 
-        val db = Room.databaseBuilder(
-            applicationContext,
-            PocheDatabase::class.java, "database-name"
-        ).build()
+        val db = PocheDatabase.make(applicationContext)
 
         val loginApi = LoginApi(httpClient)
         val authViewModel by lazy { injectViewModel { AuthViewModel(loginApi, authStatus) } }

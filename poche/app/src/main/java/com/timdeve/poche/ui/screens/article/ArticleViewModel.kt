@@ -45,17 +45,16 @@ class ArticleViewModel(
     private fun getArticle() {
         viewModelScope.launch {
             articleUiState = ArticleUiState.Loading
-            try {
+            articleUiState = try {
                 articlesRepo.fetchArticle(articleUrl)
-                articlesRepo.getArticle(articleUrl).collect {
-                    articleUiState = ArticleUiState.Success(it)
-                }
+                val article = articlesRepo.getArticle(articleUrl)
+                ArticleUiState.Success(article)
             } catch (e: IOException) {
                 Log.e("Poche", e.toString())
-                articleUiState = ArticleUiState.Error
+                ArticleUiState.Error
             } catch (e: HttpException) {
                 Log.e("Poche", e.toString())
-                articleUiState = ArticleUiState.Error
+                ArticleUiState.Error
             }
         }
     }

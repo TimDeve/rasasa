@@ -5,20 +5,21 @@ import com.timdeve.poche.network.swallowOfflineExceptions
 import com.timdeve.poche.persistence.Article
 import com.timdeve.poche.persistence.ArticlesDao
 import com.timdeve.poche.persistence.fromModel
-import kotlinx.coroutines.flow.Flow
 
 class ArticlesRepository(
     private val articlesDao: ArticlesDao,
     private val articleApiService: ArticleApiService
 ) {
-    fun getArticle(url: String): Flow<Article?> {
+    suspend fun getArticle(url: String): Article? {
         return articlesDao.getArticle(url)
     }
 
     suspend fun fetchArticle(url: String) {
         swallowOfflineExceptions {
-            val article = articleApiService.getArticle(url)
-            articlesDao.insertArticle(Article.fromModel(article))
+            if (getArticle(url) == null) {
+                val article = articleApiService.getArticle(url)
+                articlesDao.insertArticle(Article.fromModel(article))
+            }
         }
     }
 }
