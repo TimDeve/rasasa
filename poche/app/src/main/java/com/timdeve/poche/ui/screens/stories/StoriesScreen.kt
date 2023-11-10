@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +16,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -38,11 +45,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +73,7 @@ import com.timdeve.poche.persistence.Story
 import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.shared.BottomBar
+import com.timdeve.poche.ui.shared.HtmlContent
 import com.timdeve.poche.ui.theme.Typography
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -288,6 +298,8 @@ fun StoryItem(
         colorScheme.onSurface.copy(alpha = 0.7F)
     } else colorScheme.onSurface
 
+    var showContent by remember { mutableStateOf(false) }
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -297,21 +309,57 @@ fun StoryItem(
             ),
         color = Color.Transparent,
     ) {
-        Box(Modifier.padding(PaddingValues(16.dp, 12.dp))) {
-            Column {
-                Text(
-                    text = story.title,
-                    style = Typography.labelLarge.copy(
-                        color = readColor,
-                    ),
-                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp)
+        Column {
+
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .padding(PaddingValues(16.dp, 12.dp))
+                    .fillMaxWidth()
+            ) {
+                Column(modifier.fillMaxWidth(.85F)) {
+                    Text(
+                        text = story.title,
+                        style = Typography.labelLarge.copy(
+                            color = readColor,
+                        ),
+                        modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 4.dp)
+                    )
+                    Text(
+                        text = feeds[story.feedId]?.name ?: "Feed id '${story.feedId}' Not Found",
+                        style = Typography.bodyMedium.copy(
+                            color = colorScheme.onSurfaceVariant,
+                        ),
+                    )
+                }
+
+                Icon(
+                    if (showContent)
+                        Icons.Default.KeyboardArrowUp else
+                        Icons.Default.KeyboardArrowDown,
+                    contentDescription = "Expand",
+                    tint = readColor,
+                    modifier = Modifier
+                        .width(32.dp)
+                        .height(32.dp)
+                        .clip(CircleShape)
+                        .clickable { showContent = !showContent }
                 )
-                Text(
-                    text = feeds[story.feedId]?.name ?: "Feed id '${story.feedId}' Not Found",
-                    style = Typography.bodyMedium.copy(
-                        color = colorScheme.onSurfaceVariant,
-                    ),
-                )
+            }
+            if (showContent) {
+                Row(
+                    modifier = Modifier
+                        .padding(top = 0.dp, start = 8.dp, end = 8.dp, bottom = 16.dp)
+                        .clip(RoundedCornerShape(20.dp, 20.dp, 20.dp, 20.dp))
+                ) {
+                    HtmlContent(
+                        content = story.content,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(colorScheme.surfaceColorAtElevation(8.dp))
+                            .padding(8.dp, 12.dp),
+                    )
+                }
             }
         }
     }

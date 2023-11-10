@@ -1,7 +1,6 @@
 package com.timdeve.poche.ui.screens.article
 
 import android.content.res.Configuration
-import android.text.method.LinkMovementMethod
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,26 +26,17 @@ import androidx.compose.material3.pullrefresh.PullRefreshIndicator
 import androidx.compose.material3.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.text.HtmlCompat
-import com.google.android.material.textview.MaterialTextView
 import com.timdeve.poche.BaseWrapper
 import com.timdeve.poche.model.genArticle
 import com.timdeve.poche.persistence.Article
 import com.timdeve.poche.persistence.fromModel
+import com.timdeve.poche.ui.shared.HtmlContent
 import com.timdeve.poche.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -200,39 +190,14 @@ fun Success(article: Article, modifier: Modifier = Modifier) {
             // TODO: Replace with a domain only text
             // Text(text = article.url)
             if (article.byline.orEmpty().isNotEmpty()) {
-                Content(
+                HtmlContent(
                     "<h5>" + article.byline.orEmpty() + "</h5>",
                 )
             }
-            Content(article.content)
+            HtmlContent(article.content)
         } else {
             Text("Article is not readable", color = colorScheme.onSurface)
         }
     }
 }
 
-@Composable
-fun Content(content: String, modifier: Modifier = Modifier) {
-    val textColor = colorScheme.onSurface
-    val linkColor = colorScheme.tertiary
-    var size by remember { mutableStateOf(IntSize.Zero) }
-
-    AndroidView(
-        modifier = modifier.onGloballyPositioned { size = it.size },
-        factory = {
-            MaterialTextView(it).apply {
-                movementMethod = LinkMovementMethod.getInstance()
-                setTextColor(textColor.toArgb())
-                setLinkTextColor(linkColor.toArgb())
-            }
-        },
-        update = {
-            it.text = HtmlCompat.fromHtml(
-                content,
-                HtmlCompat.FROM_HTML_MODE_LEGACY,
-                CoilImageGetter(it, maxSize = size),
-                null
-            )
-        }
-    )
-}

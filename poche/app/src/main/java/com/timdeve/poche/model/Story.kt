@@ -32,7 +32,7 @@ fun genStories(): List<Story> {
             url = "http://example.com",
             isRead = it < 3,
             publishedDate = Instant.DISTANT_PAST,
-            content = "",
+            content = "<h3>Maybe a small title</h3><p>Some html content</p>",
         )
     }
 }
