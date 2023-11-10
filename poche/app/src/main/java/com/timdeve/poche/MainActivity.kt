@@ -35,6 +35,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        CacheWorker.schedule(this)
+
         val authStatus = MutableStateFlow<AuthStatus>(AuthStatus.LoggedIn)
 
         val cookieJar: ClearableCookieJar =
