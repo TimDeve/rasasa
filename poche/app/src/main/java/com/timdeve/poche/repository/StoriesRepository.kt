@@ -10,7 +10,18 @@ import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 
 class StoriesRepository(private val storiesDao: StoriesDao, private val storiesApi: StoriesApi) {
-    suspend fun getStories(listId: Long? = null, read: Boolean = false): List<Story> {
+    suspend fun getStories(
+        listId: Long? = null,
+        read: Boolean = false,
+        cachedOnly: Boolean = false
+    ): List<Story> {
+        if (cachedOnly) {
+            if (listId != null) {
+                return storiesDao.getCachedStoriesByListId(listId, read)
+            }
+            return storiesDao.getCachedStories(read)
+        }
+
         swallowOfflineExceptions {
             val res = storiesApi.retrofitService.getStories(read, listId)
             storiesDao.insertStories(res.stories.map { Story.fromModel(it) })

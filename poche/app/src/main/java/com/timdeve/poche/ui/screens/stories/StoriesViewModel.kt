@@ -29,10 +29,18 @@ class StoriesViewModel(
     var showReadStories: Boolean by mutableStateOf(false)
         private set
 
+    var showCachedOnly: Boolean by mutableStateOf(false)
+        private set
+
     var currentListId: Long? by mutableStateOf(-1)
 
     fun toggleReadStories() {
         showReadStories = !showReadStories
+        getStories()
+    }
+
+    fun toggleCachedOnly() {
+        showCachedOnly = !showCachedOnly
         getStories()
     }
 
@@ -73,7 +81,8 @@ class StoriesViewModel(
         storiesUiState = StoriesUiState.Loading(stories)
         viewModelScope.launch {
             try {
-                stories = storiesRepository.getStories(currentListId, showReadStories)
+                stories =
+                    storiesRepository.getStories(currentListId, showReadStories, showCachedOnly)
                 storiesUiState = StoriesUiState.Success(stories)
             } catch (e: IOException) {
                 Log.e("Poche Here", e.toString())

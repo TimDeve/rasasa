@@ -38,6 +38,8 @@ fun StoriesRoute(
         markStoryAsRead = storiesViewModel::markStoryAsRead,
         showReadStories = storiesViewModel.showReadStories,
         toggleReadStories = storiesViewModel::toggleReadStories,
+        showCachedOnly = storiesViewModel.showCachedOnly,
+        toggleCachedOnly = storiesViewModel::toggleCachedOnly,
         feedsUiState = feedsViewModel.feedsUiState,
         getFeedsAndFeedLists = feedsViewModel::getFeedsAndFeedLists,
         navController = navController,

@@ -84,6 +84,50 @@ interface StoriesDao {
     )
     suspend fun getStoriesByListId(listId: Long, read: Boolean): List<Story>
 
+    @Query(
+        """
+        select * 
+        from stories as s
+        where exists(
+            select * 
+            from articles as a
+            where a.url == s.url
+        )
+        and (
+            is_read == coalesce(:read, 0)
+         or is_read == 0
+        )
+        order by published_date desc
+        limit 500
+    """
+    )
+    suspend fun getCachedStories(read: Boolean): List<Story>
+
+    @Query(
+        """
+        select *
+        from stories as s
+        where exists(
+            select * 
+            from feed_list_feed_cross_refs as refs 
+            where refs.feed_id == s.feed_id 
+              and refs.feed_list_id == :listId
+        )
+        and exists(
+            select * 
+            from articles as a
+            where a.url == s.url
+        )
+        and (
+            is_read == coalesce(:read, 0)
+         or is_read == 0
+        )
+        order by published_date desc
+        limit 500
+    """
+    )
+    suspend fun getCachedStoriesByListId(listId: Long, read: Boolean): List<Story>
+
     @Query("update stories set is_read = 1 where id == :id")
     suspend fun markStoryAsRead(id: Long)
 

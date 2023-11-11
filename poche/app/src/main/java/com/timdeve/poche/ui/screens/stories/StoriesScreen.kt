@@ -89,10 +89,12 @@ fun StoriesScreen(
     markStoryAsRead: (index: Int) -> Unit,
     showReadStories: Boolean,
     toggleReadStories: () -> Unit,
+    showCachedOnly: Boolean,
+    toggleCachedOnly: () -> Unit,
     feedsUiState: FeedsUiState,
     getFeedsAndFeedLists: () -> Unit,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val appBarState = rememberTopAppBarState()
     val scrollBehavior = enterAlwaysScrollBehavior(appBarState)
@@ -125,7 +127,10 @@ fun StoriesScreen(
             )
         },
         floatingActionButton = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.offset(x = 80.dp * appBarState.collapsedFraction)
+            ) {
                 FloatingActionButton(
                     onClick = { CacheWorker.schedule(ctx, 0, false) },
                     containerColor = colorScheme.surfaceColorAtElevation(48.dp),
@@ -135,9 +140,24 @@ fun StoriesScreen(
                 ) {
                     Icon(
                         painterResource(
-                            R.drawable.download_for_offline
+                            R.drawable.icon_download_for_offline
                         ),
                         contentDescription = "Toggle read stories",
+                        tint = colorScheme.onSurfaceVariant,
+                    )
+                }
+                FloatingActionButton(
+                    onClick = toggleCachedOnly,
+                    containerColor = colorScheme.surfaceColorAtElevation(48.dp),
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .size(42.dp)
+                ) {
+                    Icon(
+                        painterResource(
+                            if (showCachedOnly) R.drawable.icon_public_off else R.drawable.icon_public
+                        ),
+                        contentDescription = "Toggle cached stories",
                         tint = colorScheme.onSurfaceVariant,
                     )
                 }
@@ -252,6 +272,8 @@ fun PreviewStoriesScreen() {
                 feedLists.mapValues { FeedList.fromModel(it.value) }),
             getFeedsAndFeedLists = {},
             navController = rememberNavController(),
+            showCachedOnly = true,
+            toggleCachedOnly = {},
         )
     }
 }
