@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -63,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.timdeve.poche.BaseWrapper
+import com.timdeve.poche.CacheWorker
 import com.timdeve.poche.PocheNavigate
 import com.timdeve.poche.R
 import com.timdeve.poche.model.genFeeds
@@ -109,6 +111,8 @@ fun StoriesScreen(
         },
     )
 
+    val ctx = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -121,15 +125,35 @@ fun StoriesScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = toggleReadStories,
-                containerColor = colorScheme.surfaceColorAtElevation(48.dp),
-            ) {
-                Icon(
-                    painterResource(
-                        if (showReadStories) R.drawable.visibility_off_fill else R.drawable.visibility_fill
-                    ), contentDescription = "Toggle read stories"
-                )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                FloatingActionButton(
+                    onClick = { CacheWorker.schedule(ctx, 0, false) },
+                    containerColor = colorScheme.surfaceColorAtElevation(48.dp),
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .size(42.dp)
+                ) {
+                    Icon(
+                        painterResource(
+                            R.drawable.download_for_offline
+                        ),
+                        contentDescription = "Toggle read stories",
+                        tint = colorScheme.onSurfaceVariant,
+                    )
+                }
+                FloatingActionButton(
+                    onClick = toggleReadStories,
+                    containerColor = colorScheme.surfaceColorAtElevation(48.dp),
+
+                    ) {
+                    Icon(
+                        painterResource(
+                            if (showReadStories) R.drawable.visibility_off_fill else R.drawable.visibility_fill
+                        ),
+                        contentDescription = "Toggle read stories",
+                        tint = colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         },
         bottomBar = { BottomBar(bottomBarHeight, navController) },

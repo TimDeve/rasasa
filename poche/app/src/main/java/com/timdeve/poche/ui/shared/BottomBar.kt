@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
@@ -19,13 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.timdeve.poche.CacheWorker
 import com.timdeve.poche.PocheDestinations
 
 @Preview
@@ -42,7 +39,6 @@ fun BottomBarHalf() {
 
 @Composable
 fun BottomBar(bottomBarHeight: Dp, navController: NavHostController = rememberNavController()) {
-    val ctx = LocalContext.current
     val shape = RoundedCornerShape(50, 50)
     BottomAppBar(
         containerColor = colorScheme.surfaceColorAtElevation(48.dp),
@@ -83,19 +79,6 @@ fun BottomBar(bottomBarHeight: Dp, navController: NavHostController = rememberNa
             },
             selected = false,
             onClick = { navController.navigate(PocheDestinations.LISTS_ROUTE) }
-        )
-        NavigationBarItem(
-            icon = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Cache",
-                    )
-                    Text("Cache")
-                }
-            },
-            selected = false,
-            onClick = { CacheWorker.schedule(ctx, 0, false) }
         )
     }
 }

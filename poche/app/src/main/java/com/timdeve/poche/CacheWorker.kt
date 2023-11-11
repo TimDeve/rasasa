@@ -4,9 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -30,18 +28,35 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
-const val TAG = "daily-worker"
-const val CHANNEL_ID = "$TAG-channel-id"
+private const val TAG = "cache-request"
+private const val WORKER_NAME = "$TAG-worker-name"
+private const val CHANNEL_ID = "$TAG-channel-id"
+
+// Static NOTIFICATION_ID so that new notifications take over older ones
+private const val NOTIFICATION_ID = 0x90c4e
 
 class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
-    private val notificationId = 1337
-
     init {
         createNotificationChannel()
     }
 
-    @RequiresApi(Build.VERSION_CODES.Q)
     override suspend fun doWork(): Result {
+        try {
+            cacheStoriesAndArticle()
+        } catch (e: Exception) {
+            createNotification(
+                notificationTitle = "Uncaught Exception while Caching",
+                notificationBody = e.toString(),
+                clear = true,
+            )
+            Log.e("CacheWorker", "Uncaught Exception when caching: $e")
+        }
+
+        schedule(applicationContext)
+        return Result.success()
+    }
+
+    private suspend fun cacheStoriesAndArticle() {
         val cookieJar: ClearableCookieJar =
             PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(applicationContext))
 
@@ -62,9 +77,16 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         var errors = 0
         val stories = storiesRepository.getStories()
         stories.forEachIndexed { i, story ->
-            createNotification(i, stories.size, story.title)
+            if (isStopped) {
+                clearNotification()
+                return
+            }
             try {
-                articlesRepository.fetchArticle(story.url)
+                val article = articlesRepository.getArticle(story.url)
+                if (article == null) {
+                    createNotification(story.title, progressTarget = stories.size, progress = i)
+                    articlesRepository.fetchArticle(story.url)
+                }
             } catch (e: Exception) {
                 errors++
                 Log.e("CacheWorker", "Exception when fetching article: $e")
@@ -72,13 +94,10 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         }
 
         createNotification(
-            stories.size + 1,
-            stories.size,
             if (errors > 0) "Finished with $errors errors" else "Done",
+            notificationTitle = "Cached Stories",
+            clear = true,
         )
-
-        schedule(applicationContext)
-        return Result.success()
     }
 
     private fun createNotificationChannel() {
@@ -93,41 +112,56 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         notificationManager.createNotificationChannel(mChannel)
     }
 
-    private fun createNotification(downloadProgress: Int, storiesSize: Int, storyTitle: String) {
+    private fun clearNotification() {
+        val notificationManager =
+            applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
+    }
+
+    private fun createNotification(
+        notificationBody: String,
+        notificationTitle: String = "Caching Stories...",
+        progressTarget: Int = 0,
+        progress: Int = 0,
+        clear: Boolean = false
+    ) {
         val notificationManager =
             applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        val cancelText = "Cancel"
-        val cancelPendingIntent =
-            WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
-
-        val action = NotificationCompat.Action.Builder(
-            R.drawable.notification_icon,
-            cancelText,
-            cancelPendingIntent
-        ).build()
+        if (clear) {
+            clearNotification()
+        }
 
         val notification = NotificationCompat.Builder(
             applicationContext,
             CHANNEL_ID
         )
-            .setContentText(storyTitle)
+            .setContentTitle(notificationTitle)
+            .setContentText(notificationBody)
             .setSmallIcon(R.drawable.notification_icon)
             .setSilent(true)
 
-        if (downloadProgress <= storiesSize) {
+        if (progressTarget > 0) {
+            val cancelText = "Cancel"
+            val cancelPendingIntent =
+                WorkManager.getInstance(applicationContext).createCancelPendingIntent(id)
+
+            val action = NotificationCompat.Action.Builder(
+                R.drawable.notification_icon,
+                cancelText,
+                cancelPendingIntent
+            ).build()
+
             notification.addAction(action)
-                .setContentTitle("Caching Stories...")
-                .setProgress(storiesSize, downloadProgress, false)
+                .setProgress(progressTarget, progress, false)
                 .setOngoing(true)
-        } else {
-            notification.setContentTitle("Cached Stories")
         }
 
-        notificationManager.notify(notificationId, notification.build())
+        notificationManager.notify(NOTIFICATION_ID, notification.build())
     }
 
     companion object {
+
         fun schedule(ctx: Context, delay: Long = diffToTargetTime(), constrain: Boolean = true) {
 
             val dailyWorkRequest = OneTimeWorkRequestBuilder<CacheWorker>()
@@ -144,7 +178,11 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             }
 
             WorkManager.getInstance(ctx)
-                .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, dailyWorkRequest.build())
+                .enqueueUniqueWork(
+                    WORKER_NAME,
+                    ExistingWorkPolicy.REPLACE,
+                    dailyWorkRequest.build()
+                )
         }
 
         private fun diffToTargetTime(): Long {
