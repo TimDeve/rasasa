@@ -44,12 +44,6 @@ class StoriesViewModel(
         getStories()
     }
 
-    init {
-        viewModelScope.launch {
-            storiesRepository.deleteOldStories()
-        }
-    }
-
     fun setListId(listId: Long?) {
         if (currentListId != listId) {
             currentListId = listId

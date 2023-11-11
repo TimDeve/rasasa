@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import com.google.android.material.textview.MaterialTextView
-import com.timdeve.poche.ui.screens.article.CoilImageGetter
 
 @Composable
 fun HtmlContent(content: String, modifier: Modifier = Modifier) {

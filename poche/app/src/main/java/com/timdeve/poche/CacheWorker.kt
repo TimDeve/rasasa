@@ -18,9 +18,12 @@ import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.timdeve.poche.network.ArticleApi
+import com.timdeve.poche.network.FeedsApi
 import com.timdeve.poche.network.StoriesApi
 import com.timdeve.poche.persistence.PocheDatabase
 import com.timdeve.poche.repository.ArticlesRepository
+import com.timdeve.poche.repository.FeedsRepository
+import com.timdeve.poche.repository.Repositories
 import com.timdeve.poche.repository.StoriesRepository
 import okhttp3.OkHttpClient
 import java.util.Calendar
@@ -52,40 +55,36 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             Log.e("CacheWorker", "Uncaught Exception when caching: $e")
         }
 
+        try {
+            clearOldCachedData()
+        } catch (e: Exception) {
+            createNotification(
+                notificationTitle = "Uncaught Exception while cleaning up",
+                notificationBody = e.toString(),
+                clearPrevious = true,
+            )
+            Log.e("CacheWorker", "Uncaught Exception when cleaning up: $e")
+        }
+
         schedule(applicationContext)
         return Result.success()
     }
 
     private suspend fun cacheStoriesAndArticle() {
-        val cookieJar: ClearableCookieJar =
-            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(applicationContext))
-
-        val httpClient: OkHttpClient = OkHttpClient.Builder()
-            .callTimeout(20.seconds.toJavaDuration())
-            .connectTimeout(5.seconds.toJavaDuration())
-            .cookieJar(cookieJar)
-            .build()
-
-        val db = PocheDatabase.make(applicationContext)
-
-        val storyApi = StoriesApi(httpClient)
-        val storiesRepository = StoriesRepository(db.storiesDao(), storyApi)
-
-        val articleApi = ArticleApi(httpClient)
-        val articlesRepository = ArticlesRepository(db.articlesDao(), articleApi)
+        val repos = makeRepos()
 
         var errors = 0
-        val stories = storiesRepository.getStories()
+        val stories = repos.stories.getStories()
         stories.forEachIndexed { i, story ->
             if (isStopped) {
                 clearNotification()
                 return
             }
             try {
-                val article = articlesRepository.getArticle(story.url)
+                val article = repos.articles.getArticle(story.url)
                 if (article == null) {
                     createNotification(story.title, progressTarget = stories.size, progress = i)
-                    articlesRepository.fetchArticle(story.url)
+                    repos.articles.fetchArticle(story.url)
                 }
             } catch (e: Exception) {
                 errors++
@@ -97,6 +96,41 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             if (errors > 0) "Finished with $errors errors" else "Done",
             notificationTitle = "Cached Stories",
             clearPrevious = true,
+        )
+    }
+
+    private suspend fun clearOldCachedData() {
+        val repos = makeRepos()
+
+        repos.stories.deleteOldStories()
+        repos.articles.deleteArticlesWithoutStories()
+    }
+
+    private fun makeRepos(): Repositories {
+        val cookieJar: ClearableCookieJar =
+            PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(applicationContext))
+
+        val httpClient: OkHttpClient = OkHttpClient.Builder()
+            .callTimeout(20.seconds.toJavaDuration())
+            .connectTimeout(5.seconds.toJavaDuration())
+            .cookieJar(cookieJar)
+            .build()
+
+        val db = PocheDatabase.make(applicationContext)
+
+        val articleApi = ArticleApi(httpClient)
+        val articlesRepository = ArticlesRepository(db.articlesDao(), articleApi)
+
+        val feedsApi = FeedsApi(httpClient)
+        val feedsRepository = FeedsRepository(db.feedListsDao(), feedsApi)
+
+        val storyApi = StoriesApi(httpClient)
+        val storiesRepository = StoriesRepository(db.storiesDao(), storyApi)
+
+        return Repositories(
+            articlesRepository,
+            feedsRepository,
+            storiesRepository,
         )
     }
 

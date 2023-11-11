@@ -1,4 +1,4 @@
-package com.timdeve.poche.ui.screens.article
+package com.timdeve.poche.ui.shared
 
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable

@@ -46,4 +46,7 @@ interface ArticlesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArticle(article: Article)
+
+    @Query("delete from articles where not exists (select * from stories where url = articles.url)")
+    suspend fun deleteArticlesWithoutStories()
 }

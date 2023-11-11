@@ -22,5 +22,9 @@ class ArticlesRepository(
             }
         }
     }
+
+    suspend fun deleteArticlesWithoutStories() {
+        articlesDao.deleteArticlesWithoutStories()
+    }
 }
 
