@@ -47,7 +47,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
             createNotification(
                 notificationTitle = "Uncaught Exception while Caching",
                 notificationBody = e.toString(),
-                clear = true,
+                clearPrevious = true,
             )
             Log.e("CacheWorker", "Uncaught Exception when caching: $e")
         }
@@ -96,7 +96,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         createNotification(
             if (errors > 0) "Finished with $errors errors" else "Done",
             notificationTitle = "Cached Stories",
-            clear = true,
+            clearPrevious = true,
         )
     }
 
@@ -123,12 +123,12 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         notificationTitle: String = "Caching Stories...",
         progressTarget: Int = 0,
         progress: Int = 0,
-        clear: Boolean = false
+        clearPrevious: Boolean = false
     ) {
         val notificationManager =
             applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
-        if (clear) {
+        if (clearPrevious) {
             clearNotification()
         }
 

@@ -56,7 +56,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -74,6 +73,7 @@ import com.timdeve.poche.persistence.FeedList
 import com.timdeve.poche.persistence.Story
 import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
+import com.timdeve.poche.ui.shared.BOTTOM_BAR_HEIGHT
 import com.timdeve.poche.ui.shared.BottomBar
 import com.timdeve.poche.ui.shared.HtmlContent
 import com.timdeve.poche.ui.theme.Typography
@@ -98,9 +98,7 @@ fun StoriesScreen(
 ) {
     val appBarState = rememberTopAppBarState()
     val scrollBehavior = enterAlwaysScrollBehavior(appBarState)
-    val bottomBarHeight = LocalDensity.current.run {
-        (((64.dp.toPx() + (appBarState.heightOffset)) / 100) * 46.dp.toPx()).toDp()
-    }
+    val bottomBarHeight = BOTTOM_BAR_HEIGHT - BOTTOM_BAR_HEIGHT * appBarState.collapsedFraction
 
     val refreshing =
         storiesUiState is StoriesUiState.Loading || feedsUiState is FeedsUiState.Loading
@@ -115,135 +113,144 @@ fun StoriesScreen(
 
     val ctx = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                colors = topAppBarColors(
-                    containerColor = Color.Transparent,
-                    titleContentColor = colorScheme.onSurface,
-                ),
-                title = { Text(screenTitle) },
-                scrollBehavior = scrollBehavior,
-            )
-        },
-        floatingActionButton = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.offset(x = 80.dp * appBarState.collapsedFraction)
-            ) {
-                FloatingActionButton(
-                    onClick = { CacheWorker.schedule(ctx, 0, false) },
-                    containerColor = colorScheme.surfaceColorAtElevation(48.dp),
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .size(42.dp)
+    Box {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    colors = topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = colorScheme.onSurface,
+                    ),
+                    title = { Text(screenTitle) },
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+            floatingActionButton = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.offset(y = -BOTTOM_BAR_HEIGHT)
                 ) {
-                    Icon(
-                        painterResource(
-                            R.drawable.icon_download_for_offline
-                        ),
-                        contentDescription = "Toggle read stories",
-                        tint = colorScheme.onSurfaceVariant,
-                    )
-                }
-                FloatingActionButton(
-                    onClick = toggleCachedOnly,
-                    containerColor = colorScheme.surfaceColorAtElevation(48.dp),
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .size(42.dp)
-                ) {
-                    Icon(
-                        painterResource(
-                            if (showCachedOnly) R.drawable.icon_public_off else R.drawable.icon_public
-                        ),
-                        contentDescription = "Toggle cached stories",
-                        tint = colorScheme.onSurfaceVariant,
-                    )
-                }
-                FloatingActionButton(
-                    onClick = toggleReadStories,
-                    containerColor = colorScheme.surfaceColorAtElevation(48.dp),
-
+                    FloatingActionButton(
+                        onClick = { CacheWorker.schedule(ctx, 0, false) },
+                        containerColor = colorScheme.surfaceColorAtElevation(48.dp),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .offset(x = 120.dp * appBarState.collapsedFraction)
+                            .size(42.dp)
                     ) {
-                    Icon(
-                        painterResource(
-                            if (showReadStories) R.drawable.visibility_off_fill else R.drawable.visibility_fill
-                        ),
-                        contentDescription = "Toggle read stories",
-                        tint = colorScheme.onSurfaceVariant,
+                        Icon(
+                            painterResource(R.drawable.icon_download_for_offline),
+                            contentDescription = "Cache stories",
+                            tint = colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    FloatingActionButton(
+                        onClick = toggleCachedOnly,
+                        containerColor = colorScheme.surfaceColorAtElevation(48.dp),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .offset(x = 100.dp * appBarState.collapsedFraction)
+                            .size(42.dp)
+                    ) {
+                        Icon(
+                            painterResource(
+                                if (showCachedOnly) R.drawable.icon_public_off else R.drawable.icon_public
+                            ),
+                            contentDescription = "Toggle cached stories",
+                            tint = colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    FloatingActionButton(
+                        onClick = toggleReadStories,
+                        containerColor = colorScheme.surfaceColorAtElevation(48.dp),
+                        modifier = Modifier
+                            .offset(x = 80.dp * appBarState.collapsedFraction)
+                    ) {
+                        Icon(
+                            painterResource(
+                                if (showReadStories) R.drawable.visibility_off_fill else R.drawable.visibility_fill
+                            ),
+                            contentDescription = "Toggle read stories",
+                            tint = colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            },
+            modifier = Modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection)
+                .background(color = Color.Transparent),
+            containerColor = Color.Transparent
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+                    .pullRefresh(pullRefreshState)
+            ) {
+                when {
+                    storiesUiState is StoriesUiState.Loading &&
+                            feedsUiState is FeedsUiState.Loading -> ResultScreen(
+                        storiesUiState.stories,
+                        feedsUiState.feeds,
+                        markStoryAsRead,
+                        navController,
+                        modifier = modifier
+                            .fillMaxWidth()
+                    )
+
+                    storiesUiState is StoriesUiState.Success &&
+                            feedsUiState is FeedsUiState.Success -> ResultScreen(
+                        storiesUiState.stories,
+                        feedsUiState.feeds,
+                        markStoryAsRead,
+                        navController,
+                        modifier = modifier
+                            .fillMaxWidth()
+                    )
+
+                    storiesUiState is StoriesUiState.Loading &&
+                            feedsUiState is FeedsUiState.Success -> ResultScreen(
+                        storiesUiState.stories,
+                        feedsUiState.feeds,
+                        markStoryAsRead,
+                        navController,
+                        modifier = modifier
+                            .fillMaxWidth()
+                    )
+
+                    storiesUiState is StoriesUiState.Success &&
+                            feedsUiState is FeedsUiState.Loading -> ResultScreen(
+                        storiesUiState.stories,
+                        feedsUiState.feeds,
+                        markStoryAsRead,
+                        navController,
+                        modifier = modifier
+                            .fillMaxWidth()
+                    )
+
+                    storiesUiState is StoriesUiState.Error
+                            || feedsUiState is FeedsUiState.Error -> ErrorScreen(
+                        modifier = modifier
+                            .fillMaxSize()
                     )
                 }
-            }
-        },
-        bottomBar = { BottomBar(bottomBarHeight, navController) },
-        modifier = Modifier
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
-            .background(color = Color.Transparent),
-        containerColor = Color.Transparent
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-                .pullRefresh(pullRefreshState)
-        ) {
-            when {
-                storiesUiState is StoriesUiState.Loading &&
-                        feedsUiState is FeedsUiState.Loading -> ResultScreen(
-                    storiesUiState.stories,
-                    feedsUiState.feeds,
-                    markStoryAsRead,
-                    navController,
+                PullRefreshIndicator(
+                    refreshing = refreshing,
+                    state = pullRefreshState,
                     modifier = modifier
-                        .fillMaxWidth()
-                )
-
-                storiesUiState is StoriesUiState.Success &&
-                        feedsUiState is FeedsUiState.Success -> ResultScreen(
-                    storiesUiState.stories,
-                    feedsUiState.feeds,
-                    markStoryAsRead,
-                    navController,
-                    modifier = modifier
-                        .fillMaxWidth()
-                )
-
-                storiesUiState is StoriesUiState.Loading &&
-                        feedsUiState is FeedsUiState.Success -> ResultScreen(
-                    storiesUiState.stories,
-                    feedsUiState.feeds,
-                    markStoryAsRead,
-                    navController,
-                    modifier = modifier
-                        .fillMaxWidth()
-                )
-
-                storiesUiState is StoriesUiState.Success &&
-                        feedsUiState is FeedsUiState.Loading -> ResultScreen(
-                    storiesUiState.stories,
-                    feedsUiState.feeds,
-                    markStoryAsRead,
-                    navController,
-                    modifier = modifier
-                        .fillMaxWidth()
-                )
-
-                storiesUiState is StoriesUiState.Error
-                        || feedsUiState is FeedsUiState.Error -> ErrorScreen(
-                    modifier = modifier
-                        .fillMaxSize()
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-64).dp),
+                    backgroundColor = colorScheme.surfaceVariant
                 )
             }
-            PullRefreshIndicator(
-                refreshing = refreshing,
-                state = pullRefreshState,
-                modifier = modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = (-64).dp),
-                backgroundColor = colorScheme.surfaceVariant
-            )
         }
+
+        BottomBar(
+            modifier = Modifier
+                .height(bottomBarHeight)
+                .align(Alignment.BottomCenter),
+            navController = navController,
+        )
     }
 }
 

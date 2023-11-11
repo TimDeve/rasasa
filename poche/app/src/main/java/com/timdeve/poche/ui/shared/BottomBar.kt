@@ -19,32 +19,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.timdeve.poche.PocheDestinations
 
+val BOTTOM_BAR_HEIGHT = 72.dp
+
 @Preview
 @Composable
 fun BottomBarFull() {
-    BottomBar(bottomBarHeight = 80.dp)
+    BottomBar(modifier = Modifier.height(BOTTOM_BAR_HEIGHT))
 }
 
 @Preview
 @Composable
 fun BottomBarHalf() {
-    BottomBar(bottomBarHeight = 40.dp)
+    BottomBar(modifier = Modifier.height(BOTTOM_BAR_HEIGHT / 2))
 }
 
 @Composable
-fun BottomBar(bottomBarHeight: Dp, navController: NavHostController = rememberNavController()) {
+fun BottomBar(
+    modifier: Modifier = Modifier,
+    navController: NavHostController = rememberNavController()
+) {
     val shape = RoundedCornerShape(50, 50)
     BottomAppBar(
         containerColor = colorScheme.surfaceColorAtElevation(48.dp),
         contentColor = colorScheme.primary,
-        modifier = Modifier
-            .height(bottomBarHeight)
+        modifier = modifier
             .padding(start = 6.dp, end = 6.dp)
             .shadow(4.dp, shape)
             .clip(shape)

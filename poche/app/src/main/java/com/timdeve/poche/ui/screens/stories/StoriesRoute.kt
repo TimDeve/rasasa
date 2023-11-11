@@ -15,7 +15,7 @@ fun StoriesRoute(
     navController: NavHostController,
     listId: Long? = null,
 ) {
-    LaunchedEffect(Unit) {
+    LaunchedEffect(listId) {
         storiesViewModel.setListId(listId)
     }
 
