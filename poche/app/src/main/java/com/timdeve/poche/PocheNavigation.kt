@@ -1,5 +1,6 @@
 package com.timdeve.poche
 
+import java.net.URL
 import java.net.URLEncoder
 
 object PocheDestinations {
@@ -11,8 +12,8 @@ object PocheDestinations {
 }
 
 object PocheNavigate {
-    fun article(url: String): String {
-        val encodedUrl = URLEncoder.encode(url, "UTF-8")
+    fun article(url: URL): String {
+        val encodedUrl = URLEncoder.encode(url.toString(), "UTF-8")
         return "${PocheDestinations.ARTICLE_ROUTE}/$encodedUrl"
     }
 

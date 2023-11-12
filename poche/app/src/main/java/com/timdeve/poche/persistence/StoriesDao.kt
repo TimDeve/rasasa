@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import kotlinx.datetime.Instant
+import java.net.URL
 
 @Entity(tableName = "stories")
 data class Story(
@@ -16,7 +17,7 @@ data class Story(
     @ColumnInfo(name = "feed_id")
     val feedId: Long,
     val title: String,
-    val url: String,
+    val url: URL,
     @ColumnInfo(name = "is_read")
     var isRead: Boolean,
     @ColumnInfo(name = "published_date")

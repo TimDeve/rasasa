@@ -79,6 +79,7 @@ import com.timdeve.poche.ui.shared.HtmlContent
 import com.timdeve.poche.ui.theme.Typography
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import java.net.URL
 
 @ExperimentalMaterial3Api
 @Composable
@@ -325,10 +326,10 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun linkSharer(url: String): () -> Unit {
+fun linkSharer(url: URL): () -> Unit {
     val sendIntent: Intent = Intent().apply {
         action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, url)
+        putExtra(Intent.EXTRA_TEXT, url.toString())
         type = "text/plain"
     }
     val shareIntent = Intent.createChooser(sendIntent, null)

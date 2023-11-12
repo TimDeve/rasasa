@@ -5,16 +5,17 @@ import com.timdeve.poche.network.swallowOfflineExceptions
 import com.timdeve.poche.persistence.Article
 import com.timdeve.poche.persistence.ArticlesDao
 import com.timdeve.poche.persistence.fromModel
+import java.net.URL
 
 class ArticlesRepository(
     private val articlesDao: ArticlesDao,
     private val articleApiService: ArticleApiService
 ) {
-    suspend fun getArticle(url: String): Article? {
+    suspend fun getArticle(url: URL): Article? {
         return articlesDao.getArticle(url)
     }
 
-    suspend fun fetchArticle(url: String) {
+    suspend fun fetchArticle(url: URL) {
         swallowOfflineExceptions {
             if (getArticle(url) == null) {
                 val article = articleApiService.getArticle(url)

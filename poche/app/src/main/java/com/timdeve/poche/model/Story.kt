@@ -1,14 +1,18 @@
+@file:UseSerializers(URLSerializer::class)
 package com.timdeve.poche.model
 
+import com.timdeve.poche.network.URLSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import java.net.URL
 
 @Serializable
 data class Story(
     val id: Long,
     val feedId: Long,
     val title: String,
-    val url: String,
+    val url: URL,
     var isRead: Boolean,
     val publishedDate: Instant,
     val content: String,
@@ -29,7 +33,7 @@ fun genStories(): List<Story> {
             id = it,
             feedId = (it * it + 1) % 5,
             title = storyTitles[(it % storyTitles.size).toInt()],
-            url = "http://example.com",
+            url = URL("http://example.com"),
             isRead = it < 3,
             publishedDate = Instant.DISTANT_PAST,
             content = "<h3>Maybe a small title</h3><p>Some html content</p>",

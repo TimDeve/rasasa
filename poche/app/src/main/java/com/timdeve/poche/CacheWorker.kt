@@ -25,6 +25,7 @@ import com.timdeve.poche.repository.ArticlesRepository
 import com.timdeve.poche.repository.FeedsRepository
 import com.timdeve.poche.repository.Repositories
 import com.timdeve.poche.repository.StoriesRepository
+import kotlinx.coroutines.CancellationException
 import okhttp3.OkHttpClient
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -38,35 +39,59 @@ private const val CHANNEL_ID = "$TAG-channel-id"
 // Static NOTIFICATION_ID so that new notifications take over older ones
 private const val NOTIFICATION_ID = 0x90c4e
 
+// Somewhat blunt workaround for websites that rates limit
+private val dontCacheThoseHosts = setOf(
+    "www.nytimes.com",
+)
+
 class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     init {
         createNotificationChannel()
     }
 
     override suspend fun doWork(): Result {
+        var cancellationException: Exception? = null
+
         try {
             cacheStoriesAndArticle()
         } catch (e: Exception) {
-            createNotification(
-                notificationTitle = "Uncaught Exception while Caching",
-                notificationBody = e.toString(),
-                clearPrevious = true,
-            )
-            Log.e("CacheWorker", "Uncaught Exception when caching: $e")
+            if (e is CancellationException) {
+                cancellationException = e
+            } else {
+                createNotification(
+                    notificationTitle = "Uncaught Exception while Caching",
+                    notificationBody = e.toString(),
+                    clearPrevious = true,
+                )
+                Log.e("CacheWorker", "Uncaught Exception when caching: $e")
+            }
         }
 
         try {
-            clearOldCachedData()
+            if (!isStopped) {
+                clearOldCachedData()
+            }
         } catch (e: Exception) {
-            createNotification(
-                notificationTitle = "Uncaught Exception while cleaning up",
-                notificationBody = e.toString(),
-                clearPrevious = true,
-            )
-            Log.e("CacheWorker", "Uncaught Exception when cleaning up: $e")
+            if (e is CancellationException) {
+                cancellationException = e
+            } else {
+                createNotification(
+                    notificationTitle = "Uncaught Exception while cleaning up",
+                    notificationBody = e.toString(),
+                    clearPrevious = true,
+                )
+                Log.e("CacheWorker", "Uncaught Exception when cleaning up: $e")
+            }
         }
 
+        if (isStopped || cancellationException != null) clearNotification()
+
         schedule(applicationContext)
+
+        cancellationException?.let {
+            throw cancellationException
+        }
+
         return Result.success()
     }
 
@@ -76,19 +101,19 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         var errors = 0
         val stories = repos.stories.getStories()
         stories.forEachIndexed { i, story ->
-            if (isStopped) {
-                clearNotification()
-                return
-            }
-            try {
-                val article = repos.articles.getArticle(story.url)
-                if (article == null) {
-                    createNotification(story.title, progressTarget = stories.size, progress = i)
-                    repos.articles.fetchArticle(story.url)
+            if (isStopped) return
+
+            if (!dontCacheThoseHosts.contains(story.url.host)) {
+                try {
+                    val article = repos.articles.getArticle(story.url)
+                    if (article == null) {
+                        createNotification(story.title, progressTarget = stories.size, progress = i)
+                        repos.articles.fetchArticle(story.url)
+                    }
+                } catch (e: Exception) {
+                    errors++
+                    Log.e("CacheWorker", "Exception when fetching article: $e")
                 }
-            } catch (e: Exception) {
-                errors++
-                Log.e("CacheWorker", "Exception when fetching article: $e")
             }
         }
 

@@ -12,6 +12,7 @@ import com.timdeve.poche.repository.ArticlesRepository
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
+import java.net.URL
 
 
 sealed interface ArticleUiState {
@@ -23,7 +24,7 @@ sealed interface ArticleUiState {
 @Suppress("UNCHECKED_CAST")
 class ArticleModelFactory(
     private val articlesRepo: ArticlesRepository,
-    private val articleUrl: String
+    private val articleUrl: URL
 ) :
     ViewModelProvider.NewInstanceFactory() {
     override fun <T : ViewModel> create(modelClass: Class<T>): T =
@@ -32,7 +33,7 @@ class ArticleModelFactory(
 
 class ArticleViewModel(
     private val articlesRepo: ArticlesRepository,
-    private val articleUrl: String
+    private val articleUrl: URL
 ) :
     ViewModel() {
     var articleUiState: ArticleUiState by mutableStateOf(ArticleUiState.Loading)

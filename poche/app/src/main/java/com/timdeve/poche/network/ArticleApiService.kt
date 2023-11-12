@@ -1,7 +1,7 @@
 package com.timdeve.poche.network
 
-import com.timdeve.poche.BuildConfig
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.timdeve.poche.BuildConfig
 import com.timdeve.poche.model.Article
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -9,11 +9,12 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.http.GET
 import retrofit2.http.Query
+import java.net.URL
 
 
 interface ArticleApiService {
     @GET("api/v0/read")
-    suspend fun getArticle(@Query("page") url: String): Article
+    suspend fun getArticle(@Query("page") url: URL): Article
 }
 
 class ArticleApi(client: OkHttpClient): ArticleApiService {
@@ -27,7 +28,7 @@ class ArticleApi(client: OkHttpClient): ArticleApiService {
         retrofit.create(ArticleApiService::class.java)
     }
 
-    override suspend fun getArticle(url: String): Article {
+    override suspend fun getArticle(url: URL): Article {
         return retrofitService.getArticle(url)
     }
 }

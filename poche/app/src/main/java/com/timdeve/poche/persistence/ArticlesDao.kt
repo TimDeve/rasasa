@@ -6,11 +6,12 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import java.net.URL
 
 @Entity(tableName = "articles")
 data class Article(
     @PrimaryKey
-    val url: String,
+    val url: URL,
     val readable: Boolean,
     val title: String = "",
     val byline: String? = "",
@@ -42,7 +43,7 @@ fun Article.toModel(): com.timdeve.poche.model.Article {
 @Dao
 interface ArticlesDao {
     @Query("select * from articles where url=:url")
-    suspend fun getArticle(url: String): Article?
+    suspend fun getArticle(url: URL): Article?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertArticle(article: Article)

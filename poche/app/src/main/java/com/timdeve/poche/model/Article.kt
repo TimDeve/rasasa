@@ -1,10 +1,14 @@
+@file:UseSerializers(URLSerializer::class)
 package com.timdeve.poche.model
 
+import com.timdeve.poche.network.URLSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
+import java.net.URL
 
 @Serializable
 data class Article(
-    val url: String,
+    val url: URL,
     val readable: Boolean,
     val title: String = "",
     val byline: String? = "",
@@ -47,7 +51,7 @@ console.log("Hello World")
 
 fun genArticle(): Article {
     return Article(
-        url = "http://example.com",
+        url = URL("http://example.com"),
         readable = true,
         title = "A most fantastic day",
         byline = "By me, a writer",

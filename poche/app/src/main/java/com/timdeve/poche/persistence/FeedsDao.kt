@@ -12,6 +12,7 @@ import androidx.room.Query
 import androidx.room.Relation
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import java.net.URL
 
 @Entity(tableName = "feed_lists")
 data class FeedList(
@@ -49,7 +50,7 @@ data class Feed(
     @PrimaryKey
     val id: Long,
     val name: String,
-    val url: String,
+    val url: URL,
 ) {
     companion object
 }

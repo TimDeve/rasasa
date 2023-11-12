@@ -20,6 +20,7 @@ import com.timdeve.poche.ui.screens.login.AuthViewModel
 import com.timdeve.poche.ui.screens.login.LoginRoute
 import com.timdeve.poche.ui.screens.stories.StoriesRoute
 import com.timdeve.poche.ui.screens.stories.StoriesViewModel
+import java.net.URL
 import java.net.URLDecoder
 
 
@@ -53,7 +54,7 @@ fun PocheNavGraph(
                 val encodedUrl = it.arguments?.getString("pageUrl")
                 ArticleRoute(
                     articlesRepository,
-                    URLDecoder.decode(encodedUrl, "UTF-8"),
+                    URL(URLDecoder.decode(encodedUrl, "UTF-8")),
                     navController
                 )
             }

@@ -30,6 +30,7 @@ android {
             manifestPlaceholders += mapOf("clearText" to false)
             buildConfigField("String", "BASE_URL", "\"https://rasasa.do.timdeve.com/\"")
             signingConfig = signingConfigs.getByName("debug")
+            isDebuggable = true
         }
 
         release {
