@@ -1,6 +1,5 @@
 package com.timdeve.poche.ui.screens.stories
 
-import android.content.Intent
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -76,10 +75,10 @@ import com.timdeve.poche.ui.screens.feedlists.FeedsUiState
 import com.timdeve.poche.ui.shared.BOTTOM_BAR_HEIGHT
 import com.timdeve.poche.ui.shared.BottomBar
 import com.timdeve.poche.ui.shared.HtmlContent
+import com.timdeve.poche.ui.shared.linkSharer
 import com.timdeve.poche.ui.theme.Typography
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import java.net.URL
 
 @ExperimentalMaterial3Api
 @Composable
@@ -322,20 +321,6 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
                 )
             }
         }
-    }
-}
-
-@Composable
-fun linkSharer(url: URL): () -> Unit {
-    val sendIntent: Intent = Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, url.toString())
-        type = "text/plain"
-    }
-    val shareIntent = Intent.createChooser(sendIntent, null)
-    val context = LocalContext.current
-    return {
-        context.startActivity(shareIntent)
     }
 }
 

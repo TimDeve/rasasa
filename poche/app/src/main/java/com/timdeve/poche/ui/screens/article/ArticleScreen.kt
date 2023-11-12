@@ -1,6 +1,8 @@
 package com.timdeve.poche.ui.screens.article
 
 import android.content.res.Configuration
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,6 +39,8 @@ import com.timdeve.poche.model.genArticle
 import com.timdeve.poche.persistence.Article
 import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.shared.HtmlContent
+import com.timdeve.poche.ui.shared.linkOpener
+import com.timdeve.poche.ui.shared.linkSharer
 import com.timdeve.poche.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -172,8 +176,12 @@ fun Failure(modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Success(article: Article, modifier: Modifier = Modifier) {
+    val shareLink = linkSharer(article.url)
+    val openLink = linkOpener(article.url)
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -185,7 +193,12 @@ fun Success(article: Article, modifier: Modifier = Modifier) {
                 style = Typography.displaySmall.copy(
                     color = colorScheme.onSurface,
                 ),
-                modifier = Modifier.padding(PaddingValues(top = 0.dp, bottom = 12.dp))
+                modifier = Modifier
+                    .padding(PaddingValues(top = 0.dp, bottom = 12.dp))
+                    .combinedClickable(
+                        onClick = openLink,
+                        onLongClick = shareLink,
+                    ),
             )
             // TODO: Replace with a domain only text
             // Text(text = article.url)
