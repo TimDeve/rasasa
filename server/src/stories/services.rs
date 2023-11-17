@@ -84,8 +84,8 @@ fn marshal_rss_feed_into_stories(feed: Channel, feed_id: i32) -> Vec<NewStory> {
             is_read: false,
             feed_id,
             content: entry.description().unwrap_or("").to_string(),
-            url: entry.link().unwrap().to_string(),
-            title: entry.title().unwrap().to_string(),
+            url: entry.link().unwrap_or(feed.link()).to_string(),
+            title: entry.title().unwrap_or("No Title").to_string(),
             published_date: DateTime::parse_from_rfc2822(entry.pub_date().unwrap()).unwrap(),
         })
         .collect()
