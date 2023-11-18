@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash Screen Theme. -->
+    <style name="Theme.PocheSplash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/dark_grey</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground_night</item>
+        <item name="windowSplashScreenAnimationDuration">300</item>
+        <item name="postSplashScreenTheme">@style/Theme.Poche</item>
+
+        <!-- Status bar and Nav bar configs -->
+        <item name="android:statusBarColor">@color/dark_grey</item>
+        <item name="android:navigationBarColor">@color/dark_grey</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

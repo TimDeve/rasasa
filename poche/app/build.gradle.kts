@@ -120,6 +120,9 @@ dependencies {
     annotationProcessor("androidx.room:room-compiler:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
+
+    // Splash Screen
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }
 
 class RoomSchemaArgProvider(
