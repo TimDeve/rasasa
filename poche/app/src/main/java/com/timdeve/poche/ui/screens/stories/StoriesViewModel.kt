@@ -58,15 +58,13 @@ class StoriesViewModel(
                     if (!story.isRead) {
                         storiesRepository.markStoriesAsRead(story.id)
                         story.isRead = true
-//                        storyApi.retrofitService.updateStory(story.id, UpdateStoryRequest(true))
-//                        story.isRead = true
                     }
                 } catch (e: Exception) {
-                    Log.e("Poche Not there", e.toString())
+                    Log.e(this::class.simpleName, e.toString())
                 }
                 Unit
             } ?: run {
-                Log.e("Poche", "index '${index}' does not exist")
+                Log.e(this::class.simpleName, "index '${index}' does not exist")
             }
         }
     }
@@ -79,10 +77,10 @@ class StoriesViewModel(
                     storiesRepository.getStories(currentListId, showReadStories, showCachedOnly)
                 storiesUiState = StoriesUiState.Success(stories)
             } catch (e: IOException) {
-                Log.e("Poche Here", e.toString())
+                Log.e(this::class.simpleName, e.toString())
                 storiesUiState = StoriesUiState.Error
             } catch (e: HttpException) {
-                Log.e("Poche There", e.toString())
+                Log.e(this::class.simpleName, e.toString())
                 storiesUiState = StoriesUiState.Error
             }
         }

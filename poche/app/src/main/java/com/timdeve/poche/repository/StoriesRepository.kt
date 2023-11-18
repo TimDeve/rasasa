@@ -1,15 +1,22 @@
 package com.timdeve.poche.repository
 
+import android.content.Context
 import com.timdeve.poche.network.StoriesApi
 import com.timdeve.poche.network.UpdateStoryRequest
+import com.timdeve.poche.network.isOfflineException
 import com.timdeve.poche.network.swallowOfflineExceptions
 import com.timdeve.poche.persistence.StoriesDao
 import com.timdeve.poche.persistence.Story
 import com.timdeve.poche.persistence.fromModel
+import com.timdeve.poche.workers.ReadStoryWorker
 import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.days
 
-class StoriesRepository(private val storiesDao: StoriesDao, private val storiesApi: StoriesApi) {
+class StoriesRepository(
+    private val ctx: Context,
+    private val storiesDao: StoriesDao,
+    private val storiesApi: StoriesApi
+) {
     suspend fun getStories(
         listId: Long? = null,
         read: Boolean = false,
@@ -34,9 +41,16 @@ class StoriesRepository(private val storiesDao: StoriesDao, private val storiesA
     }
 
     suspend fun markStoriesAsRead(id: Long) {
-        swallowOfflineExceptions {
+        try {
             storiesApi.retrofitService.updateStory(id, UpdateStoryRequest(true))
+        } catch (e: Exception) {
+            if (isOfflineException(e)) {
+                ReadStoryWorker.queue(ctx, id)
+            } else {
+                throw e
+            }
         }
+
         storiesDao.markStoryAsRead(id)
     }
 

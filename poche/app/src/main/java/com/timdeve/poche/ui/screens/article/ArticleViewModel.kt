@@ -51,10 +51,10 @@ class ArticleViewModel(
                 val article = articlesRepo.getArticle(articleUrl)
                 ArticleUiState.Success(article)
             } catch (e: IOException) {
-                Log.e("Poche", e.toString())
+                Log.e(this::class.simpleName, e.toString())
                 ArticleUiState.Error
             } catch (e: HttpException) {
-                Log.e("Poche", e.toString())
+                Log.e(this::class.simpleName, e.toString())
                 ArticleUiState.Error
             }
         }

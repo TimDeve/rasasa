@@ -58,10 +58,10 @@ class FeedsViewModel(
                         feedsUiState = FeedsUiState.Success(feeds, feedLists)
                     }.collect {}
                 } catch (e: IOException) {
-                    Log.e("Poche", e.toString())
+                    Log.e(this::class.simpleName, e.toString())
                     feedsUiState = FeedsUiState.Error
                 } catch (e: HttpException) {
-                    Log.e("Poche", e.toString())
+                    Log.e(this::class.simpleName, e.toString())
                     feedsUiState = FeedsUiState.Error
                 }
             }

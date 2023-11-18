@@ -1,9 +1,8 @@
-package com.timdeve.poche
+package com.timdeve.poche.workers
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Context.NOTIFICATION_SERVICE
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
@@ -17,6 +16,7 @@ import com.franmontiel.persistentcookiejar.ClearableCookieJar
 import com.franmontiel.persistentcookiejar.PersistentCookieJar
 import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
+import com.timdeve.poche.R
 import com.timdeve.poche.network.ArticleApi
 import com.timdeve.poche.network.FeedsApi
 import com.timdeve.poche.network.StoriesApi
@@ -44,7 +44,8 @@ private val dontCacheThoseHosts = setOf(
     "www.nytimes.com",
 )
 
-class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
+class CacheWorker(private val ctx: Context, params: WorkerParameters) :
+    CoroutineWorker(ctx, params) {
     init {
         createNotificationChannel()
     }
@@ -63,7 +64,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                     notificationBody = e.toString(),
                     clearPrevious = true,
                 )
-                Log.e("CacheWorker", "Uncaught Exception when caching: $e")
+                Log.e(this::class.simpleName, "Uncaught Exception when caching: $e")
             }
         }
 
@@ -80,7 +81,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                     notificationBody = e.toString(),
                     clearPrevious = true,
                 )
-                Log.e("CacheWorker", "Uncaught Exception when cleaning up: $e")
+                Log.e(this::class.simpleName, "Uncaught Exception when cleaning up: $e")
             }
         }
 
@@ -112,7 +113,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
                     }
                 } catch (e: Exception) {
                     errors++
-                    Log.e("CacheWorker", "Exception when fetching article: $e")
+                    Log.e(this::class.simpleName, "Exception when fetching article: $e")
                 }
             }
         }
@@ -150,7 +151,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         val feedsRepository = FeedsRepository(db.feedListsDao(), feedsApi)
 
         val storyApi = StoriesApi(httpClient)
-        val storiesRepository = StoriesRepository(db.storiesDao(), storyApi)
+        val storiesRepository = StoriesRepository(ctx, db.storiesDao(), storyApi)
 
         return Repositories(
             articlesRepository,
@@ -161,7 +162,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
 
     private fun createNotificationChannel() {
         val notificationManager =
-            applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val mChannel =
             NotificationChannel(CHANNEL_ID, "Cache Stories", NotificationManager.IMPORTANCE_DEFAULT)
@@ -173,7 +174,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
 
     private fun clearNotification() {
         val notificationManager =
-            applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
@@ -185,7 +186,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
         clearPrevious: Boolean = false
     ) {
         val notificationManager =
-            applicationContext.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (clearPrevious) {
             clearNotification()
@@ -220,9 +221,7 @@ class CacheWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx,
     }
 
     companion object {
-
         fun schedule(ctx: Context, delay: Long = diffToTargetTime(), constrain: Boolean = true) {
-
             val dailyWorkRequest = OneTimeWorkRequestBuilder<CacheWorker>()
                 .setInitialDelay(delay, TimeUnit.MILLISECONDS)
                 .addTag(TAG)

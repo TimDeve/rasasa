@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.timdeve.poche.BaseWrapper
-import com.timdeve.poche.CacheWorker
 import com.timdeve.poche.PocheNavigate
 import com.timdeve.poche.R
 import com.timdeve.poche.model.genFeeds
@@ -77,6 +76,7 @@ import com.timdeve.poche.ui.shared.BottomBar
 import com.timdeve.poche.ui.shared.HtmlContent
 import com.timdeve.poche.ui.shared.linkSharer
 import com.timdeve.poche.ui.theme.Typography
+import com.timdeve.poche.workers.CacheWorker
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 

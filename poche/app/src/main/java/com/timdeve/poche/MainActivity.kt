@@ -22,6 +22,7 @@ import com.timdeve.poche.ui.screens.feedlists.FeedsViewModel
 import com.timdeve.poche.ui.screens.login.AuthStatus
 import com.timdeve.poche.ui.screens.login.AuthViewModel
 import com.timdeve.poche.ui.screens.stories.StoriesViewModel
+import com.timdeve.poche.workers.CacheWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import okhttp3.OkHttpClient
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
         val feedsViewModel by lazy { injectViewModel { FeedsViewModel(feedsRepository) } }
 
         val storyApi = StoriesApi(httpClient)
-        val storiesRepository = StoriesRepository(db.storiesDao(), storyApi)
+        val storiesRepository = StoriesRepository(this, db.storiesDao(), storyApi)
         val storiesViewModel by lazy { injectViewModel { StoriesViewModel(storiesRepository) } }
 
         val articleApi = ArticleApi(httpClient)
