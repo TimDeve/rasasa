@@ -18,10 +18,12 @@ mod scheduler;
 pub mod schema;
 pub mod stories;
 
+use crate::diesel_migrations::MigrationHarness;
 use actix_web::web::Data;
 use actix_web::{middleware, App, HttpServer};
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 use diesel::PgConnection;
+use diesel_migrations::EmbeddedMigrations;
 use reqwest::Url;
 use scheduler::setup_scheduler;
 use std::env;
@@ -30,7 +32,7 @@ use std::io;
 type PgPool = Pool<ConnectionManager<PgConnection>>;
 type PgPooledConnection = PooledConnection<ConnectionManager<PgConnection>>;
 
-embed_migrations!("migrations");
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 #[actix_web::main]
 async fn main() -> io::Result<()> {
@@ -48,8 +50,8 @@ async fn main() -> io::Result<()> {
     let manager = ConnectionManager::<PgConnection>::new(database_url);
     let pool = Pool::new(manager).unwrap();
 
-    let connection = pool.get().unwrap();
-    embedded_migrations::run_with_output(&connection, &mut std::io::stdout()).unwrap();
+    let connection = &mut pool.get().unwrap();
+    connection.run_pending_migrations(MIGRATIONS).unwrap();
 
     let _thread_handle = setup_scheduler(pool.clone());
 

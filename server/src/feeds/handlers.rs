@@ -14,7 +14,7 @@ type DbPool = Pool<ConnectionManager<PgConnection>>;
 fn get_feeds(pool: web::Data<DbPool>) -> Result<Vec<Feed>, diesel::result::Error> {
     use crate::schema::feeds::dsl::*;
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     Ok(feeds.load::<Feed>(conn)?)
 }
@@ -31,7 +31,7 @@ async fn get_feeds_handler(pool: web::Data<DbPool>) -> Result<HttpResponse, Erro
 fn create_feed(body: NewFeed, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
     use crate::schema::feeds;
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     diesel::insert_into(feeds::table)
         .values(&body)
@@ -55,7 +55,7 @@ async fn create_feed_handler(
 fn delete_feed(feed_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
     use crate::schema::feeds::dsl::*;
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     diesel::delete(feeds.filter(id.eq(feed_id))).execute(conn)?;
 

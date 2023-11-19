@@ -3,13 +3,13 @@ use crate::schema::feed_lists;
 use crate::schema::lists;
 
 #[derive(Insertable, Deserialize, Debug)]
-#[table_name = "lists"]
+#[diesel(table_name = lists)]
 pub struct NewList {
     pub name: String,
 }
 
-#[derive(Identifiable, Associations, Serialize, Queryable, Debug)]
-#[table_name = "lists"]
+#[derive(Identifiable, Serialize, Queryable, Debug)]
+#[diesel(table_name = lists)]
 pub struct List {
     pub id: i32,
     pub name: String,
@@ -22,16 +22,16 @@ pub struct NewFeedForList {
 }
 
 #[derive(Insertable, Debug)]
-#[table_name = "feed_lists"]
+#[diesel(table_name = feed_lists)]
 pub struct NewFeedList {
     pub feed_id: i32,
     pub list_id: i32,
 }
 
 #[derive(Identifiable, Associations, Serialize, Queryable, Debug)]
-#[belongs_to(List)]
-#[belongs_to(Feed)]
-#[table_name = "feed_lists"]
+#[diesel(belongs_to(List))]
+#[diesel(belongs_to(Feed))]
+#[diesel(table_name = feed_lists)]
 pub struct FeedList {
     pub id: i32,
     pub feed_id: i32,

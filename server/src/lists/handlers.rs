@@ -21,7 +21,7 @@ type DbPool = Pool<ConnectionManager<PgConnection>>;
 fn get_lists(pool: web::Data<DbPool>) -> Result<Vec<ListWithFeedIds>, diesel::result::Error> {
     use crate::schema::lists::dsl::*;
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     lists
         .load::<List>(conn)?
@@ -50,7 +50,7 @@ async fn get_lists_handler(pool: web::Data<DbPool>) -> Result<HttpResponse, Erro
 }
 
 fn create_list(new_list: NewList, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     diesel::insert_into(lists::table)
         .values(&new_list)
@@ -76,7 +76,7 @@ fn add_feed_to_list(
     list_id: i32,
     pool: web::Data<DbPool>,
 ) -> Result<(), diesel::result::Error> {
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     diesel::insert_into(feed_lists::table)
         .values(&NewFeedList { feed_id, list_id })
@@ -103,7 +103,7 @@ fn delete_feed_from_list(
     feed_id: i32,
     pool: web::Data<DbPool>,
 ) -> Result<(), diesel::result::Error> {
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     diesel::delete(
         feed_lists::table.filter(
@@ -130,7 +130,7 @@ async fn delete_feed_from_list_handler(
 }
 
 fn delete_list(list_id: i32, pool: web::Data<DbPool>) -> Result<(), diesel::result::Error> {
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     diesel::delete(lists::table.filter(lists::dsl::id.eq(list_id))).execute(conn)?;
 

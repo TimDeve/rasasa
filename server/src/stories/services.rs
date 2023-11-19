@@ -91,7 +91,7 @@ fn marshal_rss_feed_into_stories(feed: Channel, feed_id: i32) -> Vec<NewStory> {
         .collect()
 }
 
-pub fn delete_old_stories(conn: &PgPooledConnection) {
+pub fn delete_old_stories(conn: &mut PgPooledConnection) {
     use crate::schema::stories::dsl::*;
     use diesel::dsl::{now, IntervalDsl};
 
@@ -103,7 +103,7 @@ pub fn delete_old_stories(conn: &PgPooledConnection) {
     }
 }
 
-pub fn fetch_new_stories(conn: &PgPooledConnection) -> Result<()> {
+pub fn fetch_new_stories(conn: &mut PgPooledConnection) -> Result<()> {
     use diesel::insert_into;
 
     use crate::feeds::models::Feed;

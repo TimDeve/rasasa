@@ -6,7 +6,7 @@ use crate::feeds::models::Feed;
 use crate::schema::stories;
 
 #[derive(Insertable)]
-#[table_name = "stories"]
+#[diesel(table_name = stories)]
 pub struct NewStory {
     pub feed_id: i32,
     pub title: String,
@@ -17,8 +17,8 @@ pub struct NewStory {
 }
 
 #[derive(Identifiable, Associations, Serialize, Queryable, Debug)]
-#[belongs_to(Feed, foreign_key = "feed_id")]
-#[table_name = "stories"]
+#[diesel(belongs_to(Feed, foreign_key = feed_id))]
+#[diesel(table_name = stories)]
 #[serde(rename_all = "camelCase")]
 pub struct Story {
     pub id: i32,
@@ -33,7 +33,7 @@ pub struct Story {
 }
 
 #[derive(AsChangeset, Identifiable, Deserialize, Debug)]
-#[table_name = "stories"]
+#[diesel(table_name = stories)]
 #[serde(rename_all = "camelCase")]
 pub struct StoryUpdate {
     pub id: i32,

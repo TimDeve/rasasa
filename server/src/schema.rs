@@ -40,9 +40,4 @@ diesel::joinable!(feed_lists -> feeds (feed_id));
 diesel::joinable!(feed_lists -> lists (list_id));
 diesel::joinable!(stories -> feeds (feed_id));
 
-diesel::allow_tables_to_appear_in_same_query!(
-    feed_lists,
-    feeds,
-    lists,
-    stories,
-);
+diesel::allow_tables_to_appear_in_same_query!(feed_lists, feeds, lists, stories,);

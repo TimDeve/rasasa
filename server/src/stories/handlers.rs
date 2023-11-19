@@ -10,6 +10,7 @@ use crate::diesel::prelude::*;
 use crate::lists::models::*;
 use crate::stories::models::*;
 use crate::stories::services::fetch_new_stories;
+use crate::PgPooledConnection;
 
 type DbPool = Pool<ConnectionManager<PgConnection>>;
 
@@ -42,7 +43,7 @@ fn get_stories(
     use crate::schema::lists::dsl::*;
     use crate::schema::stories::dsl::*;
 
-    let conn = &pool.get()?;
+    let conn: &mut PgPooledConnection = &mut pool.get().unwrap();
 
     if query.refresh.unwrap_or(false) {
         fetch_new_stories(conn)?
@@ -51,15 +52,13 @@ fn get_stories(
     let mut boxed_stories = stories.into_boxed();
 
     if let Some(list_id) = query.list_id {
-        use diesel::pg::expression::dsl::any;
-
         let list = lists.find(list_id).first::<List>(conn)?;
 
         let feed_ids = FeedList::belonging_to(&list)
             .select(crate::schema::feed_lists::feed_id)
             .load::<i32>(conn)?;
 
-        boxed_stories = boxed_stories.filter(feed_id.eq(any(feed_ids)))
+        boxed_stories = boxed_stories.filter(feed_id.eq_any(feed_ids))
     }
 
     if !query.read.unwrap_or(false) {
@@ -87,7 +86,7 @@ async fn get_stories_handler(
 fn get_story(story_id: i32, pool: web::Data<DbPool>) -> Result<Story, diesel::result::Error> {
     use crate::schema::stories::dsl::*;
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     Ok(stories.filter(id.eq(story_id)).first::<Story>(conn)?)
 }
@@ -110,7 +109,7 @@ fn patch_stories(
 ) -> Result<Vec<Story>, diesel::result::Error> {
     let PatchStoriesBody(stories) = body;
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn = &mut pool.get().unwrap();
 
     let updated_stories = stories
         .iter()
@@ -142,7 +141,7 @@ fn patch_story(
         is_read,
     };
 
-    let conn: &PgConnection = &pool.get().unwrap();
+    let conn: &mut PgConnection = &mut pool.get().unwrap();
 
     let updated_story = story.save_changes(conn)?;
 
