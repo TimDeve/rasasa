@@ -1,20 +1,21 @@
-const redis = require('redis')
-const bluebird = require('bluebird')
-const fetch = require('node-fetch')
-const createError = require('http-errors')
-const { parseHTML } = require('linkedom')
-const { Readability, isProbablyReaderable } = require('readability')
+import redis from 'redis'
+import fetch from 'node-fetch'
+import createError from 'http-errors'
+import { parseHTML } from 'linkedom'
+import { Readability, isProbablyReaderable } from 'readability'
+import fastifyBuilder from 'fastify'
 
-const transformHtml = require('./transformHtml')
-
-bluebird.promisifyAll(redis.RedisClient.prototype)
-bluebird.promisifyAll(redis.Multi.prototype)
+import transformHtml from './transformHtml.js'
 
 const REDIS_PREFIX = 'rasasa-read'
 
-const redisClient = redis.createClient(process.env['REDIS_URL'])
+const redisClient = await redis
+  .createClient({
+    url: process.env['REDIS_URL'],
+  })
+  .connect()
 
-const fastify = require('fastify')({
+const fastify = fastifyBuilder({
   logger: { prettyPrint: false },
 })
 
@@ -22,8 +23,8 @@ function prefixPageCaching(pageUrl) {
   return `${REDIS_PREFIX}:page-caching:${pageUrl}`
 }
 
-function cacheResponse(pageUrl, response) {
-  redisClient.set(prefixPageCaching(pageUrl), JSON.stringify(response), 'EX', 60 * 60 * 24)
+async function cacheResponse(pageUrl, response) {
+  await redisClient.set(prefixPageCaching(pageUrl), JSON.stringify(response), 'EX', 60 * 60 * 24)
 }
 
 function isValidContentType(contentType) {
@@ -43,7 +44,7 @@ fastify.get('/v0/read', async (request, reply) => {
   }
 
   if (!skipCache) {
-    const cachedPage = await redisClient.getAsync(prefixPageCaching(page))
+    const cachedPage = await redisClient.get(prefixPageCaching(page))
     if (cachedPage) {
       reply.type('application/json').code(200)
       return JSON.parse(cachedPage)
@@ -78,7 +79,7 @@ fastify.get('/v0/read', async (request, reply) => {
   if (!isValidContentType(contentType)) {
     reply.type('application/json').code(200)
     const payload = { readable: false, url: page }
-    cacheResponse(page, payload)
+    await cacheResponse(page, payload)
     return payload
   }
 
@@ -89,7 +90,7 @@ fastify.get('/v0/read', async (request, reply) => {
   if (!readable) {
     reply.type('application/json').code(200)
     const payload = { readable: false, url: page }
-    cacheResponse(page, payload)
+    await cacheResponse(page, payload)
     return payload
   }
 
@@ -104,13 +105,13 @@ fastify.get('/v0/read', async (request, reply) => {
     content: transformHtml(article.content, page),
     url: page,
   }
-  cacheResponse(page, payload)
+  await cacheResponse(page, payload)
   return payload
 })
 
 const readUrl = new URL(process.env['READ_URL'])
 
-fastify.listen(readUrl.port, readUrl.hostname, (err, address) => {
+fastify.listen({ port: readUrl.port, host: readUrl.hostname }, (err, address) => {
   if (err) throw err
   fastify.log.info(`server listening on ${address}`)
 })

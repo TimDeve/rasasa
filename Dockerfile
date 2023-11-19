@@ -17,7 +17,7 @@ RUN go build -o rasasa-gateway ./...
 #
 # NODE BUILDER
 #
-FROM node:21-bookworm-slim as node-builder
+FROM node:20-bookworm-slim as node-builder
 LABEL builder=true
 RUN apt-get update \
  && apt-get install -y build-essential \
@@ -71,7 +71,7 @@ RUN cargo build --release
 #
 # RUNNER
 #
-FROM node:21-bookworm-slim as runner
+FROM node:20-bookworm-slim as runner
 
 RUN apt-get update \
  && apt-get install -y git libpq5 \

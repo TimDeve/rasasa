@@ -34,7 +34,7 @@ services:
   read-server:
     build: .
     profiles: ["local"]
-    command: "sh -c 'pnpm start | pnpx pino-pretty -S'"
+    command: "pnpm run start:pretty"
     working_dir: "/home/runner/app/read-server"
     environment:
      - READ_URL=http://0.0.0.0:8092

@@ -1,4 +1,4 @@
-const sanitizeHtml = require('sanitize-html')
+import sanitizeHtml from 'sanitize-html'
 
 const sanitizeHtmlDefaultOptions = {
   allowedTags: [...sanitizeHtml.defaults.allowedTags, 'h1', 'h2', 'img', 'video', 'picture', 'source'],
@@ -63,7 +63,6 @@ function transformHtml(html, pageUrl) {
     }
   }
 
-
   const sanitizeHtmlOptions = {
     ...sanitizeHtmlDefaultOptions,
     transformTags: {
@@ -75,4 +74,4 @@ function transformHtml(html, pageUrl) {
   return sanitizeHtml(html, sanitizeHtmlOptions)
 }
 
-module.exports = transformHtml
+export default transformHtml
