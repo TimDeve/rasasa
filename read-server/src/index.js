@@ -15,7 +15,7 @@ const REDIS_PREFIX = 'rasasa-read'
 const redisClient = redis.createClient(process.env['REDIS_URL'])
 
 const fastify = require('fastify')({
-  logger: { prettyPrint: true },
+  logger: { prettyPrint: false },
 })
 
 function prefixPageCaching(pageUrl) {

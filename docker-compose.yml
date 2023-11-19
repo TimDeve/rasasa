@@ -3,7 +3,7 @@ version: "3.8"
 services:
   gateway:
     build: .
-    ports: ["8099:8090"]
+    ports: ["8090:8090"]
     profiles: ["local"]
     command: "./rasasa-gateway"
     environment:
@@ -26,7 +26,7 @@ services:
     command: "./rasasa-server"
     environment:
      - SERVER_URL=http://0.0.0.0:8091
-     - DATABASE_URL=postgres://admin:admin@db:5432/rasasa
+     - DATABASE_URL=postgres://postgres:postgres@db:5432/rasasa
     links:
       - db
     depends_on:
@@ -34,7 +34,7 @@ services:
   read-server:
     build: .
     profiles: ["local"]
-    command: "pnpm start"
+    command: "sh -c 'pnpm start | pnpx pino-pretty -S'"
     working_dir: "/home/runner/app/read-server"
     environment:
      - READ_URL=http://0.0.0.0:8092
