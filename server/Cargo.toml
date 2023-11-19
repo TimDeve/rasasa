@@ -12,7 +12,7 @@ chrono            = { version = "0.4", features = ["serde"] }
 clokwerk          = "0.3"
 diesel            = { version = "1.4", features = ["postgres", "chrono", "r2d2"] }
 diesel_migrations = "1.4"
-env_logger        = "0.9"
+env_logger        = "0.10"
 log               = "0.4"
 openssl           = { version = "0.10", features = ["vendored"] }
 reqwest           = { version = "0.11", features = ["blocking"] }
