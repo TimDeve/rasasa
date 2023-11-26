@@ -12,10 +12,12 @@ function url(u) {
 }
 
 function html(pageUrl, doc) {
-  const title = doc.document
+  const username = doc.document
     .getElementsByTagName('title')
     .map(el => el.textContent)
     .join('')
+    .split(':')[0]
+  const title = `${username} | Twitter`
   const content = doc.document.getElementsByClassName('conversation').toString()
 
   const transformedUrl = url(new URL(pageUrl))
