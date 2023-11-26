@@ -1,4 +1,4 @@
-const transformHtml = require('../src/transformHtml')
+import transformHtml from '../src/transform/transformHtml.js'
 
 describe('transformHtml', () => {
   describe('img transformation', () => {

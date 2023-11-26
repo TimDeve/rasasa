@@ -10,7 +10,7 @@ const sanitizeHtmlDefaultOptions = {
   allowedIframeHostnames: ['www.youtube.com'],
 }
 
-function transformHtml(html, pageUrl) {
+function cleanHtml(pageUrl, html) {
   function transformImages(tagName, attribs) {
     const src = attribs.src || ''
     if (!src || src.match(/https?/g)) {
@@ -49,9 +49,19 @@ function transformHtml(html, pageUrl) {
     const newUrl = new URL(pageUrl)
 
     if (href.charAt(0) === '/') {
-      newUrl.pathname = href
+      const parsedHref = new URL(`https://www.example.com${href}`)
+      newUrl.pathname = parsedHref.pathname
+      newUrl.hash = parsedHref.hash
+      newUrl.search = parsedHref.search
+    } else if (href.charAt(0) === '#') {
+      const parsedHref = new URL(`https://www.example.com${href}`)
+      newUrl.hash = parsedHref.hash
+      newUrl.search = parsedHref.search
     } else {
-      newUrl.pathname = `${newUrl.pathname}/${href}`
+      const parsedHref = new URL(`https://www.example.com/${href}`)
+      newUrl.pathname = `${newUrl.pathname}${parsedHref.pathname}`
+      newUrl.hash = parsedHref.hash
+      newUrl.search = parsedHref.search
     }
 
     return {
@@ -74,4 +84,4 @@ function transformHtml(html, pageUrl) {
   return sanitizeHtml(html, sanitizeHtmlOptions)
 }
 
-export default transformHtml
+export default cleanHtml

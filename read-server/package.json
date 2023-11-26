@@ -12,8 +12,8 @@
     "start:dev": "nodemon src/index.js | pino-pretty",
     "lint": "pnpm run lint:prettier",
     "lint:prettier": "prettier 'src/**/*.{ts,tsx,js,jsx,json}' --write",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
   "engines": {
     "node": ">=20"
@@ -27,6 +27,9 @@
     "trailingComma": "es5",
     "bracketSpacing": true,
     "arrowParens": "avoid"
+  },
+  "jest": {
+    "transform": {}
   },
   "license": "UNLICENSED",
   "dependencies": {
