@@ -5,6 +5,7 @@ extern crate rss;
 use actix_web::{web, Error, HttpResponse};
 use anyhow::Result;
 use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::result::Error::NotFound;
 
 use crate::diesel::prelude::*;
 use crate::lists::models::*;
@@ -33,7 +34,7 @@ struct StoriesResponse {
     stories: Vec<Story>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 struct PatchStoriesBody(Vec<StoryUpdate>);
 
 fn get_stories(
@@ -111,9 +112,16 @@ fn patch_stories(
 
     let conn = &mut pool.get().unwrap();
 
+    // TODO: Actually return an error instead of panic
     let updated_stories = stories
         .iter()
-        .map(|item| item.save_changes(conn).unwrap())
+        .filter_map(|item| match item.save_changes(conn) {
+            Ok(story) => Some(story),
+            Err(e) => match e {
+                NotFound => None,
+                _ => panic!("{}", e),
+            },
+        })
         .collect();
 
     Ok(updated_stories)
