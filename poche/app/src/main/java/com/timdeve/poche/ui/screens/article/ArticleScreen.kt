@@ -79,7 +79,7 @@ fun ArticleScreen(
                                 "Back Arrow",
                             )
                             Text(
-                                "Back to stories",
+                                "Back",
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }
