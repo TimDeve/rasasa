@@ -132,6 +132,9 @@ interface StoriesDao {
     @Query("update stories set is_read = 1 where id == :id")
     suspend fun markStoryAsRead(id: Long)
 
+    @Query("update stories set is_read = 1 where id IN (:ids)")
+    suspend fun markStoriesAsRead(ids: List<Long>)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertStories(stories: List<Story>)
 

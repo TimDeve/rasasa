@@ -18,7 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,11 +52,13 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -87,6 +89,7 @@ fun StoriesScreen(
     storiesUiState: StoriesUiState,
     getStories: () -> Unit,
     markStoryAsRead: (index: Int) -> Unit,
+    markStoriesAsRead: () -> Unit,
     showReadStories: Boolean,
     toggleReadStories: () -> Unit,
     showCachedOnly: Boolean,
@@ -193,6 +196,7 @@ fun StoriesScreen(
                         storiesUiState.stories,
                         feedsUiState.feeds,
                         markStoryAsRead,
+                        markStoriesAsRead,
                         navController,
                         modifier = modifier
                             .fillMaxWidth()
@@ -203,6 +207,7 @@ fun StoriesScreen(
                         storiesUiState.stories,
                         feedsUiState.feeds,
                         markStoryAsRead,
+                        markStoriesAsRead,
                         navController,
                         modifier = modifier
                             .fillMaxWidth()
@@ -213,6 +218,7 @@ fun StoriesScreen(
                         storiesUiState.stories,
                         feedsUiState.feeds,
                         markStoryAsRead,
+                        markStoriesAsRead,
                         navController,
                         modifier = modifier
                             .fillMaxWidth()
@@ -223,6 +229,7 @@ fun StoriesScreen(
                         storiesUiState.stories,
                         feedsUiState.feeds,
                         markStoryAsRead,
+                        markStoriesAsRead,
                         navController,
                         modifier = modifier
                             .fillMaxWidth()
@@ -272,6 +279,34 @@ fun PreviewStoriesScreen() {
             storiesUiState = StoriesUiState.Success(stories.map { Story.fromModel(it) }),
             getStories = {},
             markStoryAsRead = {},
+            markStoriesAsRead = {},
+            showReadStories = false,
+            toggleReadStories = {},
+            feedsUiState = FeedsUiState.Success(
+                feeds.mapValues { Feed.fromModel(it.value) },
+                feedLists.mapValues { FeedList.fromModel(it.value) }),
+            getFeedsAndFeedLists = {},
+            navController = rememberNavController(),
+            showCachedOnly = true,
+            toggleCachedOnly = {},
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(name = "Few Stories")
+@Composable
+fun PreviewStoriesScreenFewStories() {
+    val stories = genStories().take(3)
+    val (feeds, feedLists) = genFeeds()
+
+    BaseWrapper {
+        StoriesScreen(
+            screenTitle = "All stories",
+            storiesUiState = StoriesUiState.Success(stories.map { Story.fromModel(it) }),
+            getStories = {},
+            markStoryAsRead = {},
+            markStoriesAsRead = {},
             showReadStories = false,
             toggleReadStories = {},
             feedsUiState = FeedsUiState.Success(
@@ -409,6 +444,7 @@ fun ResultScreen(
     stories: List<Story>,
     feeds: Map<Long, Feed>,
     markStoryAsRead: (index: Int) -> Unit,
+    markStoriesAsRead: () -> Unit,
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -427,20 +463,42 @@ fun ResultScreen(
                 }
             }
     }
-    LazyColumn(state = listState, modifier = modifier) {
-        items(stories) { story ->
-            StoryItem(
-                story,
-                feeds,
-                onClick = { navController.navigate(PocheNavigate.article(story.url)) },
-            )
-            Divider(
-                color = colorScheme.surfaceVariant,
-                modifier = Modifier
-                    .padding(PaddingValues(16.dp, 0.dp))
-                    .height(1.dp)
-                    .fillMaxWidth()
-            )
+    Column {
+        LazyColumn(state = listState, modifier = modifier) {
+            itemsIndexed(stories) { i, story ->
+                StoryItem(
+                    story,
+                    feeds,
+                    onClick = { navController.navigate(PocheNavigate.article(story.url)) },
+                )
+                if (i + 1 == stories.size) { // If this is the last item
+                    Surface(
+                        color = colorScheme.surfaceColorAtElevation(48.dp),
+                        tonalElevation = 1.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(PaddingValues(16.dp, 8.dp, 32.dp, 8.dp))
+                            .shadow(3.dp, CircleShape)
+                            .clip(CircleShape)
+                            .clickable { markStoriesAsRead() }
+                    ) {
+                        Text(
+                            text = "Mark all as read",
+                            color = colorScheme.onSurfaceVariant,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                        )
+                    }
+                } else {
+                    Divider(
+                        color = colorScheme.surfaceVariant,
+                        modifier = Modifier
+                            .padding(PaddingValues(16.dp, 0.dp))
+                            .height(1.dp)
+                            .fillMaxWidth()
+                    )
+                }
+            }
         }
     }
 }

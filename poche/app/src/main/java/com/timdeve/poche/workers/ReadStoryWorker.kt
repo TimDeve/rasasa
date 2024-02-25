@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
-private const val STORY_ID_PARAM = "article-id-param"
+private const val STORY_IDS_PARAM = "article-ids-param"
 
 class ReadStoryWorker(ctx: Context, private val params: WorkerParameters) :
     CoroutineWorker(ctx, params) {
@@ -39,15 +39,13 @@ class ReadStoryWorker(ctx: Context, private val params: WorkerParameters) :
 
         val storyApi = StoriesApi(httpClient)
 
-        val storyId = params.inputData.getLong(STORY_ID_PARAM, -1)
-
-        if (storyId < 0) {
-            Log.e(this::class.simpleName, "Passed in storyId is negative")
-            return Result.failure()
-        }
+        val storyIds = params.inputData.getLongArray(STORY_IDS_PARAM)
 
         try {
-            storyApi.retrofitService.updateStory(storyId, UpdateStoryRequest(isRead = true))
+            if (storyIds != null) {
+                val requestBody = storyIds.map { UpdateStoryRequest(it, isRead = true) }
+                storyApi.retrofitService.updateStories(requestBody)
+            }
         } catch (e: Exception) {
             if (isOfflineException(e)) {
                 return Result.retry()
@@ -60,11 +58,11 @@ class ReadStoryWorker(ctx: Context, private val params: WorkerParameters) :
     }
 
     companion object {
-        fun queue(ctx: Context, storyId: Long) {
+        fun queue(ctx: Context, storyIds: List<Long>) {
             val constraints =
                 Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
 
-            val progressData = workDataOf(STORY_ID_PARAM to storyId)
+            val progressData = workDataOf(STORY_IDS_PARAM to storyIds.toLongArray())
 
             val request: OneTimeWorkRequest =
                 OneTimeWorkRequestBuilder<ReadStoryWorker>()

@@ -117,6 +117,7 @@ fun Success(
             ) {
                 Text(
                     text = list.name,
+                    color = colorScheme.onSurface,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
                 )
             }

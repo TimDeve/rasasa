@@ -20,7 +20,7 @@ data class GetStoriesResponse(
 )
 
 @Serializable
-data class UpdateStoryRequest(val isRead: Boolean)
+data class UpdateStoryRequest(val id: Long, val isRead: Boolean)
 
 interface StoryApiService {
     @GET("api/v0/stories")
@@ -31,6 +31,9 @@ interface StoryApiService {
 
     @PATCH("api/v0/stories/{id}")
     suspend fun updateStory(@Path("id") id: Long, @Body patch: UpdateStoryRequest)
+
+    @PATCH("api/v0/stories")
+    suspend fun updateStories(@Body patch: List<UpdateStoryRequest>)
 }
 
 class StoriesApi(client: OkHttpClient) {

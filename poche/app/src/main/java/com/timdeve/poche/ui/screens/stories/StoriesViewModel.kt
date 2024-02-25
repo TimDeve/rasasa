@@ -56,7 +56,7 @@ class StoriesViewModel(
             stories.getOrNull(index)?.let { story ->
                 try {
                     if (!story.isRead) {
-                        storiesRepository.markStoriesAsRead(story.id)
+                        storiesRepository.markStoryAsRead(story.id)
                         story.isRead = true
                     }
                 } catch (e: Exception) {
@@ -65,6 +65,17 @@ class StoriesViewModel(
                 Unit
             } ?: run {
                 Log.e(this::class.simpleName, "index '${index}' does not exist")
+            }
+        }
+    }
+
+    fun markStoriesAsRead() {
+        viewModelScope.launch {
+            val ids = stories.filter { !it.isRead }.map { it.id }
+            try {
+                storiesRepository.markStoriesAsRead(ids)
+            } catch (e: Exception) {
+                Log.e(this::class.simpleName, e.toString())
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.timdeve.poche.repository
 
 import android.content.Context
+import android.util.Log
 import com.timdeve.poche.network.StoriesApi
 import com.timdeve.poche.network.UpdateStoryRequest
 import com.timdeve.poche.network.isOfflineException
@@ -40,18 +41,35 @@ class StoriesRepository(
         return storiesDao.getStories(read)
     }
 
-    suspend fun markStoriesAsRead(id: Long) {
+    suspend fun markStoryAsRead(id: Long) {
         try {
-            storiesApi.retrofitService.updateStory(id, UpdateStoryRequest(true))
+            storiesApi.retrofitService.updateStory(id, UpdateStoryRequest(id, true))
         } catch (e: Exception) {
             if (isOfflineException(e)) {
-                ReadStoryWorker.queue(ctx, id)
+                Log.d("offline?", id.toString())
+                ReadStoryWorker.queue(ctx, listOf(id))
             } else {
                 throw e
             }
         }
 
         storiesDao.markStoryAsRead(id)
+    }
+
+    suspend fun markStoriesAsRead(ids: List<Long>) {
+        try {
+            val requestBody = ids.map { UpdateStoryRequest(it, true) }
+            storiesApi.retrofitService.updateStories(requestBody)
+        } catch (e: Exception) {
+            if (isOfflineException(e)) {
+                Log.d("offline?", ids.toString())
+                ReadStoryWorker.queue(ctx, ids)
+            } else {
+                throw e
+            }
+        }
+
+        storiesDao.markStoriesAsRead(ids)
     }
 
     suspend fun deleteOldStories() {

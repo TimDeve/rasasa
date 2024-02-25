@@ -36,6 +36,7 @@ fun StoriesRoute(
         storiesUiState = storiesViewModel.storiesUiState,
         getStories = storiesViewModel::getStories,
         markStoryAsRead = storiesViewModel::markStoryAsRead,
+        markStoriesAsRead = storiesViewModel::markStoriesAsRead,
         showReadStories = storiesViewModel.showReadStories,
         toggleReadStories = storiesViewModel::toggleReadStories,
         showCachedOnly = storiesViewModel.showCachedOnly,
