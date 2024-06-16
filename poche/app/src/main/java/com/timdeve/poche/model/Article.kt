@@ -1,4 +1,5 @@
 @file:UseSerializers(URLSerializer::class)
+
 package com.timdeve.poche.model
 
 import com.timdeve.poche.network.URLSerializer
@@ -13,9 +14,50 @@ data class Article(
     val title: String = "",
     val byline: String? = "",
     val content: String = "",
+    val contentFormat: String? = "html"
 )
 
-private const val fakeArticleContent = """
+private const val FAKE_MARKDOWN_ARTICLE_CONTENT = """
+H2 Type title
+-------------
+
+A paragraph _wow_ this is just some great html.
+
+Another paragraph with a [Link](http://example.com) in the middle of it. This one is longer and run for more than one line. Maybe even three lines.
+
+### H3 Type title
+
+Small paragraph with _emphasised_ text
+
+#### H4 Type title
+
+Small paragraph with **strong** text
+
+##### H5 Type title
+
+    
+    function wow() {
+        return "wow"
+    }
+    console.log("Hello " + wow())
+    
+
+###### H6 Type title
+
+Unordered list
+
+*   Cat
+*   Dog
+*   Rabbit
+
+Ordered list
+
+1.  One
+2.  Two
+3.  Three
+"""
+
+private const val FAKE_HTML_ARTICLE_CONTENT = """
 <h2>H2 Type title</h2>
 <p>
     A paragraph <i>wow</i> this is just some great html.
@@ -32,7 +74,10 @@ private const val fakeArticleContent = """
 <p>Small paragraph with <strong>strong</strong> text</p>
 <h5>H5 Type title</h5>
 <pre><code>
-console.log("Hello World")
+function wow() {
+    return "wow"
+}
+console.log("Hello " + wow())
 </code></pre>
 <h6>H6 Type title</h6>
 <p>Unordered list</p>
@@ -49,12 +94,15 @@ console.log("Hello World")
 </ol>
 """
 
-fun genArticle(): Article {
+fun genArticle(markdown: Boolean = false): Article {
+    val content = if (markdown) FAKE_MARKDOWN_ARTICLE_CONTENT else FAKE_HTML_ARTICLE_CONTENT
+
     return Article(
         url = URL("http://example.com"),
         readable = true,
         title = "A most fantastic day",
         byline = "By me, a writer",
-        content = fakeArticleContent,
+        content = content,
+        contentFormat = if (markdown) "markdown" else "html"
     )
 }

@@ -1,6 +1,5 @@
 package com.timdeve.poche.ui.screens.article
 
-import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -39,6 +38,7 @@ import com.timdeve.poche.model.genArticle
 import com.timdeve.poche.persistence.Article
 import com.timdeve.poche.persistence.fromModel
 import com.timdeve.poche.ui.shared.HtmlContent
+import com.timdeve.poche.ui.shared.MarkdownContent
 import com.timdeve.poche.ui.shared.linkOpener
 import com.timdeve.poche.ui.shared.linkSharer
 import com.timdeve.poche.ui.theme.Typography
@@ -123,36 +123,45 @@ fun ArticleScreen(
 }
 
 @Composable
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
-)
 @Preview
 fun ArticleScreenSuccessPreview() {
     BaseWrapper {
         ArticleScreen(
-            ArticleUiState.Success(Article.fromModel(genArticle())),
-            {}
-        )
+            ArticleUiState.Success(Article.fromModel(genArticle(false)))
+        ) {}
     }
 }
 
 @Composable
 @Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    name = "Dark Mode"
+//    uiMode = Configuration.UI_MODE_NIGHT_YES,
+//    showBackground = true,
+//    name = "Dark Mode"
 )
-@Preview(showSystemUi = true)
-fun ArticleScreenLoadingPreview() {
+fun ArticleScreenMardownSuccessPreview() {
     BaseWrapper {
         ArticleScreen(
-            ArticleUiState.Loading,
+            ArticleUiState.Success(Article.fromModel(genArticle(true))),
             {}
         )
     }
 }
+
+//@Composable
+//@Preview(
+//    uiMode = Configuration.UI_MODE_NIGHT_YES,
+//    showBackground = true,
+//    name = "Dark Mode"
+//)
+//@Preview(showSystemUi = true)
+//fun ArticleScreenLoadingPreview() {
+//    BaseWrapper {
+//        ArticleScreen(
+//            ArticleUiState.Loading,
+//            {}
+//        )
+//    }
+//}
 
 @Composable
 fun NoArticle(modifier: Modifier = Modifier) {
@@ -207,7 +216,10 @@ fun Success(article: Article, modifier: Modifier = Modifier) {
                     "<h5>" + article.byline.orEmpty() + "</h5>",
                 )
             }
-            HtmlContent(article.content)
+            if (article.contentFormat == "markdown")
+                MarkdownContent(article.content)
+            else
+                HtmlContent(article.content)
         } else {
             Text("Article is not readable", color = colorScheme.onSurface)
         }

@@ -16,6 +16,7 @@ data class Article(
     val title: String = "",
     val byline: String? = "",
     val content: String = "",
+    val contentFormat: String? = "html",
 ) {
     companion object
 }
@@ -27,6 +28,7 @@ fun Article.Companion.fromModel(article: com.timdeve.poche.model.Article): Artic
         title = article.title,
         byline = article.byline,
         content = article.content,
+        contentFormat = article.contentFormat,
     )
 }
 
@@ -37,6 +39,7 @@ fun Article.toModel(): com.timdeve.poche.model.Article {
         title = this.title,
         byline = this.byline,
         content = this.content,
+        contentFormat = this.contentFormat,
     )
 }
 

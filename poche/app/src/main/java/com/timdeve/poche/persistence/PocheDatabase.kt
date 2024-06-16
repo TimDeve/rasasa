@@ -1,6 +1,7 @@
 package com.timdeve.poche.persistence
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -16,7 +17,10 @@ const val DB_NAME = "poche-db"
         FeedListFeedCrossRef::class,
         Story::class
     ],
-    version = 1
+    version = 2,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ]
 )
 
 @TypeConverters(Converters::class)

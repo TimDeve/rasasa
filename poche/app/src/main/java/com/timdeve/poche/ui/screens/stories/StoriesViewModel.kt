@@ -74,6 +74,7 @@ class StoriesViewModel(
             val ids = stories.filter { !it.isRead }.map { it.id }
             try {
                 storiesRepository.markStoriesAsRead(ids)
+                stories.forEach { it.isRead = true }
             } catch (e: Exception) {
                 Log.e(this::class.simpleName, e.toString())
             }

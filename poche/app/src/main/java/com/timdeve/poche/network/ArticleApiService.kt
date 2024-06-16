@@ -14,7 +14,7 @@ import java.net.URL
 
 interface ArticleApiService {
     @GET("api/v0/read")
-    suspend fun getArticle(@Query("page") url: URL): Article
+    suspend fun getArticle(@Query("page") url: URL, @Query("format") format: String): Article
 }
 
 class ArticleApi(client: OkHttpClient): ArticleApiService {
@@ -28,7 +28,7 @@ class ArticleApi(client: OkHttpClient): ArticleApiService {
         retrofit.create(ArticleApiService::class.java)
     }
 
-    override suspend fun getArticle(url: URL): Article {
-        return retrofitService.getArticle(url)
+    override suspend fun getArticle(url: URL, format: String): Article {
+        return retrofitService.getArticle(url, format)
     }
 }

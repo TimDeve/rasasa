@@ -82,6 +82,12 @@ dependencies {
     implementation("androidx.navigation:navigation-compose")
     implementation("androidx.navigation:navigation-runtime-ktx:2.7.5")
 
+    // Markdown renderer
+    val markdownRendererVersion = "0.21.0"
+    implementation("com.mikepenz:multiplatform-markdown-renderer-android:${markdownRendererVersion}")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-m3:${markdownRendererVersion}")
+    implementation("com.mikepenz:multiplatform-markdown-renderer-coil2:${markdownRendererVersion}")
+
     // Other UI
     implementation("androidx.activity:activity-compose:1.8.1")
     implementation("androidx.core:core-ktx:1.12.0")

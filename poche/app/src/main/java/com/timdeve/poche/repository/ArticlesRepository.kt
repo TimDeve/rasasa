@@ -18,7 +18,7 @@ class ArticlesRepository(
     suspend fun fetchArticle(url: URL) {
         swallowOfflineExceptions {
             if (getArticle(url) == null) {
-                val article = articleApiService.getArticle(url)
+                val article = articleApiService.getArticle(url, "markdown")
                 articlesDao.insertArticle(Article.fromModel(article))
             }
         }
