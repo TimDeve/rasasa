@@ -1,5 +1,6 @@
 package com.timdeve.poche.ui.screens.article
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -123,22 +124,13 @@ fun ArticleScreen(
 }
 
 @Composable
+@Preview(
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    name = "Dark Mode"
+)
 @Preview
 fun ArticleScreenSuccessPreview() {
-    BaseWrapper {
-        ArticleScreen(
-            ArticleUiState.Success(Article.fromModel(genArticle(false)))
-        ) {}
-    }
-}
-
-@Composable
-@Preview(
-//    uiMode = Configuration.UI_MODE_NIGHT_YES,
-//    showBackground = true,
-//    name = "Dark Mode"
-)
-fun ArticleScreenMardownSuccessPreview() {
     BaseWrapper {
         ArticleScreen(
             ArticleUiState.Success(Article.fromModel(genArticle(true))),
@@ -147,21 +139,27 @@ fun ArticleScreenMardownSuccessPreview() {
     }
 }
 
-//@Composable
-//@Preview(
-//    uiMode = Configuration.UI_MODE_NIGHT_YES,
-//    showBackground = true,
-//    name = "Dark Mode"
-//)
-//@Preview(showSystemUi = true)
-//fun ArticleScreenLoadingPreview() {
-//    BaseWrapper {
-//        ArticleScreen(
-//            ArticleUiState.Loading,
-//            {}
-//        )
-//    }
-//}
+@Composable
+@Preview
+fun ArticleScreenHtmlSuccessPreview() {
+    BaseWrapper {
+        ArticleScreen(
+            ArticleUiState.Success(Article.fromModel(genArticle(false)))
+        ) {}
+    }
+}
+
+
+@Composable
+@Preview(showSystemUi = true)
+fun ArticleScreenLoadingPreview() {
+    BaseWrapper {
+        ArticleScreen(
+            ArticleUiState.Loading,
+            {}
+        )
+    }
+}
 
 @Composable
 fun NoArticle(modifier: Modifier = Modifier) {
