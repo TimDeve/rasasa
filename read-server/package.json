@@ -40,7 +40,9 @@
     "pino-pretty": "^10.2.3",
     "readability": "git+https://github.com/TimDeve/readability.git#28843b6de84447dd6cef04058fda336938e628dc",
     "redis": "^4.6.10",
-    "sanitize-html": "^2.11.0"
+    "sanitize-html": "^2.11.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
     "jest": "^29.7.0",

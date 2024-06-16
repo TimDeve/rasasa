@@ -18,8 +18,9 @@ const fastify = fastifyBuilder({
   logger: { prettyPrint: false },
 })
 
-function prefixPageCaching(pageUrl) {
-  return `${REDIS_PREFIX}:page-caching:${pageUrl}`
+function prefixPageCaching(pageUrl, format) {
+  let formatPrefix = format === "html" ? "" : `:${format}`
+  return `${REDIS_PREFIX}:page-caching${formatPrefix}:${pageUrl}`
 }
 
 async function cacheResponse(pageUrl, response) {
@@ -36,6 +37,7 @@ function isValidContentType(contentType) {
 
 fastify.get('/v0/read', async (request, reply) => {
   const { page, skipCache } = request.query
+  const format = request.query.format || "html"
 
   if (!page) {
     reply.code(400)
@@ -88,7 +90,7 @@ fastify.get('/v0/read', async (request, reply) => {
   const text = await res.text()
   const doc = parseHTML(text)
 
-  const payload = transformHtml(page, doc)
+  const payload = transformHtml(page, doc, format)
   await cacheResponse(page, payload)
 
   reply.type('application/json').code(200)

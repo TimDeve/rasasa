@@ -1,6 +1,11 @@
 import cleanHtml from './cleanHtml.js'
 import twitter from './twitter.js'
 import { Readability, isProbablyReaderable } from 'readability'
+import TurndownService from 'turndown'
+import turndownPluginGfm from 'turndown-plugin-gfm'
+
+const turndownService = new TurndownService()
+turndownService.use(turndownPluginGfm.gfm)
 
 const transformers = [twitter]
 
@@ -19,7 +24,7 @@ export function transformUrl(u) {
   return newUrl.toString()
 }
 
-export function transformHtml(url, doc) {
+export function transformHtml(url, doc, format) {
   for (const t of transformers) {
     if (t.domains.has(new URL(url).host)) {
       if (t.html) {
@@ -36,12 +41,21 @@ export function transformHtml(url, doc) {
 
   const reader = new Readability(doc.window.document)
   const article = reader.parse()
+  const content = cleanHtml(url, article.content)
 
-  return {
+  const payload = {
     readable: true,
     title: article.title,
     byline: article.byline,
+    contentFormat: format,
     url,
-    content: cleanHtml(url, article.content),
   }
+
+  if (format === "markdown") {
+    payload.content = turndownService.turndown(content)
+  } else {
+    payload.content = content
+  }
+
+  return payload
 }
