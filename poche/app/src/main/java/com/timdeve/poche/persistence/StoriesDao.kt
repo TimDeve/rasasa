@@ -72,12 +72,12 @@ interface StoriesDao {
         where exists(
             select * 
             from feed_list_feed_cross_refs as refs 
-            where refs.feed_id == s.feed_id 
-              and refs.feed_list_id == :listId
+            where refs.feed_id = s.feed_id 
+              and refs.feed_list_id = :listId
         )
         and (
-            is_read == coalesce(:read, 0)
-         or is_read == 0
+            is_read = coalesce(:read, 0)
+         or is_read = 0
         )
         order by published_date desc
         limit 500
@@ -92,11 +92,12 @@ interface StoriesDao {
         where exists(
             select * 
             from articles as a
-            where a.url == s.url
+            where a.url = s.url 
+                and a.readable = 1
         )
         and (
-            is_read == coalesce(:read, 0)
-         or is_read == 0
+            is_read = coalesce(:read, 0)
+         or is_read = 0
         )
         order by published_date desc
         limit 500
@@ -111,17 +112,18 @@ interface StoriesDao {
         where exists(
             select * 
             from feed_list_feed_cross_refs as refs 
-            where refs.feed_id == s.feed_id 
-              and refs.feed_list_id == :listId
+            where refs.feed_id = s.feed_id 
+              and refs.feed_list_id = :listId
         )
         and exists(
             select * 
             from articles as a
-            where a.url == s.url
+            where a.url = s.url 
+                and a.readable = 1
         )
         and (
-            is_read == coalesce(:read, 0)
-         or is_read == 0
+            is_read = coalesce(:read, 0)
+         or is_read = 0
         )
         order by published_date desc
         limit 500
