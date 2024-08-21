@@ -19,7 +19,7 @@ const fastify = fastifyBuilder({
 })
 
 function prefixPageCaching(pageUrl, format) {
-  let formatPrefix = format === "html" ? "" : `:${format}`
+  let formatPrefix = format === 'html' ? '' : `:${format}`
   return `${REDIS_PREFIX}:page-caching${formatPrefix}:${pageUrl}`
 }
 
@@ -37,7 +37,7 @@ function isValidContentType(contentType) {
 
 fastify.get('/v0/read', async (request, reply) => {
   const { page, skipCache } = request.query
-  const format = request.query.format || "html"
+  const format = request.query.format || 'html'
 
   if (!page) {
     reply.code(400)
@@ -53,9 +53,10 @@ fastify.get('/v0/read', async (request, reply) => {
   }
 
   const res = await fetch(transformUrl(page), {
-    // Pretend to be browser
+    // Pretend to be browser/googlebot
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
+      'User-Agent':
+        'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
       Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
       'Accept-Language': 'en-GB,en;q=0.5',
       'Accept-Encoding': 'gzip, deflate, br',

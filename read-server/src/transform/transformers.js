@@ -51,7 +51,7 @@ export function transformHtml(url, doc, format) {
     url,
   }
 
-  if (format === "markdown") {
+  if (format === 'markdown') {
     payload.content = turndownService.turndown(content)
   } else {
     payload.content = content
