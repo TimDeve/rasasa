@@ -4,7 +4,7 @@ import createError from 'http-errors'
 import { parseHTML } from 'linkedom'
 import fastifyBuilder from 'fastify'
 
-import { transformUrl, transformHtml } from './transform/transformers.js'
+import { transformUrl, transformHtml, transformUserAgent } from './transform/transformers.js'
 
 const REDIS_PREFIX = 'rasasa-read'
 
@@ -53,10 +53,8 @@ fastify.get('/v0/read', async (request, reply) => {
   }
 
   const res = await fetch(transformUrl(page), {
-    // Pretend to be browser/googlebot
     headers: {
-      'User-Agent':
-        'Mozilla/5.0 (Linux; Android 6.0.1; Nexus 5X Build/MMB29P) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.6533.119 Mobile Safari/537.36 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+      'User-Agent': transformUserAgent(page),
       Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
       'Accept-Language': 'en-GB,en;q=0.5',
       'Accept-Encoding': 'gzip, deflate, br',

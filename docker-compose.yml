@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   gateway:
     build: .
@@ -20,6 +18,12 @@ services:
       - server
       - read-server
       - redis
+    develop:
+      watch:
+        - action: rebuild
+          path: gateway
+        - action: rebuild
+          path: client
   server:
     build: .
     profiles: ["local"]
@@ -31,6 +35,10 @@ services:
       - db
     depends_on:
       - db
+    develop:
+      watch:
+        - action: rebuild
+          path: server
   read-server:
     build: .
     profiles: ["local"]
@@ -43,6 +51,10 @@ services:
       - redis
     depends_on:
       - redis
+    develop:
+      watch:
+        - action: rebuild
+          path: read-server
   db:
     image: postgres
     ports: ["15432:5432"]

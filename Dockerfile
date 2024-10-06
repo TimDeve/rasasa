@@ -1,7 +1,7 @@
 #
 # GOLANG BUILDER
 #
-FROM golang:1.21-bookworm as golang-builder
+FROM golang:1.21-bookworm AS golang-builder
 LABEL builder=true
 
 RUN mkdir -p /root/app
@@ -17,7 +17,7 @@ RUN go build -o rasasa-gateway ./...
 #
 # NODE BUILDER
 #
-FROM node:20-bookworm-slim as node-builder
+FROM node:20-bookworm-slim AS node-builder
 LABEL builder=true
 RUN apt-get update \
  && apt-get install -y build-essential \
@@ -41,7 +41,7 @@ RUN NODE_ENV=production pnpm run build
 #
 # RUST BUILDER
 #
-FROM rust:1.74-slim-bookworm as rust-builder
+FROM rust:1.74-slim-bookworm AS rust-builder
 LABEL builder=true
 
 RUN mkdir -p /root/app
@@ -71,7 +71,7 @@ RUN cargo build --release
 #
 # RUNNER
 #
-FROM node:20-bookworm-slim as runner
+FROM node:20-bookworm-slim AS runner
 
 RUN apt-get update \
  && apt-get install -y git libpq5 \
