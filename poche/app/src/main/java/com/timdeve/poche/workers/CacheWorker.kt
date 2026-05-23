@@ -20,6 +20,7 @@ import com.timdeve.poche.R
 import com.timdeve.poche.network.ArticleApi
 import com.timdeve.poche.network.FeedsApi
 import com.timdeve.poche.network.StoriesApi
+import com.timdeve.poche.network.addDynamicBaseUrlInterceptor
 import com.timdeve.poche.persistence.PocheDatabase
 import com.timdeve.poche.repository.ArticlesRepository
 import com.timdeve.poche.repository.FeedsRepository
@@ -137,6 +138,7 @@ class CacheWorker(private val ctx: Context, params: WorkerParameters) :
             PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(applicationContext))
 
         val httpClient: OkHttpClient = OkHttpClient.Builder()
+            .addDynamicBaseUrlInterceptor(applicationContext)
             .callTimeout(20.seconds.toJavaDuration())
             .connectTimeout(5.seconds.toJavaDuration())
             .cookieJar(cookieJar)

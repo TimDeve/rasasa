@@ -16,27 +16,26 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        manifestPlaceholders["clearText"] = true
-        buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8090/\"")
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
     }
 
-    buildTypes {
-        create("debug-remote") {
-            manifestPlaceholders += mapOf("clearText" to false)
-            buildConfigField("String", "BASE_URL", "\"https://rasasa.do.timdeve.com/\"")
-            signingConfig = signingConfigs.getByName("debug")
-            isDebuggable = true
+    flavorDimensions += "environment"
+    productFlavors {
+        create("local") {
+            dimension = "environment"
+            buildConfigField("String", "BASE_URL", "\"http://10.0.2.2:8090/\"")
         }
+        create("production") {
+            dimension = "environment"
+            buildConfigField("String", "BASE_URL", "\"http://100.96.61.128:45454/\"")
+        }
+    }
 
+    buildTypes {
         release {
-            manifestPlaceholders["clearText"] = false
-            buildConfigField("String", "BASE_URL", "\"https://rasasa.do.timdeve.com/\"")
-
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

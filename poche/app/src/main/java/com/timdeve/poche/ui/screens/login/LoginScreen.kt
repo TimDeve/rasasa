@@ -34,11 +34,13 @@ import com.timdeve.poche.ui.theme.PocheTheme
 @ExperimentalMaterial3Api
 @Composable
 fun LoginScreen(
-    login: (LoginRequest) -> Unit,
+    initialServerUrl: String,
+    login: (LoginRequest, String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
+    var serverUrl by rememberSaveable { mutableStateOf(initialServerUrl) }
 
     Column(
         modifier = Modifier
@@ -52,6 +54,21 @@ fun LoginScreen(
             style = MaterialTheme.typography.displaySmall.copy(
                 color = colorScheme.onBackground,
             ),
+        )
+
+        Spacer(modifier = Modifier.padding(8.dp))
+
+        Text(
+            text = "Server URL",
+            style = MaterialTheme.typography.bodyLarge.copy(
+                color = colorScheme.onBackground,
+            ),
+        )
+
+        TextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = serverUrl,
+            onValueChange = { serverUrl = it },
         )
 
         Spacer(modifier = Modifier.padding(8.dp))
@@ -89,7 +106,7 @@ fun LoginScreen(
         Spacer(modifier = Modifier.padding(8.dp))
 
         Button(
-            onClick = {login(LoginRequest(username, password))},
+            onClick = {login(LoginRequest(username, password), serverUrl)},
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
@@ -117,7 +134,7 @@ fun LoginScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = colorScheme.surfaceColorAtElevation(2.dp),
         ) {
-            LoginScreen({})
+            LoginScreen("https://example.com", { _, _ -> })
         }
     }
 }

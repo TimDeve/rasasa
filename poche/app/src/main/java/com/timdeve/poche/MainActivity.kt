@@ -13,7 +13,9 @@ import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersisto
 import com.timdeve.poche.network.ArticleApi
 import com.timdeve.poche.network.FeedsApi
 import com.timdeve.poche.network.LoginApi
+import com.timdeve.poche.network.ServerConfig
 import com.timdeve.poche.network.StoriesApi
+import com.timdeve.poche.network.addDynamicBaseUrlInterceptor
 import com.timdeve.poche.persistence.PocheDatabase
 import com.timdeve.poche.repository.ArticlesRepository
 import com.timdeve.poche.repository.FeedsRepository
@@ -46,6 +48,8 @@ class MainActivity : ComponentActivity() {
         val cookieJar: ClearableCookieJar =
             PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(this))
 
+        val serverConfig = ServerConfig(applicationContext)
+
         val httpClient: OkHttpClient = Builder()
             .addInterceptor { chain ->
                 val response: Response = chain.proceed(chain.request())
@@ -54,6 +58,7 @@ class MainActivity : ComponentActivity() {
                     response
                 } else response
             }
+            .addDynamicBaseUrlInterceptor(applicationContext)
             .connectTimeout(1.seconds.toJavaDuration())
             .cookieJar(cookieJar)
             .build()
@@ -61,7 +66,7 @@ class MainActivity : ComponentActivity() {
         val db = PocheDatabase.make(applicationContext)
 
         val loginApi = LoginApi(httpClient)
-        val authViewModel by lazy { injectViewModel { AuthViewModel(loginApi, authStatus) } }
+        val authViewModel by lazy { injectViewModel { AuthViewModel(loginApi, authStatus, serverConfig) } }
 
         val feedsApi = FeedsApi(httpClient)
         val feedsRepository = FeedsRepository(db.feedListsDao(), feedsApi)

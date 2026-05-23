@@ -6,5 +6,8 @@ import androidx.compose.runtime.Composable
 @ExperimentalMaterial3Api
 @Composable
 fun LoginRoute(authViewModel: AuthViewModel) {
-    LoginScreen(authViewModel::login)
+    LoginScreen(
+        initialServerUrl = authViewModel.getServerUrl(),
+        login = authViewModel::login
+    )
 }

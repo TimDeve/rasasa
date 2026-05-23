@@ -17,6 +17,7 @@ import com.franmontiel.persistentcookiejar.cache.SetCookieCache
 import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor
 import com.timdeve.poche.network.StoriesApi
 import com.timdeve.poche.network.UpdateStoryRequest
+import com.timdeve.poche.network.addDynamicBaseUrlInterceptor
 import com.timdeve.poche.network.isOfflineException
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
@@ -32,6 +33,7 @@ class ReadStoryWorker(ctx: Context, private val params: WorkerParameters) :
             PersistentCookieJar(SetCookieCache(), SharedPrefsCookiePersistor(applicationContext))
 
         val httpClient: OkHttpClient = OkHttpClient.Builder()
+            .addDynamicBaseUrlInterceptor(applicationContext)
             .callTimeout(20.seconds.toJavaDuration())
             .connectTimeout(5.seconds.toJavaDuration())
             .cookieJar(cookieJar)

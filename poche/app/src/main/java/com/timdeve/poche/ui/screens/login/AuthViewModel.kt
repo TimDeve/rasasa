@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.timdeve.poche.network.LoginApi
 import com.timdeve.poche.network.LoginApiService
 import com.timdeve.poche.network.LoginRequest
+import com.timdeve.poche.network.ServerConfig
 import com.timdeve.poche.network.StoryApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,14 +22,18 @@ sealed interface AuthStatus {
 
 class AuthViewModel(
     private val loginService: LoginApi,
-    private val _authStatus: MutableStateFlow<AuthStatus>
+    private val _authStatus: MutableStateFlow<AuthStatus>,
+    private val serverConfig: ServerConfig
 ) : ViewModel() {
     val authStatus: StateFlow<AuthStatus> = _authStatus.asStateFlow()
 
-    fun login(req: LoginRequest) {
+    fun getServerUrl(): String = serverConfig.url
+
+    fun login(req: LoginRequest, serverUrl: String) {
         viewModelScope.launch {
             _authStatus.update {
                 try {
+                    serverConfig.url = serverUrl
                     loginService.retrofitService.login(req)
                     AuthStatus.LoggedIn
                 } catch (e: IOException) {
