@@ -30,7 +30,7 @@ android {
         }
         create("production") {
             dimension = "environment"
-            buildConfigField("String", "BASE_URL", "\"http://100.96.61.128:45454/\"")
+            buildConfigField("String", "BASE_URL", "\"https://rasasa.hl.timdeve.com\"")
         }
     }
 
